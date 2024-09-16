@@ -1,10 +1,8 @@
-# ERpBRCA_OlderWomen
-
 ---
 title: "chronic inflammation and hormone disposition in breast cancer of older women"
 author: "Neil Carleton"
-format: html
-editor: qmd
+format: qmd
+editor: R
 ---
 
 
