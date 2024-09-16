@@ -7,6 +7,7 @@ format: html
 editor: qmd
 ---
 
+
 # Chronic inflammation and hormone disposition promote a tumor-permissive locale for breast cancer in older women
 
 -   Despite the hormone sensitivity of older age-related tumors, our understanding of the interplay between the systemic and local hormonal disposition and chronic inflammation is limited.
@@ -23,11 +24,12 @@ Paradoxically, ER+ breast cancer is an age-related disease, with the peak incide
 
 ### Sequencing data analysis
 
-1.  Rat single nucleus RNA sequencing (snRNA-seq) data analysis, GSEXXXXXX https://github.com/leeoesterreich/BRCA_Rat_YoungerOlder_snRNAseq
-2.  Rat whole exome sequencing (WES) data analysism, GSEXXXXXX
-3.  Human breast cancer bulk RNA-seq data analysis, GSEXXXXXX https://github.com/leeoesterreich/BRCA_OlderWomen_BulkRNAseq
-4.  Human single cell RNA sequencing (scRNA-seq) of ER+ breast cancer, publically available at Wu et al. 2021. Nat. Genetics
-5.  Bulk RNA-seq data sets: TCGA, METABRIC, SCAN-B
+1.  Human breast cancer bulk RNA-seq data analysis, GSE276755 https://github.com/leeoesterreich/BRCA_OlderWomen_BulkRNAseq
+2.  Rat bulk RNA-seq data analysis, GSE276757, 
+3.  Rat single nucleus RNA sequencing (snRNA-seq) data analysis, GSE276758 https://github.com/leeoesterreich/BRCA_Rat_YoungerOlder_snRNAseq
+4.  Rat whole exome sequencing (WES) data analysism, GSE276759 https://github.com/leeoesterreich/RatAgingWES
+5.  Human single cell RNA sequencing (scRNA-seq) of ER+ breast cancer, publically available at Wu et al. 2021. Nat. Genetics
+6.  Public Bulk RNA-seq data sets: TCGA, METABRIC, SCAN-B
 
 ### Summary of this study
 
