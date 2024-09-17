@@ -27,7 +27,8 @@ Paradoxically, ER+ breast cancer is an age-related disease, with the peak incide
 3.  Rat single nucleus RNA sequencing (snRNA-seq) data analysis, GSE276758 https://github.com/leeoesterreich/BRCA_Rat_YoungerOlder_snRNAseq
 4.  Rat whole exome sequencing (WES) data analysism, GSE276759 https://github.com/leeoesterreich/RatAgingWES
 5.  Human single cell RNA sequencing (scRNA-seq) of ER+ breast cancer, publically available at Wu et al. 2021. Nat. Genetics
-6.  Public Bulk RNA-seq data sets: TCGA, METABRIC, SCAN-B
+6.  Public BRCA bulk RNA-seq or microarray data analysis: we used Mutual Information Concordance Analysis (MICA), https://github.com/jyyulab/MICA
+    - TCGA, METABRIC, SCAN-B
 
 ### Summary of this study
 
