@@ -1,0 +1,20 @@
+name: erp_bulk_rnaseq
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base=4.4.1
+  - r-tidyverse
+  - r-data.table
+  - r-ggplot2
+  - r-patchwork
+  - r-rmarkdown
+  - bioconductor-deseq2
+  - bioconductor-gsva
+  - bioconductor-progeny
+  - bioconductor-msigdbr
+  - bioconductor-qusage
+  - r-ggrepel
+  - r-pheatmap
+  - r-rcolorbrewer

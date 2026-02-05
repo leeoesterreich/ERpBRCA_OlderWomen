@@ -1,0 +1,58 @@
+name: erp_brca_aging
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # R base
+  - r-base=4.4.1
+  - r-essentials
+
+  # R core packages
+  - r-tidyverse
+  - r-data.table
+  - r-ggplot2
+  - r-patchwork
+  - r-rmarkdown
+  - r-knitr
+  - r-ggrepel
+  - r-gridextra
+  - r-rcolorbrewer
+  - r-pheatmap
+
+  # Bioconductor packages
+  - bioconductor-deseq2
+  - bioconductor-gsva
+  - bioconductor-progeny
+  - bioconductor-msigdbr
+  - bioconductor-qusage
+
+  # Seurat ecosystem
+  - r-seurat>=5.0
+  - r-seuratobject
+  - r-harmony
+  - bioconductor-glmgampoi
+  - bioconductor-singlecellexperiment
+  - bioconductor-singler
+  - r-dittoseq
+
+  # Statistical packages
+  - r-speckle
+  - r-lme4
+
+  # Python for WES and utilities
+  - python=3.10
+  - pandas
+  - numpy
+  - jupyter
+  - matplotlib
+  - seaborn
+
+  # System tools
+  - pandoc
+  - wget
+  - curl
+
+  # PDF generation
+  - r-pagedown
+  - chromium

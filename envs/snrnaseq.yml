@@ -1,0 +1,21 @@
+name: erp_snrnaseq
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base=4.4.1
+  - r-tidyverse
+  - r-data.table
+  - r-ggplot2
+  - r-patchwork
+  - r-seurat>=5.0
+  - r-seuratobject
+  - r-harmony
+  - bioconductor-glmgampoi
+  - bioconductor-singler
+  - r-dittoseq
+  - r-speckle
+  - r-doubletfinder
+  - r-ggrepel
+  - r-gridextra
