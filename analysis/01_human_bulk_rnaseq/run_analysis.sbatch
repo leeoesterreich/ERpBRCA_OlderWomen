@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=human_bulk_rnaseq
-#SBATCH --output=logs/bulk_rnaseq_%j.out
-#SBATCH --error=logs/bulk_rnaseq_%j.err
+#SBATCH --output=/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/01_human_bulk_rnaseq/logs/bulk_rnaseq_%j.out
+#SBATCH --error=/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/01_human_bulk_rnaseq/logs/bulk_rnaseq_%j.err
 #SBATCH --time=04:00:00
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
@@ -12,9 +12,9 @@
 # Human Bulk RNA-seq Analysis Pipeline
 # Runs preprocessing, GSVA, PROGENy, correlations, and visualization
 
-set -euo pipefail
+set -eo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/01_human_bulk_rnaseq"
 cd "$SCRIPT_DIR"
 
 # Create log directory
@@ -29,7 +29,10 @@ echo "Start time: $(date)"
 echo ""
 
 # Load conda and activate environment
+set +u
 source ~/.bashrc
+eval "$(conda shell.bash hook)"
+set -u
 conda activate erp_bulk_rnaseq || {
     echo "Conda environment not found, attempting to create..."
     conda env create -f ../../envs/bulk_rnaseq.yml

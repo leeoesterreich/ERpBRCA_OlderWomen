@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=rat_snrnaseq
-#SBATCH --output=logs/snrnaseq_%j.out
-#SBATCH --error=logs/snrnaseq_%j.err
+#SBATCH --output=/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/02_rat_snrnaseq/logs/snrnaseq_%j.out
+#SBATCH --error=/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/02_rat_snrnaseq/logs/snrnaseq_%j.err
 #SBATCH --time=12:00:00
 #SBATCH --mem=64G
 #SBATCH --cpus-per-task=8
@@ -12,9 +12,9 @@
 # Rat snRNA-seq Analysis Pipeline
 # Runs QC, integration, clustering, DE, and DA analyses
 
-set -euo pipefail
+set -eo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/02_rat_snrnaseq"
 cd "$SCRIPT_DIR"
 
 # Create directories
@@ -29,7 +29,10 @@ echo "Start time: $(date)"
 echo ""
 
 # Load conda and activate environment
+set +u
 source ~/.bashrc
+eval "$(conda shell.bash hook)"
+set -u
 conda activate erp_snrnaseq || {
     echo "Conda environment not found, attempting to create..."
     conda env create -f ../../envs/snrnaseq.yml
