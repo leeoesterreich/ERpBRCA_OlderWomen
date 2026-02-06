@@ -56,6 +56,14 @@ cat("\n")
 cat("Step 1: Loading data...\n")
 seurat_obj <- readRDS(input_rds)
 
+# Validate Seurat object
+if (!inherits(seurat_obj, "Seurat")) {
+  stop("ERROR: Loaded object is not a valid Seurat object")
+}
+if (ncol(seurat_obj) == 0) {
+  stop("ERROR: Seurat object contains no cells")
+}
+
 # Get metadata
 meta <- seurat_obj@meta.data %>%
   select(orig.ident, AgeGroup, CellTypeByMarker_RatsnRNAseq, CellTypeMacroTcell_RatsnRNAseq)
@@ -198,7 +206,11 @@ da_plot_data <- da_all %>%
     LogFC = log2(PropMean.Aged / PropMean.Young)
   )
 
-# Handle infinite values
+# Handle infinite values (log how many are affected)
+n_infinite <- sum(is.infinite(da_plot_data$LogFC))
+if (n_infinite > 0) {
+  cat("  Warning:", n_infinite, "infinite LogFC values set to NA (division by zero)\n")
+}
 da_plot_data$LogFC[is.infinite(da_plot_data$LogFC)] <- NA
 
 p3 <- ggplot(da_plot_data %>% filter(!is.na(LogFC)),

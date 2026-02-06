@@ -41,7 +41,6 @@ script_dir <- dirname(sys.frame(1)$ofile)
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
 data_dir <- file.path(project_root, "data/rat_snrnaseq/raw")
-dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
 cat("=== Rat snRNA-seq QC and Filtering ===\n")
 cat("Random seed: 12345\n")
@@ -53,6 +52,9 @@ cat("Output directory:", output_dir, "\n\n")
 # -----------------------------------------------------------------------------
 cat("Step 1: Finding sample directories...\n")
 check_dir_exists(data_dir, "Raw data directory")
+
+# Create output directory only after verifying input data exists
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
 sample_dirs <- list.dirs(data_dir, recursive = FALSE)
 sample_dirs <- sample_dirs[grepl("Lee_021924_Nuclei", sample_dirs)]
@@ -77,8 +79,12 @@ for (sample_dir in sample_dirs) {
   sample_name <- basename(sample_dir)
   cat("  Processing:", sample_name, "\n")
 
-  # Read 10X data
-  expr_matrix <- Read10X(data.dir = sample_dir, gene.column = 2)
+  # Read 10X data with error handling
+  expr_matrix <- tryCatch({
+    Read10X(data.dir = sample_dir, gene.column = 2)
+  }, error = function(e) {
+    stop(sprintf("ERROR: Failed to read 10X data from %s: %s", sample_dir, e$message))
+  })
   seurat_obj <- CreateSeuratObject(counts = expr_matrix, project = sample_name)
   seurat_obj$orig.ident <- sample_name
 

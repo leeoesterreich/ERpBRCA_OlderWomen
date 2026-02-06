@@ -55,6 +55,14 @@ cat("\n")
 cat("Step 1: Loading annotated Seurat object...\n")
 seurat_obj <- readRDS(input_rds)
 
+# Validate Seurat object
+if (!inherits(seurat_obj, "Seurat")) {
+  stop("ERROR: Loaded object is not a valid Seurat object")
+}
+if (ncol(seurat_obj) == 0) {
+  stop("ERROR: Seurat object contains no cells")
+}
+
 cat("  Total cells:", ncol(seurat_obj), "\n")
 cat("  Age groups:\n")
 print(table(seurat_obj$AgeGroup))
