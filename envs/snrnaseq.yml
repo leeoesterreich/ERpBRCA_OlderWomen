@@ -4,18 +4,21 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - r-base=4.4.1
+  - r-base=4.3
   - r-tidyverse
   - r-data.table
   - r-ggplot2
   - r-patchwork
+  - r-ggrepel
+  - r-gridextra
+  - r-matrix
+  - r-tibble
   - r-seurat>=5.0
   - r-seuratobject
   - r-harmony
   - bioconductor-glmgampoi
-  - bioconductor-singler
-  - r-dittoseq
-  - r-speckle
-  - r-doubletfinder
-  - r-ggrepel
-  - r-gridextra
+  # Install via R after env creation:
+  # BiocManager::install("SingleR")
+  # install.packages("dittoSeq")
+  # install.packages("speckle")
+  # remotes::install_github("chris-mcginnis-ucsf/DoubletFinder")
