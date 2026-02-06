@@ -1,0 +1,13 @@
+# Ignore large data files
+*.tar
+*.tar.gz
+*.zip
+*.gz
+*.txt
+*.csv
+*.tsv
+
+# But keep metadata and .gitkeep
+!*/metadata/*.txt
+!*/.gitkeep
+!.gitkeep
