@@ -20,6 +20,14 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
+# Helper function to check file existence
+check_file_exists <- function(filepath, description = "file") {
+  if (!file.exists(filepath)) {
+    stop(sprintf("ERROR: %s not found: %s", description, filepath))
+  }
+  cat(sprintf("  Found: %s\n", basename(filepath)))
+}
+
 script_dir <- dirname(sys.frame(1)$ofile)
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
@@ -36,12 +44,24 @@ cat("=== Correlation Analysis with FDR Correction ===\n")
 # Step 1: Load Data
 # -----------------------------------------------------------------------------
 cat("Step 1: Loading data...\n")
-pathway_activity <- readRDS(file.path(output_dir, "progeny_pathway_activity.rds"))
-gsva_result <- readRDS(file.path(output_dir, "gsva_estrogen_pathways.rds"))
-sample_annot <- readRDS(file.path(output_dir, "sample_annotation.rds"))
+
+# Define input files
+progeny_file <- file.path(output_dir, "progeny_pathway_activity.rds")
+gsva_file <- file.path(output_dir, "gsva_estrogen_pathways.rds")
+sample_file <- file.path(output_dir, "sample_annotation.rds")
+tpm_file <- file.path(data_dir, "raw/HumanERpAge_39404g168s_TPMlog2.txt")
+
+# Check all input files exist
+check_file_exists(progeny_file, "PROGENy pathway activity")
+check_file_exists(gsva_file, "GSVA results")
+check_file_exists(sample_file, "Sample annotation")
+check_file_exists(tpm_file, "TPM data")
+
+pathway_activity <- readRDS(progeny_file)
+gsva_result <- readRDS(gsva_file)
+sample_annot <- readRDS(sample_file)
 
 # Load TPM data for gene expression
-tpm_file <- file.path(data_dir, "raw/HumanERpAge_39404g168s_TPMlog2.txt")
 tpm_data <- fread(tpm_file, stringsAsFactors = FALSE, header = TRUE)
 colnames(tpm_data)[1] <- "GeneSymb"
 colnames(tpm_data) <- gsub("_LEE.*", "", colnames(tpm_data))

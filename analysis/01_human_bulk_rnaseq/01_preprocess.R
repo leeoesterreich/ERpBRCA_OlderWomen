@@ -25,6 +25,14 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
+# Helper function to check file existence
+check_file_exists <- function(filepath, description = "file") {
+  if (!file.exists(filepath)) {
+    stop(sprintf("ERROR: %s not found: %s", description, filepath))
+  }
+  cat(sprintf("  Found: %s\n", basename(filepath)))
+}
+
 # Define paths relative to project root
 project_root <- normalizePath(file.path(dirname(sys.frame(1)$ofile), "../.."))
 data_dir <- file.path(project_root, "data/human_bulk_rnaseq")
@@ -40,15 +48,25 @@ cat("=== Human Bulk RNA-seq Preprocessing ===\n")
 cat("Project root:", project_root, "\n")
 cat("Output directory:", output_dir, "\n\n")
 
+# Verify input files exist
+cat("Checking input files...\n")
+check_file_exists(count_file, "Count data file")
+check_file_exists(sample_file, "Sample annotation file")
+check_file_exists(gene_annot_file, "Gene annotation file")
+cat("\n")
+
 # -----------------------------------------------------------------------------
 # Step 1: Read Gene Annotation
 # -----------------------------------------------------------------------------
 cat("Step 1: Reading gene annotation...\n")
 gene_annot <- fread(gene_annot_file, header = TRUE, stringsAsFactors = FALSE)
+n_genes_raw <- nrow(gene_annot)
 gene_annot_filtered <- gene_annot %>%
   dplyr::select(Symbol, type_of_gene) %>%
   dplyr::filter(type_of_gene == "protein-coding", !grepl("^LOC\\d+", Symbol))
-cat("  Protein-coding genes:", nrow(gene_annot_filtered), "\n")
+cat("  Total genes in annotation:", n_genes_raw, "\n")
+cat("  Protein-coding genes (after filter):", nrow(gene_annot_filtered), "\n")
+cat("  Genes removed:", n_genes_raw - nrow(gene_annot_filtered), "\n")
 
 # -----------------------------------------------------------------------------
 # Step 2: Read Count Data
@@ -61,9 +79,11 @@ cat("  Raw genes:", nrow(count_data), "\n")
 cat("  Samples:", ncol(count_data) - 1, "\n")
 
 # Filter to protein-coding genes
+n_genes_before_filter <- nrow(count_data)
 count_data_filtered <- count_data %>%
   dplyr::filter(GeneSymb %in% gene_annot_filtered$Symbol)
 cat("  Protein-coding genes in data:", nrow(count_data_filtered), "\n")
+cat("  Genes removed (non-protein-coding):", n_genes_before_filter - nrow(count_data_filtered), "\n")
 
 # -----------------------------------------------------------------------------
 # Step 3: Read Sample Annotation
@@ -199,6 +219,10 @@ cat("Step 8: Saving outputs...\n")
 saveRDS(dds, file.path(output_dir, "dds_norm_AllAgeGroup.rds"))
 saveRDS(vst_matrix_nodup, file.path(output_dir, "vst_normalized_matrix.rds"))
 saveRDS(sample_annot, file.path(output_dir, "sample_annotation.rds"))
+
+# Memory cleanup - remove large intermediate objects
+rm(count_data, count_data_t, count_annot, gene_annot, vst_data)
+gc()
 
 cat("\n=== Preprocessing complete ===\n")
 cat("Outputs saved to:", output_dir, "\n")

@@ -14,7 +14,16 @@ set.seed(12345)
 suppressPackageStartupMessages({
   library(dplyr)
   library(ggplot2)
+  library(patchwork)
 })
+
+# Helper function to check file existence
+check_file_exists <- function(filepath, description = "file") {
+  if (!file.exists(filepath)) {
+    stop(sprintf("ERROR: %s not found: %s", description, filepath))
+  }
+  cat(sprintf("  Found: %s\n", basename(filepath)))
+}
 
 script_dir <- dirname(sys.frame(1)$ofile)
 project_root <- normalizePath(file.path(script_dir, "../.."))
@@ -28,7 +37,9 @@ cat("=== Generating Visualizations ===\n")
 # Step 1: Load Correlation Results
 # -----------------------------------------------------------------------------
 cat("Step 1: Loading correlation results...\n")
-corr_results <- readRDS(file.path(output_dir, "correlation_results.rds"))
+corr_file <- file.path(output_dir, "correlation_results.rds")
+check_file_exists(corr_file, "Correlation results")
+corr_results <- readRDS(corr_file)
 
 # Filter out RAB19 and prepare for plotting
 # Note: Document rationale - RAB19 was removed in original analysis
@@ -106,8 +117,6 @@ ggsave(
 # Step 4: Side-by-side Comparison
 # -----------------------------------------------------------------------------
 cat("Step 4: Creating side-by-side comparison...\n")
-
-library(patchwork)
 
 p_combined <- p_original + p_fdr +
   plot_annotation(

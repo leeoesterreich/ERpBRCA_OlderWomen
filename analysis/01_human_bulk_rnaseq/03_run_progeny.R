@@ -19,6 +19,14 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
+# Helper function to check file existence
+check_file_exists <- function(filepath, description = "file") {
+  if (!file.exists(filepath)) {
+    stop(sprintf("ERROR: %s not found: %s", description, filepath))
+  }
+  cat(sprintf("  Found: %s\n", basename(filepath)))
+}
+
 script_dir <- dirname(sys.frame(1)$ofile)
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
@@ -31,15 +39,19 @@ cat("=== PROGENy Analysis ===\n")
 # -----------------------------------------------------------------------------
 cat("Step 1: Loading TPM data...\n")
 tpm_file <- file.path(data_dir, "raw/HumanERpAge_39404g168s_TPMlog2.txt")
+gene_annot_file <- file.path(data_dir, "external/Homo_sapiens.gene_info.txt")
+sample_annot_file <- file.path(output_dir, "sample_annotation.rds")
+
+check_file_exists(tpm_file, "TPM data file")
+check_file_exists(gene_annot_file, "Gene annotation file")
+check_file_exists(sample_annot_file, "Sample annotation file")
+
 tpm_data <- fread(tpm_file, stringsAsFactors = FALSE, header = TRUE)
 colnames(tpm_data)[1] <- "GeneSymb"
 colnames(tpm_data) <- gsub("_LEE.*", "", colnames(tpm_data))
 
 # Load gene annotation for filtering
-gene_annot <- fread(
-  file.path(data_dir, "external/Homo_sapiens.gene_info.txt"),
-  header = TRUE, stringsAsFactors = FALSE
-)
+gene_annot <- fread(gene_annot_file, header = TRUE, stringsAsFactors = FALSE)
 prot_coding <- gene_annot %>%
   filter(type_of_gene == "protein-coding", !grepl("^LOC\\d+", Symbol)) %>%
   pull(Symbol)
@@ -53,7 +65,7 @@ cat("  TPM matrix:", nrow(tpm_filtered), "genes x", ncol(tpm_filtered) - 1, "sam
 # Step 2: Prepare Expression Matrix
 # -----------------------------------------------------------------------------
 cat("Step 2: Preparing expression matrix...\n")
-sample_annot <- readRDS(file.path(output_dir, "sample_annotation.rds"))
+sample_annot <- readRDS(sample_annot_file)
 
 tpm_t <- tpm_filtered %>%
   column_to_rownames("GeneSymb") %>%

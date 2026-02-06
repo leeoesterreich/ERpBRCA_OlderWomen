@@ -21,6 +21,14 @@ suppressPackageStartupMessages({
   library(pheatmap)
 })
 
+# Helper function to check file existence
+check_file_exists <- function(filepath, description = "file") {
+  if (!file.exists(filepath)) {
+    stop(sprintf("ERROR: %s not found: %s", description, filepath))
+  }
+  cat(sprintf("  Found: %s\n", basename(filepath)))
+}
+
 # Define paths
 script_dir <- dirname(sys.frame(1)$ofile)
 project_root <- normalizePath(file.path(script_dir, "../.."))
@@ -33,7 +41,9 @@ cat("=== GSVA Analysis ===\n")
 # Step 1: Load Normalized Data
 # -----------------------------------------------------------------------------
 cat("Step 1: Loading normalized data...\n")
-vst_matrix <- readRDS(file.path(output_dir, "vst_normalized_matrix.rds"))
+vst_file <- file.path(output_dir, "vst_normalized_matrix.rds")
+check_file_exists(vst_file, "VST normalized matrix")
+vst_matrix <- readRDS(vst_file)
 vst_mat <- vst_matrix %>%
   tibble::column_to_rownames("GeneSymb") %>%
   as.matrix()
@@ -88,6 +98,14 @@ gobp_estrogen <- gobp_list[c(
 estrogen_pathways <- c(hallmark_estrogen, e1_gene_list, reactome_estrogen, wiki_estrogen, gobp_estrogen)
 estrogen_pathways <- estrogen_pathways[!sapply(estrogen_pathways, is.null)]
 cat("  Total pathways:", length(estrogen_pathways), "\n")
+
+# Log which gene sets were found
+cat("  Gene sets included in GSVA:\n")
+for (gs_name in names(estrogen_pathways)) {
+  n_genes <- length(estrogen_pathways[[gs_name]])
+  n_in_data <- sum(estrogen_pathways[[gs_name]] %in% rownames(vst_mat))
+  cat(sprintf("    - %s: %d genes (%d found in data)\n", gs_name, n_genes, n_in_data))
+}
 
 # -----------------------------------------------------------------------------
 # Step 3: Run GSVA
