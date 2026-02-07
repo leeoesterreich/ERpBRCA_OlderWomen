@@ -17,7 +17,11 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(ggplot2)
   library(ggrepel)
+  library(future)
 })
+
+# Increase memory limit for parallelization (required for large cell populations)
+options(future.globals.maxSize = 4 * 1024^3)  # 4 GB
 
 # Helper function to check file existence
 check_file_exists <- function(filepath, description = "file") {
@@ -27,7 +31,17 @@ check_file_exists <- function(filepath, description = "file") {
   cat(sprintf("  Found: %s\n", basename(filepath)))
 }
 
-script_dir <- dirname(sys.frame(1)$ofile)
+# Define paths - use commandArgs to get script directory when run via Rscript
+get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(dirname(normalizePath(sub("--file=", "", file_arg))))
+  }
+  return(getwd())
+}
+
+script_dir <- get_script_dir()
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
 results_dir <- file.path(project_root, "results/corrected/rat_snrnaseq")
@@ -74,6 +88,13 @@ if (is.null(seurat_obj$AgeGroup) || all(is.na(seurat_obj$AgeGroup))) {
 
 # Set RNA assay as default for DE
 DefaultAssay(seurat_obj) <- "RNA"
+
+# Seurat v5 requires joining layers before differential expression
+if ("JoinLayers" %in% ls("package:SeuratObject")) {
+  seurat_obj <- JoinLayers(seurat_obj)
+  cat("  Joined Seurat v5 layers\n")
+}
+
 seurat_obj <- NormalizeData(seurat_obj, verbose = FALSE)
 
 # -----------------------------------------------------------------------------

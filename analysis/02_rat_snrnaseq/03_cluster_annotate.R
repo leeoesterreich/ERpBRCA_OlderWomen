@@ -29,7 +29,17 @@ check_file_exists <- function(filepath, description = "file") {
   cat(sprintf("  Found: %s\n", basename(filepath)))
 }
 
-script_dir <- dirname(sys.frame(1)$ofile)
+# Define paths - use commandArgs to get script directory when run via Rscript
+get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(dirname(normalizePath(sub("--file=", "", file_arg))))
+  }
+  return(getwd())
+}
+
+script_dir <- get_script_dir()
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
 fig_dir <- file.path(project_root, "figures/by_analysis/rat_snrnaseq")
@@ -160,6 +170,13 @@ avg_exp <- AverageExpression(
   group.by = "seurat_clusters"
 )$RNA
 
+# Fix column names: Seurat may prepend 'g' to numeric cluster names
+# Strip the 'g' prefix to match actual cluster IDs
+if (all(grepl("^g[0-9]+$", colnames(avg_exp)))) {
+  colnames(avg_exp) <- gsub("^g", "", colnames(avg_exp))
+  cat("  Note: Corrected cluster names in average expression matrix\n")
+}
+
 # -----------------------------------------------------------------------------
 # Step 6: Assign Cell Types Based on Marker Expression
 # -----------------------------------------------------------------------------
@@ -272,6 +289,12 @@ cat("  Marker heatmap saved to:", file.path(output_dir, "marker_heatmap.pdf"), "
 # -----------------------------------------------------------------------------
 cat("\nStep 8: Finding cluster markers...\n")
 
+# Seurat v5 requires joining layers before FindAllMarkers
+if ("JoinLayers" %in% ls("package:SeuratObject")) {
+  seurat_obj <- JoinLayers(seurat_obj)
+  cat("  Joined Seurat v5 layers\n")
+}
+
 Idents(seurat_obj) <- "seurat_clusters"
 cluster_markers <- FindAllMarkers(
   seurat_obj,
@@ -282,13 +305,17 @@ cluster_markers <- FindAllMarkers(
   verbose = FALSE
 )
 
-# Save top markers per cluster
-top_markers <- cluster_markers %>%
-  group_by(cluster) %>%
-  slice_max(avg_log2FC, n = 10)
+# Save top markers per cluster (handle case where no markers found)
+if (nrow(cluster_markers) > 0) {
+  top_markers <- cluster_markers %>%
+    group_by(cluster) %>%
+    slice_max(avg_log2FC, n = 10)
 
-write.csv(top_markers, file.path(output_dir, "cluster_markers_top10.csv"), row.names = FALSE)
-cat("  Top 10 markers per cluster saved\n")
+  write.csv(top_markers, file.path(output_dir, "cluster_markers_top10.csv"), row.names = FALSE)
+  cat("  Top 10 markers per cluster saved\n")
+} else {
+  cat("  Warning: No markers found meeting criteria\n")
+}
 
 # -----------------------------------------------------------------------------
 # Step 9: Save Annotated Object

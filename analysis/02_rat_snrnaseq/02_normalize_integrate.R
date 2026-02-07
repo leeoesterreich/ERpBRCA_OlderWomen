@@ -19,7 +19,11 @@ suppressPackageStartupMessages({
   library(harmony)
   library(ggplot2)
   library(dplyr)
+  library(future)
 })
+
+# Increase memory limit for parallelization (4GB per worker)
+options(future.globals.maxSize = 4 * 1024^3)
 
 # Helper function to check file existence
 check_file_exists <- function(filepath, description = "file") {
@@ -29,7 +33,17 @@ check_file_exists <- function(filepath, description = "file") {
   cat(sprintf("  Found: %s\n", basename(filepath)))
 }
 
-script_dir <- dirname(sys.frame(1)$ofile)
+# Define paths - use commandArgs to get script directory when run via Rscript
+get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(dirname(normalizePath(sub("--file=", "", file_arg))))
+  }
+  return(getwd())
+}
+
+script_dir <- get_script_dir()
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
 metadata_dir <- file.path(project_root, "data/rat_snrnaseq/metadata")
@@ -123,10 +137,9 @@ cat("\nStep 5: Running Harmony integration...\n")
 seurat_obj <- RunHarmony(
   seurat_obj,
   group.by.vars = "orig.ident",
-  reduction = "pca",
+  reduction.use = "pca",
   assay.use = "SCT",
-  plot_convergence = FALSE,
-  seed = 12345
+  plot_convergence = FALSE
 )
 
 cat("  Harmony integration complete\n")

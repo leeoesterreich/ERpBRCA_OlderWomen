@@ -19,7 +19,11 @@ suppressPackageStartupMessages({
   library(ggplot2)
   library(dplyr)
   library(DoubletFinder)  # BIOSTATISTICAL FIX: Enable doublet detection
+  library(future)
 })
+
+# Increase memory limit for parallelization (4GB per worker)
+options(future.globals.maxSize = 4 * 1024^3)
 
 # Helper function to check file existence
 check_file_exists <- function(filepath, description = "file") {
@@ -37,7 +41,17 @@ check_dir_exists <- function(dirpath, description = "directory") {
   cat(sprintf("  Found directory: %s\n", basename(dirpath)))
 }
 
-script_dir <- dirname(sys.frame(1)$ofile)
+# Define paths - use commandArgs to get script directory when run via Rscript
+get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(dirname(normalizePath(sub("--file=", "", file_arg))))
+  }
+  return(getwd())
+}
+
+script_dir <- get_script_dir()
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
 data_dir <- file.path(project_root, "data/rat_snrnaseq/raw")
@@ -162,37 +176,44 @@ seurat_merged <- merge(
 cat("  Total cells after merge:", ncol(seurat_merged), "\n")
 
 # -----------------------------------------------------------------------------
-# Step 4: Generate QC Plots
+# Step 4: Save Output (before plots to prevent data loss)
 # -----------------------------------------------------------------------------
-cat("\nStep 4: Generating QC plots...\n")
-
-pdf(file.path(output_dir, "qc_plots.pdf"), width = 12, height = 10)
-
-# Violin plots of QC metrics
-VlnPlot(seurat_merged, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"),
-        group.by = "orig.ident", pt.size = 0)
-
-# Feature scatter
-FeatureScatter(seurat_merged, feature1 = "nCount_RNA", feature2 = "nFeature_RNA",
-               group.by = "orig.ident")
-
-# Cells per sample
-cells_per_sample <- data.frame(table(seurat_merged$orig.ident))
-ggplot(cells_per_sample, aes(x = Var1, y = Freq, fill = Var1)) +
-  geom_bar(stat = "identity") +
-  theme_bw() +
-  labs(x = "Sample", y = "Number of Cells", title = "Cells per Sample (Post-QC)") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-dev.off()
-
-cat("  QC plots saved to:", file.path(output_dir, "qc_plots.pdf"), "\n")
-
-# -----------------------------------------------------------------------------
-# Step 5: Save Output
-# -----------------------------------------------------------------------------
-cat("\nStep 5: Saving output...\n")
+cat("\nStep 4: Saving output...\n")
 saveRDS(seurat_merged, file.path(output_dir, "seurat_qc_filtered.rds"))
+cat("  Saved:", file.path(output_dir, "seurat_qc_filtered.rds"), "\n")
+
+# -----------------------------------------------------------------------------
+# Step 5: Generate QC Plots
+# -----------------------------------------------------------------------------
+cat("\nStep 5: Generating QC plots...\n")
+
+tryCatch({
+  pdf(file.path(output_dir, "qc_plots.pdf"), width = 12, height = 10)
+
+  # Violin plots of QC metrics - generate individually to avoid patchwork issues
+  for (feat in c("nFeature_RNA", "nCount_RNA", "percent.mt")) {
+    print(VlnPlot(seurat_merged, features = feat, group.by = "orig.ident", pt.size = 0))
+  }
+
+  # Feature scatter
+  print(FeatureScatter(seurat_merged, feature1 = "nCount_RNA", feature2 = "nFeature_RNA",
+                 group.by = "orig.ident"))
+
+  # Cells per sample
+  cells_per_sample <- data.frame(table(seurat_merged$orig.ident))
+  print(ggplot(cells_per_sample, aes(x = Var1, y = Freq, fill = Var1)) +
+    geom_bar(stat = "identity") +
+    theme_bw() +
+    labs(x = "Sample", y = "Number of Cells", title = "Cells per Sample (Post-QC)") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)))
+
+  dev.off()
+  cat("  QC plots saved to:", file.path(output_dir, "qc_plots.pdf"), "\n")
+}, error = function(e) {
+  cat("  Warning: QC plot generation failed:", conditionMessage(e), "\n")
+  cat("  Data was saved successfully - plots can be regenerated\n")
+  try(dev.off(), silent = TRUE)
+})
 
 # Memory cleanup
 rm(seurat_list, expr_matrix)

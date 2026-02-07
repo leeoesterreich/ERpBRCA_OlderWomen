@@ -29,8 +29,17 @@ check_file_exists <- function(filepath, description = "file") {
   cat(sprintf("  Found: %s\n", basename(filepath)))
 }
 
-# Define paths
-script_dir <- dirname(sys.frame(1)$ofile)
+# Define paths - use commandArgs to get script directory when run via Rscript
+get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(dirname(normalizePath(sub("--file=", "", file_arg))))
+  }
+  return(getwd())
+}
+
+script_dir <- get_script_dir()
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
 data_dir <- file.path(project_root, "data/human_bulk_rnaseq")

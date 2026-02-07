@@ -36,10 +36,20 @@ check_file_exists <- function(filepath, description = "file") {
   cat(sprintf("  Found: %s\n", basename(filepath)))
 }
 
-# Define paths relative to project root
-project_root <- normalizePath(file.path(dirname(sys.frame(1)$ofile), "../.."))
+# Define paths - use commandArgs to get script directory when run via Rscript
+get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(dirname(normalizePath(sub("--file=", "", file_arg))))
+  }
+  return(getwd())
+}
+
+script_dir <- get_script_dir()
+project_root <- normalizePath(file.path(script_dir, "../.."))
 data_dir <- file.path(project_root, "data/human_bulk_rnaseq")
-output_dir <- file.path(dirname(sys.frame(1)$ofile), "outputs")
+output_dir <- file.path(script_dir, "outputs")
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
 # Input files
@@ -96,6 +106,11 @@ if (use_tpm_only) {
   if ("TissueType" %in% colnames(sample_annot) && !"Group" %in% colnames(sample_annot)) {
     sample_annot$Group <- gsub("Tumor_Adj", "TumorAdj", sample_annot$TissueType)
     sample_annot$Group <- gsub("^Tumor$", "Tumor", sample_annot$Group)
+  }
+
+  # Create Age alias from ChronologicalAge for downstream scripts
+  if ("ChronologicalAge" %in% colnames(sample_annot) && !"Age" %in% colnames(sample_annot)) {
+    sample_annot$Age <- sample_annot$ChronologicalAge
   }
 
   sample_annot <- sample_annot %>%

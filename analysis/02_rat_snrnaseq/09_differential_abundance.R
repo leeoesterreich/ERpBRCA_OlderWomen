@@ -28,7 +28,17 @@ check_file_exists <- function(filepath, description = "file") {
   cat(sprintf("  Found: %s\n", basename(filepath)))
 }
 
-script_dir <- dirname(sys.frame(1)$ofile)
+# Define paths - use commandArgs to get script directory when run via Rscript
+get_script_dir <- function() {
+  args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("--file=", args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(dirname(normalizePath(sub("--file=", "", file_arg))))
+  }
+  return(getwd())
+}
+
+script_dir <- get_script_dir()
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
 results_dir <- file.path(project_root, "results/corrected/rat_snrnaseq")
@@ -117,26 +127,40 @@ cat("\nStep 3: Running propeller differential abundance test...\n")
 # Prepare data for propeller
 # Note: propeller requires counts, sample IDs, and cluster IDs
 
-# Main cell types
-tryCatch({
-  da_main <- propeller(
-    clusters = seurat_obj$CellTypeByMarker_RatsnRNAseq,
-    sample = seurat_obj$orig.ident,
-    group = seurat_obj$AgeGroup
-  )
+# Check for valid cell types before running propeller
+cell_types <- unique(seurat_obj$CellTypeByMarker_RatsnRNAseq)
+cell_types <- cell_types[!is.na(cell_types)]
+cat("  Cell types for DA:", length(cell_types), "-", paste(cell_types, collapse = ", "), "\n")
 
-  da_main$CellType <- rownames(da_main)
-  # BIOSTATISTICAL FIX: Apply BH FDR correction
-  da_main$FDR <- p.adjust(da_main$P.Value, method = "BH")
-  da_main$Level <- "Main"
+if (length(cell_types) < 2) {
+  warning("Need at least 2 cell types for differential abundance analysis")
+  cat("\nWARNING: Fewer than 2 cell types found. Skipping propeller analysis.\n")
+  cat("This may indicate cell type annotation issues.\n")
 
-  cat("\nMain cell type results:\n")
-  print(da_main %>% select(CellType, PropMean.Aged, PropMean.Young, P.Value, FDR) %>% arrange(P.Value))
-
-}, error = function(e) {
-  cat("  Error in main cell type propeller:", e$message, "\n")
+  # Still generate proportion plots with available data
   da_main <- NULL
-})
+} else {
+  # Main cell types
+  da_main <- NULL
+  tryCatch({
+    da_main <- propeller(
+      clusters = seurat_obj$CellTypeByMarker_RatsnRNAseq,
+      sample = seurat_obj$orig.ident,
+      group = seurat_obj$AgeGroup
+    )
+
+    da_main$CellType <- rownames(da_main)
+    # BIOSTATISTICAL FIX: Apply BH FDR correction
+    da_main$FDR <- p.adjust(da_main$P.Value, method = "BH")
+    da_main$Level <- "Main"
+
+    cat("\nMain cell type results:\n")
+    print(da_main %>% select(CellType, PropMean.Aged, PropMean.Young, P.Value, FDR) %>% arrange(P.Value))
+
+  }, error = function(e) {
+    cat("  Error in main cell type propeller:", e$message, "\n")
+  })
+}
 
 # Detailed subtypes (if enough cells per category)
 da_sub <- NULL
@@ -159,12 +183,13 @@ tryCatch({
 })
 
 # Combine results
+da_all <- NULL
 if (!is.null(da_main) && !is.null(da_sub)) {
   da_all <- rbind(da_main, da_sub)
 } else if (!is.null(da_main)) {
   da_all <- da_main
-} else {
-  stop("ERROR: No DA results could be computed")
+} else if (!is.null(da_sub)) {
+  da_all <- da_sub
 }
 
 # -----------------------------------------------------------------------------
@@ -199,49 +224,53 @@ p2 <- ggplot(prop_main, aes(x = CellTypeByMarker_RatsnRNAseq, y = proportion * 1
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(p2)
 
-# DA results visualization
-da_plot_data <- da_all %>%
-  mutate(
-    Sig = FDR < 0.05,
-    LogFC = log2(PropMean.Aged / PropMean.Young)
-  )
+# DA results visualization (only if we have results)
+if (!is.null(da_all)) {
+  da_plot_data <- da_all %>%
+    mutate(
+      Sig = FDR < 0.05,
+      LogFC = log2(PropMean.Aged / PropMean.Young)
+    )
 
-# Handle infinite values (log how many are affected)
-n_infinite <- sum(is.infinite(da_plot_data$LogFC))
-if (n_infinite > 0) {
-  cat("  Warning:", n_infinite, "infinite LogFC values set to NA (division by zero)\n")
+  # Handle infinite values (log how many are affected)
+  n_infinite <- sum(is.infinite(da_plot_data$LogFC))
+  if (n_infinite > 0) {
+    cat("  Warning:", n_infinite, "infinite LogFC values set to NA (division by zero)\n")
+  }
+  da_plot_data$LogFC[is.infinite(da_plot_data$LogFC)] <- NA
+
+  p3 <- ggplot(da_plot_data %>% filter(!is.na(LogFC)),
+               aes(x = reorder(CellType, LogFC), y = LogFC, fill = Sig)) +
+    geom_bar(stat = "identity") +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    coord_flip() +
+    facet_wrap(~Level, scales = "free_y") +
+    scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red")) +
+    theme_bw() +
+    labs(
+      title = "Differential Abundance: Aged vs Young",
+      subtitle = "Red = FDR < 0.05",
+      x = "Cell Type", y = "log2 Fold Change (Aged/Young)"
+    )
+  print(p3)
+
+  # P-value bar plot
+  p4 <- ggplot(da_plot_data, aes(x = reorder(CellType, -log10(FDR)), y = -log10(FDR), fill = Sig)) +
+    geom_bar(stat = "identity") +
+    geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
+    coord_flip() +
+    facet_wrap(~Level, scales = "free_y") +
+    scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red")) +
+    theme_bw() +
+    labs(
+      title = "Differential Abundance Significance",
+      subtitle = "Dashed line = FDR 0.05",
+      x = "Cell Type", y = "-log10(FDR)"
+    )
+  print(p4)
+} else {
+  cat("  Note: Skipping DA plots - no propeller results available\n")
 }
-da_plot_data$LogFC[is.infinite(da_plot_data$LogFC)] <- NA
-
-p3 <- ggplot(da_plot_data %>% filter(!is.na(LogFC)),
-             aes(x = reorder(CellType, LogFC), y = LogFC, fill = Sig)) +
-  geom_bar(stat = "identity") +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  coord_flip() +
-  facet_wrap(~Level, scales = "free_y") +
-  scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red")) +
-  theme_bw() +
-  labs(
-    title = "Differential Abundance: Aged vs Young",
-    subtitle = "Red = FDR < 0.05",
-    x = "Cell Type", y = "log2 Fold Change (Aged/Young)"
-  )
-print(p3)
-
-# P-value bar plot
-p4 <- ggplot(da_plot_data, aes(x = reorder(CellType, -log10(FDR)), y = -log10(FDR), fill = Sig)) +
-  geom_bar(stat = "identity") +
-  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
-  coord_flip() +
-  facet_wrap(~Level, scales = "free_y") +
-  scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red")) +
-  theme_bw() +
-  labs(
-    title = "Differential Abundance Significance",
-    subtitle = "Dashed line = FDR 0.05",
-    x = "Cell Type", y = "-log10(FDR)"
-  )
-print(p4)
 
 dev.off()
 
@@ -252,11 +281,17 @@ cat("  Proportion plots saved to:", file.path(fig_dir, "DA_proportion_plots.pdf"
 # -----------------------------------------------------------------------------
 cat("\nStep 5: Saving results...\n")
 
-# Add sample size warning to results
-da_all$Warning <- "n=3 per group; interpret with caution"
-
-write.csv(da_all, file.path(results_dir, "DA_results_celltypes.csv"), row.names = FALSE)
+# Save proportions regardless of DA results
 write.csv(prop_main, file.path(results_dir, "cell_proportions_by_sample.csv"), row.names = FALSE)
+
+# Save DA results if available
+if (!is.null(da_all)) {
+  # Add sample size warning to results
+  da_all$Warning <- "n=3 per group; interpret with caution"
+  write.csv(da_all, file.path(results_dir, "DA_results_celltypes.csv"), row.names = FALSE)
+} else {
+  cat("  Note: No DA results to save (fewer than 2 cell types)\n")
+}
 
 # Also document the limitation
 writeLines(
