@@ -274,7 +274,28 @@ if (!is.null(da_all)) {
 
 dev.off()
 
+# Save individual plots as PNG and SVG
+ggsave(file.path(fig_dir, "DA_stacked_barplot.png"), p1, width = 12, height = 8, dpi = 300)
+ggsave(file.path(fig_dir, "DA_stacked_barplot.svg"), p1, width = 12, height = 8)
+ggsave(file.path(fig_dir, "DA_boxplot_proportions.png"), p2, width = 10, height = 8, dpi = 300)
+ggsave(file.path(fig_dir, "DA_boxplot_proportions.svg"), p2, width = 10, height = 8)
+
+if (!is.null(da_all)) {
+  ggsave(file.path(fig_dir, "DA_logfc_barplot.png"), p3, width = 10, height = 6, dpi = 300)
+  ggsave(file.path(fig_dir, "DA_logfc_barplot.svg"), p3, width = 10, height = 6)
+  ggsave(file.path(fig_dir, "DA_significance_barplot.png"), p4, width = 10, height = 6, dpi = 300)
+  ggsave(file.path(fig_dir, "DA_significance_barplot.svg"), p4, width = 10, height = 6)
+
+  # Combined figure
+  library(patchwork)
+  p_combined <- (p1 + p2) / (p3 + p4) +
+    plot_annotation(title = "Differential Abundance Analysis: Young vs Aged")
+  ggsave(file.path(fig_dir, "DA_combined.png"), p_combined, width = 16, height = 14, dpi = 300)
+  ggsave(file.path(fig_dir, "DA_combined.svg"), p_combined, width = 16, height = 14)
+}
+
 cat("  Proportion plots saved to:", file.path(fig_dir, "DA_proportion_plots.pdf"), "\n")
+cat("  Individual PNG/SVG plots also saved\n")
 
 # -----------------------------------------------------------------------------
 # Step 5: Save Results

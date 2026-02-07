@@ -220,12 +220,12 @@ add_table_slide(prs, "Human Bulk RNA-seq: Correlation Analysis",
 
 # Slide 4: Human correlation figure - Original
 add_image_slide(prs, "Human Bulk RNA-seq: Original Correlations (p < 0.05)",
-    fig_dir / "human_bulk_rnaseq" / "correlation_bubbleplot_original.pdf",
+    fig_dir / "human_bulk_rnaseq" / "correlation_bubbleplot_original.png",
     "22 significant correlations at nominal p < 0.05")
 
 # Slide 5: Human correlation figure - FDR corrected
 add_image_slide(prs, "Human Bulk RNA-seq: FDR-Corrected Correlations",
-    fig_dir / "human_bulk_rnaseq" / "correlation_bubbleplot_fdr.pdf",
+    fig_dir / "human_bulk_rnaseq" / "correlation_bubbleplot_fdr.png",
     "20 significant correlations at FDR < 0.05 (2 lost: HSD17B7 correlations)")
 
 # Slide 6: Rat DE Results
@@ -241,12 +241,12 @@ add_table_slide(prs, "Rat snRNA-seq: Differential Expression (NEW)",
 
 # Slide 7: Rat volcano plots
 add_image_slide(prs, "Rat snRNA-seq: DE Volcano Plots",
-    fig_dir / "rat_snrnaseq" / "DE_volcano_plots.pdf",
+    fig_dir / "rat_snrnaseq" / "DE_volcano_combined.png",
     "Differential expression between Young and Aged per cell type")
 
 # Slide 8: Rat DA plots
 add_image_slide(prs, "Rat snRNA-seq: Differential Abundance",
-    fig_dir / "rat_snrnaseq" / "DA_proportion_plots.pdf",
+    fig_dir / "rat_snrnaseq" / "DA_combined.png",
     "Cell type proportions by age group (n=3 per group)")
 
 # Slide 9: Technical Fixes

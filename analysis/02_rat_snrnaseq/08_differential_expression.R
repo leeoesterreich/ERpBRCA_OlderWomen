@@ -200,6 +200,9 @@ print(as.data.frame(de_summary))
 # -----------------------------------------------------------------------------
 cat("\nStep 4: Generating volcano plots...\n")
 
+# Store individual plots for combined figure
+volcano_plots <- list()
+
 pdf(file.path(fig_dir, "DE_volcano_plots.pdf"), width = 12, height = 10)
 
 for (ct in unique(all_de_results$celltype)) {
@@ -226,6 +229,12 @@ for (ct in unique(all_de_results$celltype)) {
     theme(legend.position = "none")
 
   print(p)
+  volcano_plots[[ct]] <- p
+
+  # Save individual volcano plots as PNG and SVG
+  ct_clean <- gsub("[^A-Za-z0-9]", "_", ct)
+  ggsave(file.path(fig_dir, paste0("DE_volcano_", ct_clean, ".png")), p, width = 10, height = 8, dpi = 300)
+  ggsave(file.path(fig_dir, paste0("DE_volcano_", ct_clean, ".svg")), p, width = 10, height = 8)
 }
 
 # Combined summary plot
@@ -244,7 +253,21 @@ print(p_summary)
 
 dev.off()
 
+# Save summary plot as PNG and SVG
+ggsave(file.path(fig_dir, "DE_summary_barplot.png"), p_summary, width = 8, height = 6, dpi = 300)
+ggsave(file.path(fig_dir, "DE_summary_barplot.svg"), p_summary, width = 8, height = 6)
+
+# Create combined 2x2 volcano plot grid
+if (length(volcano_plots) == 4) {
+  library(patchwork)
+  p_combined <- (volcano_plots[[1]] + volcano_plots[[2]]) / (volcano_plots[[3]] + volcano_plots[[4]]) +
+    plot_annotation(title = "Differential Expression: Young vs Aged by Cell Type")
+  ggsave(file.path(fig_dir, "DE_volcano_combined.png"), p_combined, width = 16, height = 14, dpi = 300)
+  ggsave(file.path(fig_dir, "DE_volcano_combined.svg"), p_combined, width = 16, height = 14)
+}
+
 cat("  Volcano plots saved to:", file.path(fig_dir, "DE_volcano_plots.pdf"), "\n")
+cat("  Individual PNG/SVG plots also saved\n")
 
 # -----------------------------------------------------------------------------
 # Step 5: Save Results
