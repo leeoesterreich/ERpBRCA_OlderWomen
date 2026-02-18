@@ -39,6 +39,7 @@ dependencies:
   # Statistical packages
   - r-speckle
   - r-lme4
+  - r-genefu
 
   # Python for WES and utilities
   - python=3.10

@@ -24,7 +24,10 @@ This repository contains all analysis code for the study examining how the aged 
 ├── analysis/
 │   ├── 01_human_bulk_rnaseq/    # Human ER+ breast cancer RNA-seq
 │   ├── 02_rat_snrnaseq/         # Rat mammary tumor snRNA-seq
-│   └── 03_rat_wes/              # Rat whole exome sequencing
+│   ├── 03_comparison/           # Cross-species comparison
+│   ├── 03_rat_wes/              # Rat whole exome sequencing
+│   ├── 04_human_scrnaseq/       # Human ER+ scRNA-seq (Wu et al.)
+│   └── 05_rat_bulk_rnaseq/      # Rat mammary tumor bulk RNA-seq
 ├── data/                         # Data download scripts (GEO)
 ├── figures/                      # Generated figures
 ├── results/                      # Analysis outputs
@@ -73,6 +76,7 @@ bash analysis/03_rat_wes/run_analysis.sh
 | Rat snRNA-seq | [GSE276758](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE276758) | 6 samples |
 | Rat Bulk RNA-seq | [GSE276757](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE276757) | - |
 | Rat WES | [GSE276759](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE276759) | - |
+| Human scRNA-seq | [GSE176078](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE176078) | Wu et al. 2021 |
 
 ## Methods Summary
 
@@ -86,6 +90,17 @@ bash analysis/03_rat_wes/run_analysis.sh
 - DoubletFinder for doublet removal
 - Differential expression (Wilcoxon + BH-FDR)
 - Differential abundance (propeller)
+
+### Human scRNA-seq (Wu et al. 2021)
+- Seurat v5 + Harmony batch correction
+- Pseudo-bulk GSVA and PROGENy analysis
+- WCSEA pathway enrichment (indepthPathway)
+- CellPhoneDB interaction analysis
+
+### Rat Bulk RNA-seq
+- STAR alignment to mRatBN7.2
+- DESeq2 differential expression with BH-FDR correction
+- PAM50 molecular subtyping (human orthologs)
 
 ## Translational Relevance
 
