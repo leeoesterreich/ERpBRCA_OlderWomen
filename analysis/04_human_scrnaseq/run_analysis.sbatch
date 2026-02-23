@@ -10,6 +10,7 @@
 #SBATCH --error=logs/analysis_%j.err
 
 # Human scRNA-seq analysis pipeline
+# Requires: Raw data downloaded via 00a_download_geo.sh
 set -euo pipefail
 
 module purge
@@ -18,13 +19,15 @@ module load r/4.2.0
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-mkdir -p logs outputs
+mkdir -p logs outputs outputs/preprocessing
+
+echo "=== Step 0b: Preprocess raw data ==="
+Rscript 00b_preprocess_seurat.R
 
 echo "=== Step 1: Load and subset data ==="
 Rscript 01_load_subset_data.R
 
-echo "=== Step 2: Harmony integration ==="
-Rscript 02_harmony_integrate.R
+# Note: Harmony integration removed (not used per methods)
 
 echo "=== Step 3: Cell type annotation ==="
 Rscript 03_cell_type_annotation.R
