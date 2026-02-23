@@ -1,15 +1,15 @@
 #!/usr/bin/env Rscript
 # analysis/04_human_scrnaseq/00b_preprocess_seurat.R
-# Preprocess Wu et al. (GSE176078) scRNA-seq data following published methods
+# Load Wu et al. (GSE176078) pre-processed scRNA-seq data
 #
-# Methods citation:
-#   QC: nFeature 200-6000, nCount >400, percent.mt <15%
-#   Normalization: SCTransform per sample (glmGamPoi)
-#   Dimensionality reduction: PCA (30 dims) -> UMAP
-#   Cell types: Original Wu et al. annotations
+# The GEO data is provided as a combined sparse matrix with metadata
+# including QC metrics and cell type annotations from Wu et al.
 #
 # Inputs:
-#   - data/human_scrnaseq/raw/CID*/matrix.mtx.gz, features.tsv.gz, barcodes.tsv.gz
+#   - data/human_scrnaseq/raw/Wu_etal_2021_BRCA_scRNASeq/count_matrix_sparse.mtx
+#   - data/human_scrnaseq/raw/Wu_etal_2021_BRCA_scRNASeq/count_matrix_genes.tsv
+#   - data/human_scrnaseq/raw/Wu_etal_2021_BRCA_scRNASeq/count_matrix_barcodes.tsv
+#   - data/human_scrnaseq/raw/Wu_etal_2021_BRCA_scRNASeq/metadata.csv
 #
 # Outputs:
 #   - data/human_scrnaseq/SeuratObj_GSE176078_ERpos_AfterQCSCT.rds
@@ -18,24 +18,16 @@ set.seed(12345)
 
 suppressPackageStartupMessages({
   library(Seurat)
+  library(Matrix)
   library(dplyr)
   library(data.table)
   library(ggplot2)
   library(patchwork)
-  library(future)
 })
 
-# Enable parallel processing for SCTransform
-plan("multicore", workers = 4)
-options(future.globals.maxSize = 8000 * 1024^2)  # 8GB
-
 # -----------------------------------------------------------------------------
-# Configuration (from published methods)
+# Configuration
 # -----------------------------------------------------------------------------
-MIN_FEATURES <- 200
-MAX_FEATURES <- 6000
-MIN_COUNTS <- 400
-MAX_MT_PERCENT <- 15
 PCA_DIMS <- 30
 
 # Sample IDs (10 ER+ samples)
@@ -59,147 +51,143 @@ get_script_dir <- function() {
 
 script_dir <- get_script_dir()
 project_root <- normalizePath(file.path(script_dir, "../.."))
-raw_data_dir <- file.path(project_root, "data/human_scrnaseq/raw")
+raw_data_dir <- file.path(project_root, "data/human_scrnaseq/raw/Wu_etal_2021_BRCA_scRNASeq")
 output_dir <- file.path(project_root, "data/human_scrnaseq")
 log_dir <- file.path(script_dir, "outputs/preprocessing")
 
 dir.create(log_dir, recursive = TRUE, showWarnings = FALSE)
 
-cat("=== Wu et al. scRNA-seq Preprocessing ===\n")
+cat("=== Loading Wu et al. Pre-processed scRNA-seq Data ===\n")
 cat("Raw data directory:", raw_data_dir, "\n")
 cat("Output directory:", output_dir, "\n\n")
 
 # -----------------------------------------------------------------------------
-# Step 1: Load and QC each sample
+# Step 1: Load sparse matrix and metadata
 # -----------------------------------------------------------------------------
-cat("Step 1: Loading and QC filtering samples...\n")
+cat("Step 1: Loading sparse matrix...\n")
 
-qc_stats <- data.frame(
-  sample = character(),
-  cells_raw = integer(),
-  cells_after_qc = integer(),
-  stringsAsFactors = FALSE
+# Load matrix components
+matrix_file <- file.path(raw_data_dir, "count_matrix_sparse.mtx")
+genes_file <- file.path(raw_data_dir, "count_matrix_genes.tsv")
+barcodes_file <- file.path(raw_data_dir, "count_matrix_barcodes.tsv")
+metadata_file <- file.path(raw_data_dir, "metadata.csv")
+
+counts <- readMM(matrix_file)
+genes <- fread(genes_file, header = FALSE)$V1
+barcodes <- fread(barcodes_file, header = FALSE)$V1
+
+# Set matrix dimensions
+rownames(counts) <- genes
+colnames(counts) <- barcodes
+
+cat("  Matrix dimensions:", nrow(counts), "genes x", ncol(counts), "cells\n")
+
+# Load metadata
+metadata <- fread(metadata_file, header = TRUE)
+rownames(metadata) <- metadata$V1
+metadata$V1 <- NULL
+
+cat("  Metadata loaded:", nrow(metadata), "cells\n\n")
+
+# -----------------------------------------------------------------------------
+# Step 2: Create Seurat object
+# -----------------------------------------------------------------------------
+cat("Step 2: Creating Seurat object...\n")
+
+seurat_obj <- CreateSeuratObject(
+  counts = counts,
+  meta.data = as.data.frame(metadata),
+  project = "Wu_GSE176078"
 )
 
-seurat_list <- lapply(SAMPLE_IDS, function(sample_id) {
-  cat("  Processing:", sample_id, "... ")
-
-  sample_dir <- file.path(raw_data_dir, sample_id)
-
-  if (!dir.exists(sample_dir)) {
-    stop(paste("Sample directory not found:", sample_dir))
-  }
-
-  # Load 10X data
-  counts <- Read10X(data.dir = sample_dir)
-  obj <- CreateSeuratObject(counts = counts, project = sample_id)
-  obj$orig.ident <- sample_id
-
-  cells_raw <- ncol(obj)
-
-  # QC metrics
-  obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^MT-")
-
-  # QC filtering (per methods)
-  obj <- subset(obj,
-    subset = nFeature_RNA > MIN_FEATURES &
-             nFeature_RNA < MAX_FEATURES &
-             nCount_RNA > MIN_COUNTS &
-             percent.mt < MAX_MT_PERCENT
-  )
-
-  cells_after_qc <- ncol(obj)
-
-  cat(cells_raw, "->", cells_after_qc, "cells\n")
-
-  # Track QC stats
-  qc_stats <<- rbind(qc_stats, data.frame(
-    sample = sample_id,
-    cells_raw = cells_raw,
-    cells_after_qc = cells_after_qc
-  ))
-
-  # SCTransform per sample (for batch correction)
-  obj <- SCTransform(obj,
-    method = "glmGamPoi",
-    vars.to.regress = "percent.mt",
-    verbose = FALSE
-  )
-
-  return(obj)
-})
-
-names(seurat_list) <- SAMPLE_IDS
-
-# Save QC stats
-fwrite(qc_stats, file.path(log_dir, "qc_stats.tsv"), sep = "\t")
-cat("\nQC Summary:\n")
-print(qc_stats)
-cat("Total cells after QC:", sum(qc_stats$cells_after_qc), "\n\n")
+cat("  Seurat object created\n")
+cat("  Total cells:", ncol(seurat_obj), "\n")
+cat("  Total genes:", nrow(seurat_obj), "\n\n")
 
 # -----------------------------------------------------------------------------
-# Step 2: Merge samples
+# Step 3: Subset to 10 ER+ samples
 # -----------------------------------------------------------------------------
-cat("Step 2: Merging samples...\n")
+cat("Step 3: Subsetting to 10 ER+ samples...\n")
 
-merged <- merge(
-  seurat_list[[1]],
-  y = seurat_list[-1],
-  add.cell.ids = SAMPLE_IDS,
-  project = "Wu_GSE176078_ERpos"
-)
+seurat_subset <- subset(seurat_obj, subset = orig.ident %in% SAMPLE_IDS)
 
-cat("  Merged object:", ncol(merged), "cells x", nrow(merged), "genes\n\n")
+cat("  Cells after subset:", ncol(seurat_subset), "\n")
+cat("  Samples:\n")
+print(table(seurat_subset$orig.ident))
 
 # -----------------------------------------------------------------------------
-# Step 3: PCA and UMAP
+# Step 4: Normalize and run dimensionality reduction
 # -----------------------------------------------------------------------------
-cat("Step 3: Running PCA and UMAP...\n")
+cat("\nStep 4: Running SCTransform and dimensionality reduction...\n")
 
-# Need to re-run variable features on merged object
-merged <- FindVariableFeatures(merged, selection.method = "vst", nfeatures = 3000)
-merged <- ScaleData(merged, verbose = FALSE)
-merged <- RunPCA(merged, npcs = PCA_DIMS, verbose = FALSE)
-merged <- RunUMAP(merged, reduction = "pca", dims = 1:PCA_DIMS, verbose = FALSE)
+# SCTransform (data is already QC'd by Wu et al.)
+seurat_subset <- SCTransform(seurat_subset,
+                              method = "glmGamPoi",
+                              vars.to.regress = "percent.mito",
+                              verbose = FALSE)
 
-cat("  PCA dims:", PCA_DIMS, "\n")
-cat("  UMAP computed\n\n")
+# PCA
+seurat_subset <- RunPCA(seurat_subset, npcs = PCA_DIMS, verbose = FALSE)
+
+# UMAP
+seurat_subset <- RunUMAP(seurat_subset,
+                          reduction = "pca",
+                          dims = 1:PCA_DIMS,
+                          verbose = FALSE)
+
+cat("  SCTransform, PCA, UMAP complete\n\n")
 
 # -----------------------------------------------------------------------------
-# Step 4: Generate QC plots
+# Step 5: Rename cell type columns for consistency
 # -----------------------------------------------------------------------------
-cat("Step 4: Generating QC plots...\n")
+cat("Step 5: Standardizing cell type annotations...\n")
+
+# Wu et al. annotations
+seurat_subset$CellTypeMajor <- seurat_subset$celltype_major
+seurat_subset$CellTypeMinor <- seurat_subset$celltype_minor
+seurat_subset$CellTypeSubset <- seurat_subset$celltype_subset
+seurat_subset$Subtype <- seurat_subset$subtype
+
+cat("  Cell type major:\n")
+print(table(seurat_subset$CellTypeMajor))
+
+# -----------------------------------------------------------------------------
+# Step 6: Generate QC plots
+# -----------------------------------------------------------------------------
+cat("\nStep 6: Generating QC plots...\n")
 
 # UMAP by sample
-p1 <- DimPlot(merged, reduction = "umap", group.by = "orig.ident") +
+p1 <- DimPlot(seurat_subset, reduction = "umap", group.by = "orig.ident") +
   ggtitle("UMAP by Sample")
 
-# UMAP density
-p2 <- DimPlot(merged, reduction = "umap") +
-  ggtitle("UMAP All Cells")
+# UMAP by cell type
+p2 <- DimPlot(seurat_subset, reduction = "umap", group.by = "CellTypeMajor", label = TRUE) +
+  ggtitle("UMAP by Cell Type") +
+  NoLegend()
 
-pdf(file.path(log_dir, "preprocessing_qc.pdf"), width = 12, height = 5)
+pdf(file.path(log_dir, "preprocessing_qc.pdf"), width = 14, height = 6)
 print(p1 + p2)
 dev.off()
 
 # Violin plots of QC metrics
 pdf(file.path(log_dir, "qc_violins.pdf"), width = 12, height = 4)
-print(VlnPlot(merged, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"),
+print(VlnPlot(seurat_subset,
+              features = c("nFeature_RNA", "nCount_RNA", "percent.mito"),
               group.by = "orig.ident", ncol = 3, pt.size = 0))
 dev.off()
 
 cat("  Saved QC plots to:", log_dir, "\n\n")
 
 # -----------------------------------------------------------------------------
-# Step 5: Save output
+# Step 7: Save output
 # -----------------------------------------------------------------------------
-cat("Step 5: Saving processed object...\n")
+cat("Step 7: Saving processed object...\n")
 
 output_file <- file.path(output_dir, "SeuratObj_GSE176078_ERpos_AfterQCSCT.rds")
-saveRDS(merged, output_file)
+saveRDS(seurat_subset, output_file)
 
 cat("  Saved:", output_file, "\n")
-cat("  Final dimensions:", ncol(merged), "cells x", nrow(merged), "genes\n")
+cat("  Final dimensions:", ncol(seurat_subset), "cells x", nrow(seurat_subset), "genes\n")
 
 cat("\n=== Preprocessing complete ===\n")
 
