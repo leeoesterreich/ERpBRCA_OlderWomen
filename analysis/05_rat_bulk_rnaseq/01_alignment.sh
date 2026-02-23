@@ -19,8 +19,8 @@ module purge
 module load gcc/8.2.0
 module load star/2.7.11b
 
-# Paths - UPDATED
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Paths - use absolute paths for SLURM compatibility
+SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/05_rat_bulk_rnaseq"
 INPUT_DIR="${SCRIPT_DIR}/outputs/trimmed"
 OUTPUT_DIR="${SCRIPT_DIR}/outputs/aligned"
 GENOME_DIR="/ix1/alee/LO_LAB/Personal/Rahul/Reference_genome/Rat"

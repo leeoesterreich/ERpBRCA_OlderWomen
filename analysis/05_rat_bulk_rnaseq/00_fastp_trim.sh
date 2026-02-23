@@ -18,9 +18,9 @@ set -euo pipefail
 module purge
 module load fastp/0.23.4
 
-# Paths
+# Paths - use absolute paths for SLURM compatibility
 RAW_DIR="/ix1/alee/LO_LAB/General/Lab_Data/20240622_Neil_Rahul_RNASeqRat"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/05_rat_bulk_rnaseq"
 OUTPUT_DIR="${SCRIPT_DIR}/outputs/trimmed"
 
 mkdir -p "$OUTPUT_DIR"
