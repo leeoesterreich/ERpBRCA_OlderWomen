@@ -1,0 +1,7 @@
+SAMPLE,TYPE,RAW_FASTQ_PREFIX,NOTES
+102-FF-Tumor,TEST,102-FF-Tumor,Young rat tumor
+107-L4t2-Tumor,TEST,107-L4t2-Tumor,Young rat tumor
+116-R4-Tumor,TEST,116-R4-Tumor,Young rat tumor
+157-R2-Tumor,CONTROL,157-R2-Tumor,Elderly rat tumor
+158-L2-Tumor,CONTROL,158-L2-Tumor,Elderly rat tumor
+167-L2-Tumor,CONTROL,167-L2-Tumor,Elderly rat tumor
