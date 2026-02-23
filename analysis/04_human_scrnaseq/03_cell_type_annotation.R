@@ -3,7 +3,7 @@
 # Cell type annotation using marker genes
 #
 # Inputs:
-#   - analysis/04_human_scrnaseq/outputs/seurat_harmony_integrated.rds
+#   - analysis/04_human_scrnaseq/outputs/seurat_young_midage_elderly.rds
 #
 # Outputs:
 #   - analysis/04_human_scrnaseq/outputs/seurat_annotated.rds
@@ -39,7 +39,7 @@ cat("=== Cell Type Annotation ===\n")
 # -----------------------------------------------------------------------------
 cat("Step 1: Loading data...\n")
 
-seurat_obj <- readRDS(file.path(output_dir, "seurat_harmony_integrated.rds"))
+seurat_obj <- readRDS(file.path(output_dir, "seurat_young_midage_elderly.rds"))
 cat("  Cells:", ncol(seurat_obj), "\n")
 
 # Check if cell type annotations exist from original data
