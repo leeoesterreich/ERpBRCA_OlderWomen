@@ -3,7 +3,7 @@
 # Load and subset Wu et al. scRNA-seq data for age group analysis
 #
 # Inputs:
-#   - data/human_scrnaseq/SeuratObj_GSE176078_ERpos_NewMeta_AfterQCSCT.rds
+#   - data/human_scrnaseq/SeuratObj_GSE176078_ERpos_AfterQCSCT.rds
 #   - data/human_scrnaseq/ClinicalData_Wu_scRNAseq_26p.txt
 #
 # Outputs:
@@ -33,6 +33,7 @@ script_dir <- get_script_dir()
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
 data_dir <- file.path(project_root, "data/human_scrnaseq")
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 cat("=== Load and Subset scRNA-seq Data ===\n")
 
@@ -60,15 +61,13 @@ print(table(clinical_data$AgeGroup))
 # -----------------------------------------------------------------------------
 cat("\nStep 2: Loading Seurat object...\n")
 
-seurat_file <- file.path(data_dir, "SeuratObj_GSE176078_ERpos_NewMeta_AfterQCSCT.rds")
+seurat_file <- file.path(data_dir, "SeuratObj_GSE176078_ERpos_AfterQCSCT.rds")
 seurat_obj <- readRDS(seurat_file)
 
 cat("  Cells:", ncol(seurat_obj), "\n")
 cat("  Genes:", nrow(seurat_obj), "\n")
 
-# Run PCA and UMAP
-seurat_obj <- RunPCA(seurat_obj, npcs = 30, verbose = FALSE)
-seurat_obj <- RunUMAP(seurat_obj, reduction = "pca", dims = 1:30, verbose = FALSE)
+# Note: PCA and UMAP already computed in 00b_preprocess_seurat.R
 
 # -----------------------------------------------------------------------------
 # Step 3: Subset to Young/MidAge/Elderly
