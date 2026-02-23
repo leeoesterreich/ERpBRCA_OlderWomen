@@ -9,6 +9,7 @@
 # Outputs:
 #   - analysis/05_rat_bulk_rnaseq/outputs/deseq2_results.csv
 #   - analysis/05_rat_bulk_rnaseq/outputs/deseq2_results_significant.csv
+#   - analysis/05_rat_bulk_rnaseq/outputs/normalized_tpm.csv (for PAM50)
 
 set.seed(12345)
 
@@ -36,58 +37,67 @@ count_dir <- file.path(output_dir, "counts")
 data_dir <- file.path(project_root, "data/rat_bulk_rnaseq")
 
 cat("=== DESeq2 Analysis ===\n")
+cat("Count dir:", count_dir, "\n")
+cat("Data dir:", data_dir, "\n")
 
 # -----------------------------------------------------------------------------
 # Step 1: Load count data
 # -----------------------------------------------------------------------------
-cat("Step 1: Loading count data...\n")
+cat("\nStep 1: Loading count data...\n")
 
-# Read and combine count files
 count_files <- list.files(count_dir, pattern = "\\.txt$", full.names = TRUE)
 if (length(count_files) == 0) {
   stop("No count files found in: ", count_dir)
 }
 
 count_list <- lapply(count_files, function(f) {
-  df <- fread(f, header = FALSE, col.names = c("gene_id", basename(f)))
+  df <- fread(f, header = FALSE, col.names = c("gene_id", "count"))
+  df$sample <- gsub("\\.txt$", "", basename(f))
   df
 })
 
-# Merge all count files
-countdata <- Reduce(function(x, y) merge(x, y, by = "gene_id", all = TRUE), count_list)
-countdata <- countdata %>%
-  filter(!grepl("^__", gene_id)) %>%  # Remove HTSeq summary lines
-  tibble::column_to_rownames("gene_id") %>%
-  as.matrix()
+counts_long <- rbindlist(count_list)
+counts_wide <- dcast(counts_long, gene_id ~ sample, value.var = "count")
 
-# Clean column names
-colnames(countdata) <- gsub("\\.txt$", "", colnames(countdata))
+# Remove HTSeq summary lines
+counts_wide <- counts_wide[!grepl("^__", gene_id)]
+countdata <- as.matrix(counts_wide[, -1, with = FALSE])
+rownames(countdata) <- counts_wide$gene_id
 
 cat("  Count matrix:", nrow(countdata), "genes x", ncol(countdata), "samples\n")
 
 # -----------------------------------------------------------------------------
 # Step 2: Load sample metadata
 # -----------------------------------------------------------------------------
-cat("Step 2: Loading sample metadata...\n")
+cat("\nStep 2: Loading sample metadata...\n")
 
 metadata_file <- file.path(data_dir, "sample_metadata.csv")
 if (!file.exists(metadata_file)) {
   stop("Metadata file not found: ", metadata_file)
 }
 
-coldata <- read.csv(metadata_file, row.names = 1)
-coldata$TYPE <- factor(coldata$TYPE)
+coldata <- read.csv(metadata_file)
+rownames(coldata) <- coldata$SAMPLE
+coldata$TYPE <- factor(coldata$TYPE, levels = c("CONTROL", "TEST"))
 
-# Ensure sample order matches
-countdata <- countdata[, rownames(coldata)]
+# Match sample order
+common_samples <- intersect(colnames(countdata), rownames(coldata))
+if (length(common_samples) == 0) {
+  cat("  Count file samples:", paste(colnames(countdata), collapse = ", "), "\n")
+  cat("  Metadata samples:", paste(rownames(coldata), collapse = ", "), "\n")
+  stop("No matching samples between counts and metadata!")
+}
+
+countdata <- countdata[, common_samples]
+coldata <- coldata[common_samples, ]
 
 cat("  Samples:", nrow(coldata), "\n")
-cat("  Groups:", paste(levels(coldata$TYPE), collapse = ", "), "\n")
+cat("  Groups:", paste(table(coldata$TYPE), collapse = " vs "), "\n")
 
 # -----------------------------------------------------------------------------
 # Step 3: Run DESeq2
 # -----------------------------------------------------------------------------
-cat("Step 3: Running DESeq2...\n")
+cat("\nStep 3: Running DESeq2...\n")
 
 dds <- DESeqDataSetFromMatrix(
   countData = countdata,
@@ -97,22 +107,23 @@ dds <- DESeqDataSetFromMatrix(
 
 dds <- DESeq(dds)
 
-# Get results with contrast
+# Get results (TEST vs CONTROL)
 results <- results(dds, contrast = c("TYPE", "TEST", "CONTROL"))
 
-cat("  Total genes tested:", nrow(results), "\n")
+cat("  Total genes tested:", sum(!is.na(results$padj)), "\n")
 
 # -----------------------------------------------------------------------------
-# Step 4: Add gene symbols and apply FDR correction
+# Step 4: Add gene symbols
 # -----------------------------------------------------------------------------
-cat("Step 4: Adding gene symbols...\n")
+cat("\nStep 4: Adding gene symbols...\n")
 
 res_df <- as.data.frame(results) %>%
   tibble::rownames_to_column("ensembl_gene_id")
 
 # Add normalized counts
 norm_counts <- counts(dds, normalized = TRUE)
-res_df <- merge(res_df, as.data.frame(norm_counts) %>% tibble::rownames_to_column("ensembl_gene_id"),
+res_df <- merge(res_df,
+                as.data.frame(norm_counts) %>% tibble::rownames_to_column("ensembl_gene_id"),
                 by = "ensembl_gene_id", all.x = TRUE)
 
 # Get gene symbols from biomaRt
@@ -125,32 +136,37 @@ tryCatch({
     mart = mart
   )
   res_df <- merge(res_df, gene_symbols, by = "ensembl_gene_id", all.x = TRUE)
+  cat("  Gene symbols added\n")
 }, error = function(e) {
-  cat("  Warning: Could not connect to biomaRt, skipping gene symbol annotation\n")
-  res_df$external_gene_name <- NA
+  cat("  Warning: Could not connect to biomaRt:", conditionMessage(e), "\n")
+  res_df$external_gene_name <<- NA
 })
 
 # -----------------------------------------------------------------------------
-# Step 5: Save results with FDR filtering
+# Step 5: Save results
 # -----------------------------------------------------------------------------
-cat("Step 5: Saving results...\n")
+cat("\nStep 5: Saving results...\n")
 
 # Save all results
 write.csv(res_df, file.path(output_dir, "deseq2_results.csv"), row.names = FALSE)
 cat("  Saved: deseq2_results.csv\n")
 
-# FIX: Filter by adjusted p-value (FDR < 0.05), not raw p-value
+# Filter by FDR < 0.05
 res_sig <- res_df %>%
   filter(!is.na(padj), padj < 0.05) %>%
   arrange(padj)
 
 write.csv(res_sig, file.path(output_dir, "deseq2_results_significant.csv"), row.names = FALSE)
 cat("  Significant genes (FDR < 0.05):", nrow(res_sig), "\n")
-cat("  Saved: deseq2_results_significant.csv\n")
 
-# Summary statistics
+# Summary
 cat("\nSummary:\n")
-cat("  Upregulated (FDR < 0.05, log2FC > 0):", sum(res_sig$log2FoldChange > 0, na.rm = TRUE), "\n")
-cat("  Downregulated (FDR < 0.05, log2FC < 0):", sum(res_sig$log2FoldChange < 0, na.rm = TRUE), "\n")
+cat("  Upregulated (log2FC > 0):", sum(res_sig$log2FoldChange > 0, na.rm = TRUE), "\n")
+cat("  Downregulated (log2FC < 0):", sum(res_sig$log2FoldChange < 0, na.rm = TRUE), "\n")
+
+# Save normalized counts for PAM50
+norm_tpm <- sweep(norm_counts, 2, colSums(norm_counts), "/") * 1e6
+write.csv(norm_tpm, file.path(output_dir, "normalized_tpm.csv"))
+cat("  Saved: normalized_tpm.csv\n")
 
 cat("\n=== DESeq2 complete ===\n")
