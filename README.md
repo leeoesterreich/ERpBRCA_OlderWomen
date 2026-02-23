@@ -92,10 +92,12 @@ bash analysis/03_rat_wes/run_analysis.sh
 - Differential abundance (propeller)
 
 ### Human scRNA-seq (Wu et al. 2021)
-- Seurat v5 + Harmony batch correction
+- Seurat v5 + SCTransform normalization (batch correction via per-sample SCT)
 - Pseudo-bulk GSVA and PROGENy analysis
 - WCSEA pathway enrichment (indepthPathway)
 - CellPhoneDB interaction analysis
+
+See `data/human_scrnaseq/README.md` for data provenance and preprocessing details.
 
 ### Rat Bulk RNA-seq
 - STAR alignment to mRatBN7.2
