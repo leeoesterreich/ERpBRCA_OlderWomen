@@ -19,8 +19,7 @@ conda activate /ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/wesenv || {
 # Enable strict mode after bashrc
 set -eo pipefail
 
-# Get the directory where this script is located (not where sbatch was called from)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/03_rat_wes"
 cd "$SCRIPT_DIR"
 echo "Working directory: $SCRIPT_DIR"
 
