@@ -5,8 +5,8 @@ import os
 import pandas as pd
 from pathlib import Path
 
-# Input directory
-VEP_DIR = Path("/bgfs/alee/LO_LAB/General/Lab_Data/20240628_WES_Rat_Neil/results/variant_calling/mutect2/")
+# Input directory - VEP output from 00_run_vep.sbatch
+VEP_DIR = Path(__file__).parent / "outputs" / "vep"
 OUTPUT_DIR = Path(__file__).parent / "outputs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
