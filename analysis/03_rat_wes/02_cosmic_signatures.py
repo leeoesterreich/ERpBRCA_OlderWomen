@@ -42,8 +42,9 @@ def parse_signatures():
     df = df.loc[:, (df != 0).any(axis=0)]
 
     # Add age group annotation
-    old_samples = ['102', '107', '116']
-    df['age_group'] = df.index.map(lambda x: 'Young' if x[:3] in old_samples else 'Old')
+    # Sample IDs 102, 107, 116 are from younger rats per original study design
+    young_sample_ids = ['102', '107', '116']
+    df['age_group'] = df.index.map(lambda x: 'Young' if x[:3] in young_sample_ids else 'Old')
 
     # Save to expected output location
     df.to_csv(OUTPUT_DIR / "cosmic_signatures.csv")

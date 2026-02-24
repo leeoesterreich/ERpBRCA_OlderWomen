@@ -14,7 +14,7 @@
 
 # Load conda environment before strict mode
 source /ihome/alee/alc376/.bashrc
-conda activate aging_wes
+conda activate aging_wes || { echo "ERROR: Conda environment 'aging_wes' not found"; exit 1; }
 
 # Enable strict mode after bashrc
 set -eo pipefail

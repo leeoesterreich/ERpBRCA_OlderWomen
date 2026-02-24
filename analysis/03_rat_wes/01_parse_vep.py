@@ -13,11 +13,14 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 
 def read_vep_output(file_path):
     """Read VEP output file with custom header parsing."""
+    header = None
     with open(file_path, 'r') as f:
         for line in f:
             if line.startswith('#') and not line.startswith('##'):
                 header = line[1:].strip().split('\t')
                 break
+    if header is None:
+        raise ValueError(f"No VEP header found in {file_path}")
     df = pd.read_csv(file_path, comment='#', sep='\t', names=header, header=None)
     return df
 
@@ -33,6 +36,9 @@ def filter_vep_output(df):
 def main():
     print("=== Parsing VEP Output Files ===")
 
+    if not VEP_DIR.exists():
+        raise FileNotFoundError(f"VEP input directory not found: {VEP_DIR}")
+
     dataframes = {}
     for subfolder in os.listdir(VEP_DIR):
         if subfolder.endswith('spleen'):
@@ -42,6 +48,9 @@ def main():
                 filtered = filter_vep_output(df)
                 dataframes[subfolder] = filtered
                 print(f"  {subfolder}: {len(df)} -> {len(filtered)} variants")
+
+    if not dataframes:
+        raise ValueError(f"No VEP files ending in 'spleen' found in {VEP_DIR}")
 
     # Save filtered results
     for name, df in dataframes.items():
