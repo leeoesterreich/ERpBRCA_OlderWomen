@@ -19,8 +19,8 @@ conda activate /ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/erp_brca_ag
 # Now enable strict mode
 set -eo pipefail
 
-# Use SLURM_SUBMIT_DIR to get the directory where sbatch was called
-SCRIPT_DIR="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+# Get the directory where this script is located (not where sbatch was called from)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 echo "Working directory: $SCRIPT_DIR"
 
