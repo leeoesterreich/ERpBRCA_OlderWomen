@@ -60,24 +60,37 @@ Rscript 05_visualize.R 2>&1
 
 echo "[6/6] Exporting CSVs for validation..."
 Rscript -e '
-# Export correlation results as CSV
-cor_data <- readRDS("outputs/correlation_results.rds")
-write.csv(cor_data, "outputs/correlation_results.csv", row.names = FALSE)
+tryCatch({
+  # Check input files exist
+  if (!file.exists("outputs/correlation_results.rds")) {
+    stop("correlation_results.rds not found")
+  }
+  if (!file.exists("outputs/gsva_estrogen_pathways.rds")) {
+    stop("gsva_estrogen_pathways.rds not found")
+  }
 
-# Export GSVA results as CSV (for MICA analysis)
-gsva_data <- readRDS("outputs/gsva_estrogen_pathways.rds")
-gsva_df <- as.data.frame(t(gsva_data))
-gsva_df$Sample <- rownames(gsva_df)
-write.csv(gsva_df, "outputs/mica_results.csv", row.names = FALSE)
+  # Export correlation results as CSV
+  cor_data <- readRDS("outputs/correlation_results.rds")
+  write.csv(cor_data, "outputs/correlation_results.csv", row.names = FALSE)
 
-# Export HSD17B7 correlations (subset of correlation_results)
-hsd_cor <- cor_data[cor_data$GeneSymb == "HSD17B7", ]
-write.csv(hsd_cor, "outputs/hsd17b7_correlations.csv", row.names = FALSE)
+  # Export GSVA results as CSV (for MICA analysis)
+  gsva_data <- readRDS("outputs/gsva_estrogen_pathways.rds")
+  gsva_df <- as.data.frame(t(gsva_data))
+  gsva_df$Sample <- rownames(gsva_df)
+  write.csv(gsva_df, "outputs/mica_results.csv", row.names = FALSE)
 
-cat("CSV exports complete\n")
-'
+  # Export HSD17B7 correlations (subset of correlation_results)
+  hsd_cor <- cor_data[cor_data$GeneSymb == "HSD17B7", ]
+  write.csv(hsd_cor, "outputs/hsd17b7_correlations.csv", row.names = FALSE)
 
-# Write completion marker
+  cat("CSV exports complete\n")
+}, error = function(e) {
+  message(paste("ERROR in CSV export:", e$message))
+  quit(status = 1)
+})
+' || { echo "ERROR: CSV export failed"; exit 1; }
+
+# Write completion marker (only if we get here = success)
 MARKER_DIR="$(dirname "$SCRIPT_DIR")/.pipeline_markers"
 mkdir -p "$MARKER_DIR"
 touch "$MARKER_DIR/01_human_bulk_rnaseq.complete"
