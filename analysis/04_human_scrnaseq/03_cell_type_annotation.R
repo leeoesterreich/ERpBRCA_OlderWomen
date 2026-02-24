@@ -112,7 +112,7 @@ saveRDS(seurat_obj, file.path(output_dir, "seurat_annotated.rds"))
 # Save metadata
 metadata <- seurat_obj@meta.data %>%
   tibble::rownames_to_column("CellID") %>%
-  select(CellID, orig.ident, AgeGroup, CellTypeAnnot, seurat_clusters)
+  select(CellID, orig.ident, AgeGroup, CellTypeAnnot)
 
 fwrite(metadata, file.path(output_dir, "metadata_annotated.txt"),
        sep = "\t", quote = FALSE)

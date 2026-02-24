@@ -14,6 +14,7 @@ suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
   library(dplyr)
+  library(patchwork)
 })
 
 get_script_dir <- function() {

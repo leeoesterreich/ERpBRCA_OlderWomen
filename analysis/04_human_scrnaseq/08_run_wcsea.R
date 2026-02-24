@@ -19,14 +19,13 @@ suppressPackageStartupMessages({
 })
 
 # Check if indepthPathway is installed
-if (!requireNamespace("indepthPathway", quietly = TRUE)) {
-  cat("Installing indepthPathway from GitHub...\n")
-  if (!requireNamespace("devtools", quietly = TRUE)) {
-    install.packages("devtools")
-  }
-  devtools::install_github("wangxlab/indepthPathway")
+indepthPathway_available <- FALSE
+if (requireNamespace("indepthPathway", quietly = TRUE)) {
+  library(indepthPathway)
+  indepthPathway_available <- TRUE
+} else {
+  cat("indepthPathway not available - will save markers for manual analysis\n")
 }
-library(indepthPathway)
 
 get_script_dir <- function() {
   args <- commandArgs(trailingOnly = FALSE)
@@ -85,46 +84,49 @@ cat("    Upregulated in Elderly:", sum(markers_sig$avg_log2FC > 0), "\n")
 cat("    Downregulated in Elderly:", sum(markers_sig$avg_log2FC < 0), "\n")
 
 # -----------------------------------------------------------------------------
-# Step 3: Run WCSEA
+# Step 3: Run WCSEA (if available)
 # -----------------------------------------------------------------------------
 cat("\nStep 3: Running WCSEA...\n")
 
 # Prepare gene list with fold changes
 gene_fc <- setNames(markers_sig$avg_log2FC, markers_sig$gene)
 
-# Run WCSEA (Weighted Concept Signature Enrichment Analysis)
-# This is designed to handle noisy single-cell data
-tryCatch({
-  wcsea_result <- WCSEA(
-    gene_list = gene_fc,
-    species = "human",
-    pathway_db = "GO_BP",  # Gene Ontology Biological Process
-    min_genes = 10,
-    max_genes = 500
-  )
+if (indepthPathway_available) {
+  # Run WCSEA (Weighted Concept Signature Enrichment Analysis)
+  # This is designed to handle noisy single-cell data
+  tryCatch({
+    wcsea_result <- WCSEA(
+      gene_list = gene_fc,
+      species = "human",
+      pathway_db = "GO_BP",  # Gene Ontology Biological Process
+      min_genes = 10,
+      max_genes = 500
+    )
 
-  # Extract results
-  wcsea_df <- wcsea_result$enrichment_result
+    # Extract results
+    wcsea_df <- wcsea_result$enrichment_result
 
-  # FDR correction
-  wcsea_df$padj <- p.adjust(wcsea_df$pvalue, method = "BH")
-  wcsea_sig <- wcsea_df %>%
-    filter(padj < 0.05) %>%
-    arrange(padj)
+    # FDR correction
+    wcsea_df$padj <- p.adjust(wcsea_df$pvalue, method = "BH")
+    wcsea_sig <- wcsea_df %>%
+      filter(padj < 0.05) %>%
+      arrange(padj)
 
-  cat("  Enriched pathways (FDR < 0.05):", nrow(wcsea_sig), "\n")
+    cat("  Enriched pathways (FDR < 0.05):", nrow(wcsea_sig), "\n")
 
-  # Save results
-  saveRDS(wcsea_result, file.path(output_dir, "wcsea_results.rds"))
-  write.csv(wcsea_sig, file.path(output_dir, "wcsea_enrichment.csv"), row.names = FALSE)
+    # Save results
+    saveRDS(wcsea_result, file.path(output_dir, "wcsea_results.rds"))
+    write.csv(wcsea_sig, file.path(output_dir, "wcsea_enrichment.csv"), row.names = FALSE)
 
-}, error = function(e) {
-  cat("  Error running WCSEA:", conditionMessage(e), "\n")
-  cat("  Saving marker genes for manual WCSEA analysis\n")
-
-  # Save markers for manual analysis
+  }, error = function(e) {
+    cat("  Error running WCSEA:", conditionMessage(e), "\n")
+    cat("  Saving marker genes for manual WCSEA analysis\n")
+    write.csv(markers_sig, file.path(output_dir, "wcsea_input_markers.csv"), row.names = FALSE)
+  })
+} else {
+  cat("  indepthPathway not available - saving marker genes instead\n")
   write.csv(markers_sig, file.path(output_dir, "wcsea_input_markers.csv"), row.names = FALSE)
-})
+}
 
 # -----------------------------------------------------------------------------
 # Step 4: Also check estrogen-related pathways specifically

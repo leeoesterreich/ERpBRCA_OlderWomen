@@ -11,18 +11,29 @@
 
 # Human scRNA-seq analysis pipeline
 # Requires: Raw data downloaded via 00a_download_geo.sh
-set -euo pipefail
 
-module purge
-module load r/4.2.0
+# Load conda environment (before strict mode to avoid bashrc variable issues)
+source /ihome/alee/alc376/.bashrc
+conda activate /ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/erp_brca_aging
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Now enable strict mode
+set -eo pipefail
+
+# Use SLURM_SUBMIT_DIR to get the directory where sbatch was called
+SCRIPT_DIR="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 cd "$SCRIPT_DIR"
+echo "Working directory: $SCRIPT_DIR"
 
 mkdir -p logs outputs outputs/preprocessing
 
-echo "=== Step 0b: Preprocess raw data ==="
-Rscript 00b_preprocess_seurat.R
+# Check if preprocessed data already exists
+PREPROCESS_FILE="../../data/human_scrnaseq/SeuratObj_GSE176078_ERpos_AfterQCSCT.rds"
+if [ -f "$PREPROCESS_FILE" ]; then
+    echo "=== Step 0b: Preprocessed data exists, skipping ==="
+else
+    echo "=== Step 0b: Preprocess raw data ==="
+    Rscript 00b_preprocess_seurat.R
+fi
 
 echo "=== Step 1: Load and subset data ==="
 Rscript 01_load_subset_data.R
