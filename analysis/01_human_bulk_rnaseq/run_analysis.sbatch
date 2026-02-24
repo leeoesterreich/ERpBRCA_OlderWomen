@@ -58,6 +58,31 @@ Rscript 04_correlations.R 2>&1
 echo "[5/5] Generating visualizations..."
 Rscript 05_visualize.R 2>&1
 
+echo "[6/6] Exporting CSVs for validation..."
+Rscript -e '
+# Export correlation results as CSV
+cor_data <- readRDS("outputs/correlation_results.rds")
+write.csv(cor_data, "outputs/correlation_results.csv", row.names = FALSE)
+
+# Export GSVA results as CSV (for MICA analysis)
+gsva_data <- readRDS("outputs/gsva_estrogen_pathways.rds")
+gsva_df <- as.data.frame(t(gsva_data))
+gsva_df$Sample <- rownames(gsva_df)
+write.csv(gsva_df, "outputs/mica_results.csv", row.names = FALSE)
+
+# Export HSD17B7 correlations (subset of correlation_results)
+hsd_cor <- cor_data[cor_data$GeneSymb == "HSD17B7", ]
+write.csv(hsd_cor, "outputs/hsd17b7_correlations.csv", row.names = FALSE)
+
+cat("CSV exports complete\n")
+'
+
+# Write completion marker
+MARKER_DIR="$(dirname "$SCRIPT_DIR")/.pipeline_markers"
+mkdir -p "$MARKER_DIR"
+touch "$MARKER_DIR/01_human_bulk_rnaseq.complete"
+echo "Marker written: $MARKER_DIR/01_human_bulk_rnaseq.complete"
+
 echo ""
 echo "=============================================="
 echo "Human Bulk RNA-seq Analysis Complete"
