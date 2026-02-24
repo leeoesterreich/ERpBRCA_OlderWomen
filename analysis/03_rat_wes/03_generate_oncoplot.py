@@ -115,61 +115,158 @@ def map_to_human_symbols(df):
     return mapping
 
 
-def load_filtered_data():
-    """Load all filtered variant data."""
-    combined_file = OUTPUT_DIR / "all_samples_filtered.csv"
-    if not combined_file.exists():
-        raise FileNotFoundError("Run 01_parse_vep.py first")
-    return pd.read_csv(combined_file)
+def filter_cancer_genes(df, gene_list_file):
+    """Filter for genes in cancer gene list."""
+    cancer_genes = pd.read_csv(gene_list_file)
+    cancer_gene_set = set(cancer_genes['Gene'].tolist())
+    return df[df['gene_symbol'].isin(cancer_gene_set)]
 
 
-def generate_oncoplot_data(df):
-    """Generate oncoplot matrix format."""
-    # Extract consequence impact
+def generate_oncoplot_figure(df):
+    """Generate publication-quality oncoplot figure."""
+    FIGURES_DIR.mkdir(exist_ok=True)
+
+    # Extract consequence and impact
+    df = df.copy()
     df['IMPACT'] = df['Extra'].str.extract(r'IMPACT=([^;]+)')
-    df['Consequence'] = df['Consequence'].fillna('Unknown')
 
-    # Create pivot table: genes x samples
+    # Priority: HIGH > MODERATE
     impact_priority = {'HIGH': 1, 'MODERATE': 2}
     df['IMPACT_PRIORITY'] = df['IMPACT'].map(impact_priority).fillna(3)
+    df = df.sort_values(['Sample', 'gene_symbol', 'IMPACT_PRIORITY'])
 
-    df_sorted = df.sort_values(['Sample', 'Gene', 'IMPACT_PRIORITY'])
-    agg_df = df_sorted.groupby(['Sample', 'Gene']).first().reset_index()
+    # Aggregate to one consequence per gene per sample
+    agg_df = df.groupby(['Sample', 'gene_symbol']).first().reset_index()
 
     # Pivot to matrix format
-    oncoplot_matrix = agg_df.pivot_table(
+    plot_data = agg_df.pivot_table(
         values='Consequence',
-        index='Gene',
+        index='gene_symbol',
         columns='Sample',
         aggfunc='first'
     )
 
-    # Calculate mutation frequency and sort
-    freq = oncoplot_matrix.notna().sum(axis=1).sort_values(ascending=False)
-    oncoplot_matrix = oncoplot_matrix.reindex(freq.index)
+    # Sort genes by mutation frequency
+    gene_freq = plot_data.notna().sum(axis=1).sort_values(ascending=False)
+    plot_data = plot_data.reindex(gene_freq.index)
 
-    return oncoplot_matrix
+    # Sort samples: Old first, then Young
+    sample_order = sorted(plot_data.columns, key=lambda x: (x[:3] in YOUNG_SAMPLES, x))
+    plot_data = plot_data[sample_order]
+
+    # Create consequence-to-number mapping
+    unique_consequences = df['Consequence'].dropna().unique()
+    consequence_map = {cons: i+1 for i, cons in enumerate(unique_consequences)}
+
+    # Convert to numeric matrix (0 for missing)
+    plot_numeric = plot_data.map(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
+
+    # Create colormap with white for missing
+    n_colors = len(unique_consequences) + 1
+    colors = plt.cm.tab20(np.linspace(0, 1, n_colors))
+    colors[0] = [1, 1, 1, 1]  # White for missing
+    custom_cmap = ListedColormap(colors)
+
+    # Plot
+    num_genes = plot_numeric.shape[0]
+    fig_height = max(num_genes * 0.4, 6)
+
+    fig, ax = plt.subplots(figsize=(10, fig_height))
+    sns.heatmap(plot_numeric, cmap=custom_cmap, cbar=False, linewidths=0.5, ax=ax)
+
+    # Add gridlines
+    lines = []
+    for i in range(plot_numeric.shape[0] + 1):
+        lines.append(((0, i), (plot_numeric.shape[1], i)))
+    for j in range(plot_numeric.shape[1] + 1):
+        lines.append(((j, 0), (j, plot_numeric.shape[0])))
+    line_segments = LineCollection(lines, color='gray', linewidths=0.5, alpha=0.5)
+    ax.add_collection(line_segments)
+
+    ax.set_title('Oncoplot', fontsize=16)
+    ax.set_xlabel('Samples', fontsize=14)
+    ax.set_ylabel('Genes', fontsize=14)
+
+    # Relabel x-axis with age suffix
+    new_labels = []
+    for label in ax.get_xticklabels():
+        sample_id = label.get_text()[:3]
+        suffix = '_Y' if sample_id in YOUNG_SAMPLES else '_O'
+        new_labels.append(sample_id + suffix)
+    ax.set_xticklabels(new_labels, fontsize=12, rotation=45, ha='right')
+    ax.tick_params(axis='y', labelsize=10)
+
+    # Legend
+    legend_elements = [
+        plt.Rectangle((0,0), 1, 1, facecolor=colors[consequence_map[cons]],
+                      edgecolor='none', label=cons.replace('_', ' ').title())
+        for cons in unique_consequences
+    ]
+    ax.legend(handles=legend_elements, title='Consequence',
+             bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=9)
+
+    plt.tight_layout()
+
+    fig.savefig(FIGURES_DIR / "oncoplot.svg", format='svg', bbox_inches='tight')
+    fig.savefig(FIGURES_DIR / "oncoplot.png", format='png', dpi=300, bbox_inches='tight')
+    plt.close(fig)
+
+    print(f"Saved oncoplot figure: {num_genes} genes x {plot_data.shape[1]} samples")
+
+    return plot_data
 
 
 def main():
-    print("=== Generating Oncoplot Data ===")
+    print("=== Generating Oncoplot Data and Figure ===")
 
-    df = load_filtered_data()
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    FIGURES_DIR.mkdir(exist_ok=True)
+
+    # Load filtered variant data
+    combined_file = OUTPUT_DIR / "all_samples_filtered.csv"
+    if not combined_file.exists():
+        raise FileNotFoundError("Run 01_parse_vep.py first")
+
+    df = pd.read_csv(combined_file)
     print(f"Loaded {len(df)} filtered variants")
 
-    oncoplot = generate_oncoplot_data(df)
+    # Map to human gene symbols
+    print("Mapping rat genes to human symbols...")
+    mapping = map_to_human_symbols(df)
 
-    # Save to CSV
-    oncoplot.to_csv(OUTPUT_DIR / "oncoplot_data.csv")
-    print(f"Saved oncoplot data: {oncoplot.shape[0]} genes x {oncoplot.shape[1]} samples")
+    if mapping.empty:
+        raise ValueError("No gene mappings found - check pybiomart connection")
 
-    # Also save summary statistics
+    # Merge mapping with variant data
+    df = df.merge(mapping, left_on='Gene', right_on='rat_gene_id', how='inner')
+    print(f"Mapped {len(df)} variants to human symbols")
+
+    # Filter for cancer genes
+    gene_list_file = DATA_DIR / "brca_genelist.csv"
+    if not gene_list_file.exists():
+        raise FileNotFoundError(f"Gene list not found: {gene_list_file}")
+
+    df_cancer = filter_cancer_genes(df, gene_list_file)
+    print(f"Filtered to {len(df_cancer)} variants in {df_cancer['gene_symbol'].nunique()} cancer genes")
+
+    if df_cancer.empty:
+        print("Warning: No cancer genes found in data")
+        return
+
+    # Generate figure
+    plot_data = generate_oncoplot_figure(df_cancer)
+
+    # Save data outputs
+    plot_data.to_csv(OUTPUT_DIR / "oncoplot_data.csv")
+
     summary = pd.DataFrame({
-        'gene': oncoplot.index,
-        'n_samples_mutated': oncoplot.notna().sum(axis=1),
-        'mutation_frequency': oncoplot.notna().sum(axis=1) / oncoplot.shape[1]
+        'gene': plot_data.index,
+        'n_samples_mutated': plot_data.notna().sum(axis=1),
+        'mutation_frequency': plot_data.notna().sum(axis=1) / plot_data.shape[1]
     })
     summary.to_csv(OUTPUT_DIR / "oncoplot_summary.csv", index=False)
+
+    print(f"Saved oncoplot data to {OUTPUT_DIR}")
 
 
 if __name__ == "__main__":
