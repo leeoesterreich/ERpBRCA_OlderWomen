@@ -17,6 +17,7 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(pheatmap)
   library(data.table)
+  library(biomaRt)
 })
 
 # Define paths
@@ -82,6 +83,56 @@ if (file.exists(tpm_file)) {
 }
 
 cat("  Expression matrix:", nrow(pam50_data), "genes x", ncol(pam50_data), "samples\n")
+
+# -----------------------------------------------------------------------------
+# Step 2b: Convert Ensembl IDs to gene symbols
+# -----------------------------------------------------------------------------
+cat("Step 2b: Converting Ensembl IDs to gene symbols...\n")
+
+# Check if row names are Ensembl IDs
+if (grepl("^ENSRNOG", rownames(pam50_data)[1])) {
+  cat("  Detected Ensembl IDs, fetching gene symbols from biomaRt...\n")
+
+  mart <- useMart("ensembl", dataset = "rnorvegicus_gene_ensembl")
+  gene_map <- getBM(
+    filters = "ensembl_gene_id",
+    attributes = c("ensembl_gene_id", "external_gene_name"),
+    values = rownames(pam50_data),
+    mart = mart
+  )
+
+  # Create mapping, keep only unique mappings
+  gene_map <- gene_map[gene_map$external_gene_name != "", ]
+  gene_map <- gene_map[!duplicated(gene_map$ensembl_gene_id), ]
+
+  # Map Ensembl IDs to gene symbols
+  id_to_symbol <- setNames(gene_map$external_gene_name, gene_map$ensembl_gene_id)
+  new_rownames <- id_to_symbol[rownames(pam50_data)]
+
+  # Keep rows that have valid gene symbols
+  valid_idx <- !is.na(new_rownames) & new_rownames != ""
+  pam50_data <- pam50_data[valid_idx, ]
+  new_rownames <- new_rownames[valid_idx]
+
+  # Handle duplicates BEFORE setting row names: keep highest expressing version
+  # For duplicated gene symbols, keep the one with highest mean expression
+  dup_symbols <- unique(new_rownames[duplicated(new_rownames)])
+  keep_idx <- rep(TRUE, nrow(pam50_data))
+
+  for (sym in dup_symbols) {
+    dup_idx <- which(new_rownames == sym)
+    mean_expr <- rowMeans(pam50_data[dup_idx, , drop = FALSE])
+    keep_one <- dup_idx[which.max(mean_expr)]
+    keep_idx[dup_idx] <- FALSE
+    keep_idx[keep_one] <- TRUE
+  }
+
+  pam50_data <- pam50_data[keep_idx, ]
+  new_rownames <- new_rownames[keep_idx]
+  rownames(pam50_data) <- new_rownames
+
+  cat("  Converted:", nrow(pam50_data), "genes with unique symbols\n")
+}
 
 # -----------------------------------------------------------------------------
 # Step 3: Check gene coverage

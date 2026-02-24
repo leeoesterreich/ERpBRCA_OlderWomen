@@ -10,10 +10,11 @@
 #SBATCH --error=logs/R_analysis_%j.err
 
 # Rat bulk RNA-seq R analysis
-set -euo pipefail
+set -eo pipefail
 
-module purge
-module load r/4.2.0
+# Use conda environment with DESeq2, genefu, biomaRt
+eval "$(/ix1/alee/LO_LAB/Personal/Alexander_Chang/miniconda3/bin/conda shell.bash hook)"
+conda activate /ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/erp_brca_aging
 
 # Use absolute path for SLURM compatibility
 SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/05_rat_bulk_rnaseq"
