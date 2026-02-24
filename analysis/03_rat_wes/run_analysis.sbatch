@@ -14,7 +14,7 @@
 
 # Load conda environment before strict mode
 source /ihome/alee/alc376/.bashrc
-conda activate /ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/wesenv || { echo "ERROR: Conda environment 'wesenv' not found"; exit 1; }
+conda activate /ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/machine_learning_env || { echo "ERROR: Conda environment 'machine_learning_env' not found"; exit 1; }
 
 # Enable strict mode after bashrc
 set -eo pipefail
@@ -23,7 +23,7 @@ SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/
 cd "$SCRIPT_DIR"
 echo "Working directory: $SCRIPT_DIR"
 
-mkdir -p logs outputs
+mkdir -p logs outputs figures data
 
 echo "=== Step 1: Parse VEP Output ==="
 python3 01_parse_vep.py
