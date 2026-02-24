@@ -61,4 +61,58 @@ Rscript 08_run_wcsea.R
 echo "=== Step 9: CellPhoneDB prep ==="
 Rscript 09_cellphonedb_prep.R
 
+echo "=== Step 10: Export TAM analysis CSV ==="
+Rscript -e '
+tryCatch({
+  suppressPackageStartupMessages(library(Seurat))
+  suppressPackageStartupMessages(library(dplyr))
+
+  # Check input file exists
+  if (!file.exists("outputs/seurat_annotated.rds")) {
+    stop("seurat_annotated.rds not found")
+  }
+
+  # Load annotated object
+  seurat <- readRDS("outputs/seurat_annotated.rds")
+
+  # Get macrophage cells
+  mac_cells <- WhichCells(seurat, expression = celltype_major == "Macrophage")
+
+  if (length(mac_cells) == 0) {
+    warning("No macrophage cells found, creating empty TAM analysis")
+    tam_metrics <- data.frame(sample = character(), age_group = character(), n_cells = integer())
+  } else {
+    mac_subset <- subset(seurat, cells = mac_cells)
+
+    # Calculate TAM metrics per sample
+    tam_metrics <- mac_subset@meta.data %>%
+      group_by(orig.ident) %>%
+      summarise(
+        n_cells = n(),
+        .groups = "drop"
+      )
+
+    # Add age_group if available
+    if ("age_group" %in% colnames(mac_subset@meta.data)) {
+      age_mapping <- mac_subset@meta.data %>%
+        select(orig.ident, age_group) %>%
+        distinct()
+      tam_metrics <- left_join(tam_metrics, age_mapping, by = "orig.ident")
+    }
+  }
+
+  write.csv(tam_metrics, "outputs/tam_analysis.csv", row.names = FALSE)
+  cat("TAM analysis exported:", nrow(tam_metrics), "samples\n")
+}, error = function(e) {
+  message(paste("ERROR in TAM export:", e$message))
+  quit(status = 1)
+})
+' || { echo "ERROR: TAM export failed"; exit 1; }
+
+# Write completion marker (only if we get here = success)
+MARKER_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")/.pipeline_markers"
+mkdir -p "$MARKER_DIR"
+touch "$MARKER_DIR/04_human_scrnaseq.complete"
+echo "Marker written: $MARKER_DIR/04_human_scrnaseq.complete"
+
 echo "=== Analysis complete ==="
