@@ -16,6 +16,7 @@ set -eo pipefail
 
 SCRIPT_DIR="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 cd "$SCRIPT_DIR"
+mkdir -p logs
 
 MARKER_DIR="$SCRIPT_DIR/.pipeline_markers"
 POLL_INTERVAL=60  # seconds
@@ -35,6 +36,12 @@ echo "Poll interval: ${POLL_INTERVAL}s"
 echo "Max wait: $((MAX_WAIT / 3600))h"
 echo "Required markers: ${#REQUIRED_MARKERS[@]}"
 echo ""
+
+# Validate marker directory exists
+if [ ! -d "$MARKER_DIR" ]; then
+    echo "WARNING: Marker directory does not exist yet: $MARKER_DIR"
+    echo "Will wait for it to be created by analysis jobs..."
+fi
 
 wait_start=$(date +%s)
 
@@ -68,8 +75,8 @@ while true; do
         break
     fi
 
-    # Status update every 5 minutes
-    if [ $((elapsed % 300)) -lt $POLL_INTERVAL ]; then
+    # Status update every 5 minutes (on the 0-second boundary of each 5-min cycle)
+    if [ $((elapsed % 300)) -eq 0 ]; then
         echo "[$(date '+%H:%M:%S')] Waiting... ($((elapsed / 60))m elapsed)"
         for marker in "${REQUIRED_MARKERS[@]}"; do
             if [ -f "$MARKER_DIR/$marker" ]; then
@@ -96,7 +103,14 @@ conda activate erp_brca_aging || { echo "ERROR: Failed to activate conda environ
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_ROOT"
 
-bash scripts/validation/run_validation.sh
+if [ ! -f "scripts/validation/run_validation.sh" ]; then
+    echo "ERROR: Validation script not found: scripts/validation/run_validation.sh"
+    exit 1
+fi
+bash scripts/validation/run_validation.sh || {
+    echo "ERROR: Validation script failed with exit code $?"
+    exit 1
+}
 
 echo ""
 echo "=============================================="
