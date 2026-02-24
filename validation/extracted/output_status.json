@@ -1,0 +1,56 @@
+{
+  "found": [
+    "02_rat_snrnaseq/outputs/seurat_annotated.rds",
+    "05_rat_bulk_rnaseq/outputs/deseq2_results.csv",
+    "05_rat_bulk_rnaseq/outputs/pam50_subtypes.csv"
+  ],
+  "missing": [
+    "01_human_bulk_rnaseq/outputs/correlation_results.csv",
+    "01_human_bulk_rnaseq/outputs/mica_results.csv",
+    "01_human_bulk_rnaseq/outputs/hsd17b7_correlations.csv",
+    "02_rat_snrnaseq/outputs/DE_results/",
+    "03_rat_wes/outputs/cosmic_signatures.csv",
+    "03_rat_wes/outputs/oncoplot_data.csv",
+    "04_human_scrnaseq/outputs/seurat_processed.rds",
+    "04_human_scrnaseq/outputs/tam_analysis.csv"
+  ],
+  "by_analysis": {
+    "01_human_bulk_rnaseq": {
+      "found": [],
+      "missing": [
+        "outputs/correlation_results.csv",
+        "outputs/mica_results.csv",
+        "outputs/hsd17b7_correlations.csv"
+      ]
+    },
+    "02_rat_snrnaseq": {
+      "found": [
+        "outputs/seurat_annotated.rds"
+      ],
+      "missing": [
+        "outputs/DE_results/"
+      ]
+    },
+    "03_rat_wes": {
+      "found": [],
+      "missing": [
+        "outputs/cosmic_signatures.csv",
+        "outputs/oncoplot_data.csv"
+      ]
+    },
+    "04_human_scrnaseq": {
+      "found": [],
+      "missing": [
+        "outputs/seurat_processed.rds",
+        "outputs/tam_analysis.csv"
+      ]
+    },
+    "05_rat_bulk_rnaseq": {
+      "found": [
+        "outputs/deseq2_results.csv",
+        "outputs/pam50_subtypes.csv"
+      ],
+      "missing": []
+    }
+  }
+}

@@ -1,0 +1,653 @@
+[
+  {
+    "type": "percentage",
+    "value": "60%",
+    "context": "The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, the most common subtype of breast cancer, is an age-related disease with the peak incidence of diagno",
+    "paragraph_idx": 79,
+    "figure_refs": []
+  },
+  {
+    "type": "percentage",
+    "value": "70%",
+    "context": "The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, the most common subtype of breast cancer, is an age-related disease with the peak incidence of diagno",
+    "paragraph_idx": 79,
+    "figure_refs": []
+  },
+  {
+    "type": "percentage",
+    "value": "80%",
+    "context": "The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, the most common subtype of breast cancer, is an age-related disease with the peak incidence of diagno",
+    "paragraph_idx": 79,
+    "figure_refs": []
+  },
+  {
+    "type": "percentage",
+    "value": "90%",
+    "context": "The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, the most common subtype of breast cancer, is an age-related disease with the peak incidence of diagno",
+    "paragraph_idx": 79,
+    "figure_refs": []
+  },
+  {
+    "type": "p_value",
+    "value": "p < 0.0001",
+    "context": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Following treatment, older rats developed significant",
+    "paragraph_idx": 95,
+    "figure_refs": [
+      "Fig. 1B"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p < 0.0001",
+    "context": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Following treatment, older rats developed significant",
+    "paragraph_idx": 95,
+    "figure_refs": [
+      "Fig. 1B"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.0015",
+    "context": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Following treatment, older rats developed significant",
+    "paragraph_idx": 95,
+    "figure_refs": [
+      "Fig. 1B"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.06",
+    "context": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Following treatment, older rats developed significant",
+    "paragraph_idx": 95,
+    "figure_refs": [
+      "Fig. 1B"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.02",
+    "context": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Following treatment, older rats developed significant",
+    "paragraph_idx": 95,
+    "figure_refs": [
+      "Fig. 1B"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.02",
+    "context": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Following treatment, older rats developed significant",
+    "paragraph_idx": 95,
+    "figure_refs": [
+      "Fig. 1B"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.04",
+    "context": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Following treatment, older rats developed significant",
+    "paragraph_idx": 95,
+    "figure_refs": [
+      "Fig. 1B"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 20",
+    "context": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Following treatment, older rats developed significant",
+    "paragraph_idx": 95,
+    "figure_refs": [
+      "Fig. 1B"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 17",
+    "context": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Following treatment, older rats developed significant",
+    "paragraph_idx": 95,
+    "figure_refs": [
+      "Fig. 1B"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.10",
+    "context": "With these quantitative and phenotypic differences tumors that developed in younger and older rats, we utilized whole exome sequencing, bulk RNA-seq, and single-nuclei RNA-seq to further characterize ",
+    "paragraph_idx": 97,
+    "figure_refs": [
+      "Extended Data Fig. 2A",
+      "Fig. 2A",
+      "Fig. 2B",
+      "Fig. 2C",
+      "Fig. 2D",
+      "Extended Data Fig. 2B",
+      "Fig. 2F",
+      "Fig. 2E",
+      "Fig. 2G",
+      "Fig. 2G",
+      "Fig. 2H"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p < 0.05",
+    "context": "With these quantitative and phenotypic differences tumors that developed in younger and older rats, we utilized whole exome sequencing, bulk RNA-seq, and single-nuclei RNA-seq to further characterize ",
+    "paragraph_idx": 97,
+    "figure_refs": [
+      "Extended Data Fig. 2A",
+      "Fig. 2A",
+      "Fig. 2B",
+      "Fig. 2C",
+      "Fig. 2D",
+      "Extended Data Fig. 2B",
+      "Fig. 2F",
+      "Fig. 2E",
+      "Fig. 2G",
+      "Fig. 2G",
+      "Fig. 2H"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 115",
+    "context": "We next constructed two cohorts of human specimens to investigate changes in both circulating and local factors with age: (1) matched plasma, tumor tissue, and tumor-adjacent tissue from n = 115 patie",
+    "paragraph_idx": 101,
+    "figure_refs": [
+      "Fig. 3A"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 89",
+    "context": "We next constructed two cohorts of human specimens to investigate changes in both circulating and local factors with age: (1) matched plasma, tumor tissue, and tumor-adjacent tissue from n = 115 patie",
+    "paragraph_idx": 101,
+    "figure_refs": [
+      "Fig. 3A"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.0033",
+    "context": "We next investigated estrogen disposition in the normal breast microenvironment from KTB donors as well as in the TME from patients with breast cancer and their adjacent tissues. In the normal breast,",
+    "paragraph_idx": 107,
+    "figure_refs": [
+      "Fig. 4A",
+      "Fig. 4A",
+      "Extended Data Fig. 3A",
+      "Extended Data Fig. 3B",
+      "Extended Data Fig. 3C",
+      "Extended Data Fig. 4A"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.99",
+    "context": "We next investigated estrogen disposition in the normal breast microenvironment from KTB donors as well as in the TME from patients with breast cancer and their adjacent tissues. In the normal breast,",
+    "paragraph_idx": 107,
+    "figure_refs": [
+      "Fig. 4A",
+      "Fig. 4A",
+      "Extended Data Fig. 3A",
+      "Extended Data Fig. 3B",
+      "Extended Data Fig. 3C",
+      "Extended Data Fig. 4A"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.012",
+    "context": "To decipher how E2 is synthesized in the breast, we examined a panel of genes encoding enzymes involved in estrogen synthesis and conversion, again using the MICA method. Among all of the hydroxystero",
+    "paragraph_idx": 111,
+    "figure_refs": [
+      "Extended Data Fig. 5A",
+      "Fig. 4D",
+      "Extended Data Fig. 5B",
+      "Fig. 4E"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.0061",
+    "context": "To decipher how E2 is synthesized in the breast, we examined a panel of genes encoding enzymes involved in estrogen synthesis and conversion, again using the MICA method. Among all of the hydroxystero",
+    "paragraph_idx": 111,
+    "figure_refs": [
+      "Extended Data Fig. 5A",
+      "Fig. 4D",
+      "Extended Data Fig. 5B",
+      "Fig. 4E"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.049",
+    "context": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correlated with a number of estrogen-related pathways (Ex",
+    "paragraph_idx": 113,
+    "figure_refs": [
+      "Extended Data Fig. 6A",
+      "Extended Data Fig. 6B",
+      "Fig. 4F"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.12",
+    "context": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correlated with a number of estrogen-related pathways (Ex",
+    "paragraph_idx": 113,
+    "figure_refs": [
+      "Extended Data Fig. 6A",
+      "Extended Data Fig. 6B",
+      "Fig. 4F"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.0012",
+    "context": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correlated with a number of estrogen-related pathways (Ex",
+    "paragraph_idx": 113,
+    "figure_refs": [
+      "Extended Data Fig. 6A",
+      "Extended Data Fig. 6B",
+      "Fig. 4F"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.038",
+    "context": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correlated with a number of estrogen-related pathways (Ex",
+    "paragraph_idx": 113,
+    "figure_refs": [
+      "Extended Data Fig. 6A",
+      "Extended Data Fig. 6B",
+      "Fig. 4F"
+    ]
+  },
+  {
+    "type": "correlation",
+    "value": "Spearman r = 0.26",
+    "context": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correlated with a number of estrogen-related pathways (Ex",
+    "paragraph_idx": 113,
+    "figure_refs": [
+      "Extended Data Fig. 6A",
+      "Extended Data Fig. 6B",
+      "Fig. 4F"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p < 0.0001",
+    "context": "Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8,31, a finding compounded with increasing hypomethylation and concomitant increases in ER protein (F",
+    "paragraph_idx": 115,
+    "figure_refs": [
+      "Extended Data Fig. 7A",
+      "Extended Data Fig. 7B",
+      "Extended Data Fig. 7C",
+      "Fig. 4G",
+      "Extended Data Fig. 7D",
+      "Fig. 4H"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.0090",
+    "context": "Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8,31, a finding compounded with increasing hypomethylation and concomitant increases in ER protein (F",
+    "paragraph_idx": 115,
+    "figure_refs": [
+      "Extended Data Fig. 7A",
+      "Extended Data Fig. 7B",
+      "Extended Data Fig. 7C",
+      "Fig. 4G",
+      "Extended Data Fig. 7D",
+      "Fig. 4H"
+    ]
+  },
+  {
+    "type": "correlation",
+    "value": "Spearman r = 0.48",
+    "context": "Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8,31, a finding compounded with increasing hypomethylation and concomitant increases in ER protein (F",
+    "paragraph_idx": 115,
+    "figure_refs": [
+      "Extended Data Fig. 7A",
+      "Extended Data Fig. 7B",
+      "Extended Data Fig. 7C",
+      "Fig. 4G",
+      "Extended Data Fig. 7D",
+      "Fig. 4H"
+    ]
+  },
+  {
+    "type": "correlation",
+    "value": "Spearman r = -0.24",
+    "context": "Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8,31, a finding compounded with increasing hypomethylation and concomitant increases in ER protein (F",
+    "paragraph_idx": 115,
+    "figure_refs": [
+      "Extended Data Fig. 7A",
+      "Extended Data Fig. 7B",
+      "Extended Data Fig. 7C",
+      "Fig. 4G",
+      "Extended Data Fig. 7D",
+      "Fig. 4H"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.0043",
+    "context": "To validate and support the scRNA-seq findings, we analyzed two additional datasets that included multispectral immunohistochemistry stained slides from a cohort of patients with ER+/HER2- breast canc",
+    "paragraph_idx": 133,
+    "figure_refs": [
+      "Extended Data Fig. 10A",
+      "Fig. 7E",
+      "Extended Data Fig. 10B",
+      "Fig. 7F",
+      "Extended Data Fig. 10",
+      "Fig. 7F",
+      "Fig. 7G",
+      "Fig. 7H"
+    ]
+  },
+  {
+    "type": "correlation",
+    "value": "Spearman r = 0.31",
+    "context": "To validate and support the scRNA-seq findings, we analyzed two additional datasets that included multispectral immunohistochemistry stained slides from a cohort of patients with ER+/HER2- breast canc",
+    "paragraph_idx": 133,
+    "figure_refs": [
+      "Extended Data Fig. 10A",
+      "Fig. 7E",
+      "Extended Data Fig. 10B",
+      "Fig. 7F",
+      "Extended Data Fig. 10",
+      "Fig. 7F",
+      "Fig. 7G",
+      "Fig. 7H"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 5",
+    "context": "To mechanistically examine and validate the degree to which the aged TME, which is characterized not only by a chronically inflamed TME but also by high local E2 levels, enhances macrophage polarizati",
+    "paragraph_idx": 139,
+    "figure_refs": [
+      "Fig. 8A",
+      "Figure 5",
+      "Fig. 8B",
+      "Fig. 8C",
+      "Fig. 8D"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "10%",
+    "context": "Mammary tumor development and growth were monitored biweekly by palpating all six mammary gland pairs. Once a tumor formed, we assessed growth dynamics using a volumetric calculation of tumor growth (",
+    "paragraph_idx": 186,
+    "figure_refs": []
+  },
+  {
+    "type": "percentage",
+    "value": "70%",
+    "context": "Mammary tumor development and growth were monitored biweekly by palpating all six mammary gland pairs. Once a tumor formed, we assessed growth dynamics using a volumetric calculation of tumor growth (",
+    "paragraph_idx": 186,
+    "figure_refs": []
+  },
+  {
+    "type": "percentage",
+    "value": "0.1%",
+    "context": "A previously validated LC-MS/MS assay for the quantification of estradiol and estrone in human serum was adapted and used for this study 77. Briefly, a LC-MS/MS system consisting of a Thermo Scientifi",
+    "paragraph_idx": 221,
+    "figure_refs": []
+  },
+  {
+    "type": "percentage",
+    "value": "15%",
+    "context": "We compiled single-cell RNA sequencing (scRNA-seq) datasets from ten ER+ breast tumor samples, focusing exclusively on cells from pre-treatment patients. The processed scRNA-seq data, originally publi",
+    "paragraph_idx": 230,
+    "figure_refs": []
+  },
+  {
+    "type": "percentage",
+    "value": "4%",
+    "context": "PBMCs were isolated from healthy donors using Ficoll (Cytiva, #17-5446-52) and SepMate-50 tubes (STEMCELL, #85460) for density gradient centrifugation according to the manufacturer\u2019s procedure. Monocy",
+    "paragraph_idx": 247,
+    "figure_refs": []
+  },
+  {
+    "type": "percentage",
+    "value": "0.1%",
+    "context": "PBMCs were isolated from healthy donors using Ficoll (Cytiva, #17-5446-52) and SepMate-50 tubes (STEMCELL, #85460) for density gradient centrifugation according to the manufacturer\u2019s procedure. Monocy",
+    "paragraph_idx": 247,
+    "figure_refs": []
+  },
+  {
+    "type": "p_value",
+    "value": "p < 0.0001",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 20",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 17",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 3",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 8",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 3",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 8",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 20",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "sample_size",
+    "value": "n = 17",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "95%",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "95%",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "95%",
+    "context": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the experimental setup. In brief, younger F344 rats (",
+    "paragraph_idx": 402,
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "95%",
+    "context": "Fig. 2: Accelerated tumorigenesis in older rats is unlikely related to cancer cell intrinsic factors but rather due to inflammation and immune differences. (A) Oncoplot for the three tumors from young",
+    "paragraph_idx": 405,
+    "figure_refs": [
+      "Fig. 2"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "95%",
+    "context": "Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant, chronically inflamed host environment. (A) Schematic of the key cohorts of human specimens utilize",
+    "paragraph_idx": 408,
+    "figure_refs": [
+      "Fig. 3"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "95%",
+    "context": "Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant, chronically inflamed host environment. (A) Schematic of the key cohorts of human specimens utilize",
+    "paragraph_idx": 408,
+    "figure_refs": [
+      "Fig. 3"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "95%",
+    "context": "Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant, chronically inflamed host environment. (A) Schematic of the key cohorts of human specimens utilize",
+    "paragraph_idx": 408,
+    "figure_refs": [
+      "Fig. 3"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "95%",
+    "context": "Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant, chronically inflamed host environment. (A) Schematic of the key cohorts of human specimens utilize",
+    "paragraph_idx": 408,
+    "figure_refs": [
+      "Fig. 3"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.03",
+    "context": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, creating a local environment high in E2 and ER. (A) Ti",
+    "paragraph_idx": 411,
+    "figure_refs": [
+      "Fig. 4"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p < 0.0001",
+    "context": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, creating a local environment high in E2 and ER. (A) Ti",
+    "paragraph_idx": 411,
+    "figure_refs": [
+      "Fig. 4"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.009",
+    "context": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, creating a local environment high in E2 and ER. (A) Ti",
+    "paragraph_idx": 411,
+    "figure_refs": [
+      "Fig. 4"
+    ]
+  },
+  {
+    "type": "correlation",
+    "value": "Spearman r = 0.24",
+    "context": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, creating a local environment high in E2 and ER. (A) Ti",
+    "paragraph_idx": 411,
+    "figure_refs": [
+      "Fig. 4"
+    ]
+  },
+  {
+    "type": "correlation",
+    "value": "Spearman r = 0.45",
+    "context": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, creating a local environment high in E2 and ER. (A) Ti",
+    "paragraph_idx": 411,
+    "figure_refs": [
+      "Fig. 4"
+    ]
+  },
+  {
+    "type": "correlation",
+    "value": "Spearman r = -0.24",
+    "context": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, creating a local environment high in E2 and ER. (A) Ti",
+    "paragraph_idx": 411,
+    "figure_refs": [
+      "Fig. 4"
+    ]
+  },
+  {
+    "type": "p_value",
+    "value": "p = 0.0043",
+    "context": "Fig. 7: A chemokine-rich aged TME is associated with accumulation of immunosuppressive macrophages. (A) Using immune deconvoluted data from TCGA, METABRIC, and SCAN-B, the MICA pipeline identified tha",
+    "paragraph_idx": 421,
+    "figure_refs": [
+      "Fig. 7",
+      "Extended Data Fig. 10"
+    ]
+  },
+  {
+    "type": "correlation",
+    "value": "Spearman r = 0.31",
+    "context": "Fig. 7: A chemokine-rich aged TME is associated with accumulation of immunosuppressive macrophages. (A) Using immune deconvoluted data from TCGA, METABRIC, and SCAN-B, the MICA pipeline identified tha",
+    "paragraph_idx": 421,
+    "figure_refs": [
+      "Fig. 7",
+      "Extended Data Fig. 10"
+    ]
+  },
+  {
+    "type": "percentage",
+    "value": "95%",
+    "context": "Fig. 8: Aged TME polarizes macrophages to an immunosuppressive state that is targetable through the CCL2 axis or through endocrine therapies. (A) We first exogenously treated macrophages with componen",
+    "paragraph_idx": 425,
+    "figure_refs": [
+      "Fig. 8"
+    ]
+  }
+]

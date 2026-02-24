@@ -1,0 +1,66 @@
+claim_type,manuscript_value,manuscript_numeric,code_value,status,difference,context,figure_refs
+percentage,60%,60.0,,MISSING,,"The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, t",[]
+percentage,70%,70.0,,MISSING,,"The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, t",[]
+percentage,80%,80.0,,MISSING,,"The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, t",[]
+percentage,90%,90.0,,MISSING,,"The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, t",[]
+p_value,p < 0.0001,0.0001,,MISSING,,Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) ,['Fig. 1B']
+p_value,p < 0.0001,0.0001,,MISSING,,Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) ,['Fig. 1B']
+p_value,p = 0.0015,0.0015,,MISSING,,Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) ,['Fig. 1B']
+p_value,p = 0.06,0.06,,MISSING,,Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) ,['Fig. 1B']
+p_value,p = 0.02,0.02,,MISSING,,Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) ,['Fig. 1B']
+p_value,p = 0.02,0.02,,MISSING,,Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) ,['Fig. 1B']
+p_value,p = 0.04,0.04,,MISSING,,Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) ,['Fig. 1B']
+sample_size,n = 20,20.0,,MISSING,,Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) ,['Fig. 1B']
+sample_size,n = 17,17.0,,MISSING,,Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) ,['Fig. 1B']
+p_value,p = 0.10,0.1,,MISSING,,"With these quantitative and phenotypic differences tumors that developed in younger and older rats, ","['Extended Data Fig. 2A', 'Fig. 2A', 'Fig. 2B', 'Fig. 2C', 'Fig. 2D', 'Extended Data Fig. 2B', 'Fig. 2F', 'Fig. 2E', 'Fig. 2G', 'Fig. 2G', 'Fig. 2H']"
+p_value,p < 0.05,0.05,,MISSING,,"With these quantitative and phenotypic differences tumors that developed in younger and older rats, ","['Extended Data Fig. 2A', 'Fig. 2A', 'Fig. 2B', 'Fig. 2C', 'Fig. 2D', 'Extended Data Fig. 2B', 'Fig. 2F', 'Fig. 2E', 'Fig. 2G', 'Fig. 2G', 'Fig. 2H']"
+sample_size,n = 115,115.0,,MISSING,,We next constructed two cohorts of human specimens to investigate changes in both circulating and lo,['Fig. 3A']
+sample_size,n = 89,89.0,,MISSING,,We next constructed two cohorts of human specimens to investigate changes in both circulating and lo,['Fig. 3A']
+p_value,p = 0.0033,0.0033,,MISSING,,We next investigated estrogen disposition in the normal breast microenvironment from KTB donors as w,"['Fig. 4A', 'Fig. 4A', 'Extended Data Fig. 3A', 'Extended Data Fig. 3B', 'Extended Data Fig. 3C', 'Extended Data Fig. 4A']"
+p_value,p = 0.99,0.99,,MISSING,,We next investigated estrogen disposition in the normal breast microenvironment from KTB donors as w,"['Fig. 4A', 'Fig. 4A', 'Extended Data Fig. 3A', 'Extended Data Fig. 3B', 'Extended Data Fig. 3C', 'Extended Data Fig. 4A']"
+p_value,p = 0.012,0.012,,MISSING,,"To decipher how E2 is synthesized in the breast, we examined a panel of genes encoding enzymes invol","['Extended Data Fig. 5A', 'Fig. 4D', 'Extended Data Fig. 5B', 'Fig. 4E']"
+p_value,p = 0.0061,0.0061,,MISSING,,"To decipher how E2 is synthesized in the breast, we examined a panel of genes encoding enzymes invol","['Extended Data Fig. 5A', 'Fig. 4D', 'Extended Data Fig. 5B', 'Fig. 4E']"
+p_value,p = 0.049,0.049,,MISSING,,"In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which sho","['Extended Data Fig. 6A', 'Extended Data Fig. 6B', 'Fig. 4F']"
+p_value,p = 0.12,0.12,,MISSING,,"In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which sho","['Extended Data Fig. 6A', 'Extended Data Fig. 6B', 'Fig. 4F']"
+p_value,p = 0.0012,0.0012,,MISSING,,"In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which sho","['Extended Data Fig. 6A', 'Extended Data Fig. 6B', 'Fig. 4F']"
+p_value,p = 0.038,0.038,,MISSING,,"In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which sho","['Extended Data Fig. 6A', 'Extended Data Fig. 6B', 'Fig. 4F']"
+correlation,Spearman r = 0.26,0.26,,MISSING,,"In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which sho","['Extended Data Fig. 6A', 'Extended Data Fig. 6B', 'Fig. 4F']"
+p_value,p < 0.0001,0.0001,,MISSING,,"Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8","['Extended Data Fig. 7A', 'Extended Data Fig. 7B', 'Extended Data Fig. 7C', 'Fig. 4G', 'Extended Data Fig. 7D', 'Fig. 4H']"
+p_value,p = 0.0090,0.009,,MISSING,,"Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8","['Extended Data Fig. 7A', 'Extended Data Fig. 7B', 'Extended Data Fig. 7C', 'Fig. 4G', 'Extended Data Fig. 7D', 'Fig. 4H']"
+correlation,Spearman r = 0.48,0.48,,MISSING,,"Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8","['Extended Data Fig. 7A', 'Extended Data Fig. 7B', 'Extended Data Fig. 7C', 'Fig. 4G', 'Extended Data Fig. 7D', 'Fig. 4H']"
+correlation,Spearman r = -0.24,-0.24,,MISSING,,"Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8","['Extended Data Fig. 7A', 'Extended Data Fig. 7B', 'Extended Data Fig. 7C', 'Fig. 4G', 'Extended Data Fig. 7D', 'Fig. 4H']"
+p_value,p = 0.0043,0.0043,,MISSING,,"To validate and support the scRNA-seq findings, we analyzed two additional datasets that included mu","['Extended Data Fig. 10A', 'Fig. 7E', 'Extended Data Fig. 10B', 'Fig. 7F', 'Extended Data Fig. 10', 'Fig. 7F', 'Fig. 7G', 'Fig. 7H']"
+correlation,Spearman r = 0.31,0.31,,MISSING,,"To validate and support the scRNA-seq findings, we analyzed two additional datasets that included mu","['Extended Data Fig. 10A', 'Fig. 7E', 'Extended Data Fig. 10B', 'Fig. 7F', 'Extended Data Fig. 10', 'Fig. 7F', 'Fig. 7G', 'Fig. 7H']"
+sample_size,n = 5,5.0,,MISSING,,"To mechanistically examine and validate the degree to which the aged TME, which is characterized not","['Fig. 8A', 'Figure 5', 'Fig. 8B', 'Fig. 8C', 'Fig. 8D']"
+percentage,10%,10.0,,MISSING,,Mammary tumor development and growth were monitored biweekly by palpating all six mammary gland pair,[]
+percentage,70%,70.0,,MISSING,,Mammary tumor development and growth were monitored biweekly by palpating all six mammary gland pair,[]
+percentage,0.1%,0.1,,MISSING,,A previously validated LC-MS/MS assay for the quantification of estradiol and estrone in human serum,[]
+percentage,15%,15.0,,MISSING,,"We compiled single-cell RNA sequencing (scRNA-seq) datasets from ten ER+ breast tumor samples, focus",[]
+percentage,4%,4.0,,MISSING,,"PBMCs were isolated from healthy donors using Ficoll (Cytiva, #17-5446-52) and SepMate-50 tubes (STE",[]
+percentage,0.1%,0.1,,MISSING,,"PBMCs were isolated from healthy donors using Ficoll (Cytiva, #17-5446-52) and SepMate-50 tubes (STE",[]
+p_value,p < 0.0001,0.0001,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+sample_size,n = 20,20.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+sample_size,n = 17,17.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+sample_size,n = 3,3.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+sample_size,n = 8,8.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+sample_size,n = 3,3.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+sample_size,n = 8,8.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+sample_size,n = 20,20.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+sample_size,n = 17,17.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+percentage,95%,95.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+percentage,95%,95.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+percentage,95%,95.0,,MISSING,,Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-,['Fig. 1']
+percentage,95%,95.0,,MISSING,,Fig. 2: Accelerated tumorigenesis in older rats is unlikely related to cancer cell intrinsic factors,['Fig. 2']
+percentage,95%,95.0,,MISSING,,Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant,['Fig. 3']
+percentage,95%,95.0,,MISSING,,Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant,['Fig. 3']
+percentage,95%,95.0,,MISSING,,Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant,['Fig. 3']
+percentage,95%,95.0,,MISSING,,Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant,['Fig. 3']
+p_value,p = 0.03,0.03,,MISSING,,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
+p_value,p < 0.0001,0.0001,,MISSING,,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
+p_value,p = 0.009,0.009,,MISSING,,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
+correlation,Spearman r = 0.24,0.24,,MISSING,,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
+correlation,Spearman r = 0.45,0.45,,MISSING,,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
+correlation,Spearman r = -0.24,-0.24,,MISSING,,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
+p_value,p = 0.0043,0.0043,,MISSING,,Fig. 7: A chemokine-rich aged TME is associated with accumulation of immunosuppressive macrophages. ,"['Fig. 7', 'Extended Data Fig. 10']"
+correlation,Spearman r = 0.31,0.31,,MISSING,,Fig. 7: A chemokine-rich aged TME is associated with accumulation of immunosuppressive macrophages. ,"['Fig. 7', 'Extended Data Fig. 10']"
+percentage,95%,95.0,,MISSING,,Fig. 8: Aged TME polarizes macrophages to an immunosuppressive state that is targetable through the ,['Fig. 8']

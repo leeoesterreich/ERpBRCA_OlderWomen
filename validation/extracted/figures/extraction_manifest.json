@@ -1,0 +1,284 @@
+{
+  "main": {
+    "1": {
+      "title": "A",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_01_A/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_01_A/img_01.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_01_A/img_02.wmf"
+      ],
+      "image_count": 3
+    },
+    "2": {
+      "title": "Figure 2",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_02.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_03.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_04.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_05.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_06.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_07.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_08.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_09.png"
+      ],
+      "image_count": 10
+    },
+    "3": {
+      "title": "D",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_03_D/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_03_D/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_03_D/img_02.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_03_D/img_03.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_03_D/img_04.wmf"
+      ],
+      "image_count": 5
+    },
+    "4": {
+      "title": "Figure 4",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_04_Figure 4/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_04_Figure 4/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_04_Figure 4/img_02.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_04_Figure 4/img_03.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_04_Figure 4/img_04.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_04_Figure 4/img_05.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_04_Figure 4/img_06.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_04_Figure 4/img_07.png"
+      ],
+      "image_count": 8
+    },
+    "5": {
+      "title": "A",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_05_A/img_00.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_05_A/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_05_A/img_02.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_05_A/img_03.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_05_A/img_04.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_05_A/img_05.wmf"
+      ],
+      "image_count": 6
+    },
+    "6": {
+      "title": "Figure 6",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_06_Figure 6/img_00.wmf"
+      ],
+      "image_count": 1
+    },
+    "7": {
+      "title": "Figure 7",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_02.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_03.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_04.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_05.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_06.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_07.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_08.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_09.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_10.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_11.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_12.png"
+      ],
+      "image_count": 13
+    },
+    "8": {
+      "title": "F",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_00.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_02.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_03.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_04.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_05.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_06.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_07.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_08.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_09.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_10.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_11.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_08_F/img_12.png"
+      ],
+      "image_count": 13
+    }
+  },
+  "supplemental": {
+    "1": {
+      "title": "EDF 1",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_01_EDF 1/img_00.jpg",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_01_EDF 1/img_01.jpg",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_01_EDF 1/img_02.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_01_EDF 1/img_03.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_01_EDF 1/img_04.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_01_EDF 1/img_05.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_01_EDF 1/img_06.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_01_EDF 1/img_07.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_01_EDF 1/img_08.wmf"
+      ],
+      "image_count": 9
+    },
+    "2": {
+      "title": "EDF 2",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_02_EDF 2/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_02_EDF 2/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_02_EDF 2/img_02.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_02_EDF 2/img_03.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_02_EDF 2/img_04.png"
+      ],
+      "image_count": 5
+    },
+    "3": {
+      "title": "Supplementary Fig. 1",
+      "images": [],
+      "image_count": 0
+    },
+    "4": {
+      "title": "EDF 3",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_04_EDF 3/img_00.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_04_EDF 3/img_01.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_04_EDF 3/img_02.wmf"
+      ],
+      "image_count": 3
+    },
+    "5": {
+      "title": "EDF 4",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_05_EDF 4/img_00.wmf"
+      ],
+      "image_count": 1
+    },
+    "6": {
+      "title": "A",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_06_A/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_06_A/img_01.png"
+      ],
+      "image_count": 2
+    },
+    "7": {
+      "title": "EDF 5",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_07_EDF 5/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_07_EDF 5/img_01.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_07_EDF 5/img_02.wmf"
+      ],
+      "image_count": 3
+    },
+    "8": {
+      "title": "A",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_08_A/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_08_A/img_01.png"
+      ],
+      "image_count": 2
+    },
+    "9": {
+      "title": "EDF 7",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_09_EDF 7/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_09_EDF 7/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_09_EDF 7/img_02.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_09_EDF 7/img_03.wmf"
+      ],
+      "image_count": 4
+    },
+    "10": {
+      "title": "EDF 8",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_10_EDF 8/img_00.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_10_EDF 8/img_01.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_10_EDF 8/img_02.wmf"
+      ],
+      "image_count": 3
+    },
+    "11": {
+      "title": "EDF 9",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_11_EDF 9/img_00.wmf"
+      ],
+      "image_count": 1
+    },
+    "12": {
+      "title": "A",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_12_A/img_00.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_12_A/img_01.wmf"
+      ],
+      "image_count": 2
+    },
+    "13": {
+      "title": "Cancer Epithelial DAMP Expression",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_02.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_03.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_04.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_05.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_06.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_07.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_08.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_13_Cancer Epithelial DAMP Expression/img_09.png"
+      ],
+      "image_count": 10
+    },
+    "14": {
+      "title": "EDF 10",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_14_EDF 10/img_00.wmf",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_14_EDF 10/img_01.tiff",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_14_EDF 10/img_02.tiff",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_14_EDF 10/img_03.png"
+      ],
+      "image_count": 4
+    },
+    "15": {
+      "title": "P1 (IPM-BO-279)",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_15_P1 _IPM-BO-279_/img_00.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_15_P1 _IPM-BO-279_/img_01.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_15_P1 _IPM-BO-279_/img_02.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_15_P1 _IPM-BO-279_/img_03.png",
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_15_P1 _IPM-BO-279_/img_04.png"
+      ],
+      "image_count": 5
+    },
+    "16": {
+      "title": "Supplementary Fig. 6",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_16_Supplementary Fig. 6/img_00.png"
+      ],
+      "image_count": 1
+    },
+    "17": {
+      "title": "Table S1 \u2013 PBC cohort.",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_17_Table S1 _ PBC cohort./img_00.wmf"
+      ],
+      "image_count": 1
+    },
+    "18": {
+      "title": "Table S2 \u2013 KTB participants.",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_18_Table S2 _ KTB participants./img_00.wmf"
+      ],
+      "image_count": 1
+    },
+    "19": {
+      "title": "Table S3 \u2013 Tumor characteristics of PDOs used in this study.",
+      "images": [
+        "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_19_Table S3 _ Tumor characteristics of PDOs used in this study./img_00.wmf"
+      ],
+      "image_count": 1
+    }
+  }
+}
