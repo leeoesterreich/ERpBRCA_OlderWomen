@@ -16,7 +16,7 @@ OUTPUT_DIR = Path(__file__).parent / "outputs"
 FIGURES_DIR = Path(__file__).parent / "figures"
 
 # SigProfiler paths
-VCF_INPUT = Path("/bgfs/alee/LO_LAB/Personal/Alexander_Chang/alc376/NeilRatWES/RatWES_Mutect2_VCF_Input")
+VCF_INPUT = Path("/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/NeilRatWES/RatWES_Mutect2_VCF_Input")
 SIGPROFILER_OUTPUT = OUTPUT_DIR / "sigprofiler"
 
 
