@@ -14,9 +14,21 @@ OUTPUT_DIR = Path(__file__).parent / "outputs"
 FIGURES_DIR = Path(__file__).parent / "figures"
 DATA_DIR = Path(__file__).parent / "data"
 
-# Sample age groups
-YOUNG_SAMPLES = ['102', '107', '116']
-OLD_SAMPLES = ['157', '158', '167']
+# Sample age groups (confirmed: lower IDs are older rats)
+YOUNG_SAMPLES = ['157', '158', '167']
+OLD_SAMPLES = ['102', '107', '116']
+
+
+def extract_sample_id(sample_name: str) -> str:
+    """Extract numeric sample ID from various naming formats.
+
+    Handles: '157_tumor_vs_157_spleen', '102', 'Rat_O_102', etc.
+    """
+    import re
+    match = re.search(r'(102|107|116|157|158|167)', sample_name)
+    if match:
+        return match.group(1)
+    return sample_name[:3]  # Fallback to first 3 chars
 
 
 def chunk_list(lst, chunk_size=200):
@@ -158,8 +170,11 @@ def generate_oncoplot_figure(df):
     gene_freq = plot_data.notna().sum(axis=1).sort_values(ascending=False)
     plot_data = plot_data.reindex(gene_freq.index)
 
-    # Sort samples: Old first, then Young
-    sample_order = sorted(plot_data.columns, key=lambda x: (x[:3] in YOUNG_SAMPLES, x))
+    # Sort samples: Old first (157, 158, 167), then Young (102, 107, 116)
+    sample_order = sorted(plot_data.columns, key=lambda x: (
+        extract_sample_id(x) in YOUNG_SAMPLES,  # False (Old) sorts before True (Young)
+        int(extract_sample_id(x))  # Then by numeric ID
+    ))
     plot_data = plot_data[sample_order]
 
     # Create consequence-to-number mapping
@@ -196,12 +211,13 @@ def generate_oncoplot_figure(df):
     ax.set_xlabel('Samples', fontsize=14)
     ax.set_ylabel('Genes', fontsize=14)
 
-    # Relabel x-axis with age suffix
+    # Relabel x-axis with age suffix using ID-based lookup (not positional)
+    # Per legend: Young (102, 107, 116) = "_Y", Old (157, 158, 167) = "_O"
     new_labels = []
     for label in ax.get_xticklabels():
-        sample_id = label.get_text()[:3]
+        sample_id = extract_sample_id(label.get_text())
         suffix = '_Y' if sample_id in YOUNG_SAMPLES else '_O'
-        new_labels.append(sample_id + suffix)
+        new_labels.append(f"{sample_id}{suffix}")
     ax.set_xticklabels(new_labels, fontsize=12, rotation=45, ha='right')
     ax.tick_params(axis='y', labelsize=10)
 
