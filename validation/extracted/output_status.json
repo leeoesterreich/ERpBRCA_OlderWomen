@@ -1,49 +1,47 @@
 {
   "found": [
-    "02_rat_snrnaseq/outputs/seurat_annotated.rds",
-    "05_rat_bulk_rnaseq/outputs/deseq2_results.csv",
-    "05_rat_bulk_rnaseq/outputs/pam50_subtypes.csv"
-  ],
-  "missing": [
     "01_human_bulk_rnaseq/outputs/correlation_results.csv",
     "01_human_bulk_rnaseq/outputs/mica_results.csv",
     "01_human_bulk_rnaseq/outputs/hsd17b7_correlations.csv",
-    "02_rat_snrnaseq/outputs/DE_results/",
+    "02_rat_snrnaseq/outputs/seurat_annotated.rds",
+    "02_rat_snrnaseq/../../results/corrected/rat_snrnaseq/DE_results_by_celltype.csv",
     "03_rat_wes/outputs/cosmic_signatures.csv",
     "03_rat_wes/outputs/oncoplot_data.csv",
-    "04_human_scrnaseq/outputs/seurat_processed.rds",
-    "04_human_scrnaseq/outputs/tam_analysis.csv"
+    "04_human_scrnaseq/outputs/seurat_annotated.rds",
+    "04_human_scrnaseq/outputs/tam_analysis.csv",
+    "05_rat_bulk_rnaseq/outputs/deseq2_results.csv",
+    "05_rat_bulk_rnaseq/outputs/pam50_subtypes.csv"
   ],
+  "missing": [],
   "by_analysis": {
     "01_human_bulk_rnaseq": {
-      "found": [],
-      "missing": [
+      "found": [
         "outputs/correlation_results.csv",
         "outputs/mica_results.csv",
         "outputs/hsd17b7_correlations.csv"
-      ]
+      ],
+      "missing": []
     },
     "02_rat_snrnaseq": {
       "found": [
-        "outputs/seurat_annotated.rds"
+        "outputs/seurat_annotated.rds",
+        "../../results/corrected/rat_snrnaseq/DE_results_by_celltype.csv"
       ],
-      "missing": [
-        "outputs/DE_results/"
-      ]
+      "missing": []
     },
     "03_rat_wes": {
-      "found": [],
-      "missing": [
+      "found": [
         "outputs/cosmic_signatures.csv",
         "outputs/oncoplot_data.csv"
-      ]
+      ],
+      "missing": []
     },
     "04_human_scrnaseq": {
-      "found": [],
-      "missing": [
-        "outputs/seurat_processed.rds",
+      "found": [
+        "outputs/seurat_annotated.rds",
         "outputs/tam_analysis.csv"
-      ]
+      ],
+      "missing": []
     },
     "05_rat_bulk_rnaseq": {
       "found": [

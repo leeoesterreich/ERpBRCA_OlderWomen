@@ -2,117 +2,133 @@
   {
     "claim": "The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, the most common subtype of breast cancer, is an age",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "60%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, the most common subtype of breast cancer, is an age",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "70%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, the most common subtype of breast cancer, is an age",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "80%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "The biology of breast cancer is age-dependent 1,2. Estrogen receptor positive (ER+) breast cancer, the most common subtype of breast cancer, is an age",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "90%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Fol",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "p_value",
+    "status": "WET_LAB",
+    "manuscript_value": "p < 0.0001",
+    "notes": "Wet lab figure: ['Fig. 1B']",
     "figure_refs": [
       "Fig. 1B"
     ]
   },
   {
     "claim": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Fol",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "p_value",
+    "status": "WET_LAB",
+    "manuscript_value": "p < 0.0001",
+    "notes": "Wet lab figure: ['Fig. 1B']",
     "figure_refs": [
       "Fig. 1B"
     ]
   },
   {
     "claim": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Fol",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "p_value",
+    "status": "WET_LAB",
+    "manuscript_value": "p = 0.0015",
+    "notes": "Wet lab figure: ['Fig. 1B']",
     "figure_refs": [
       "Fig. 1B"
     ]
   },
   {
     "claim": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Fol",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "p_value",
+    "status": "WET_LAB",
+    "manuscript_value": "p = 0.06",
+    "notes": "Wet lab figure: ['Fig. 1B']",
     "figure_refs": [
       "Fig. 1B"
     ]
   },
   {
     "claim": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Fol",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "p_value",
+    "status": "WET_LAB",
+    "manuscript_value": "p = 0.02",
+    "notes": "Wet lab figure: ['Fig. 1B']",
     "figure_refs": [
       "Fig. 1B"
     ]
   },
   {
     "claim": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Fol",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "p_value",
+    "status": "WET_LAB",
+    "manuscript_value": "p = 0.02",
+    "notes": "Wet lab figure: ['Fig. 1B']",
     "figure_refs": [
       "Fig. 1B"
     ]
   },
   {
     "claim": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Fol",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "p_value",
+    "status": "WET_LAB",
+    "manuscript_value": "p = 0.04",
+    "notes": "Wet lab figure: ['Fig. 1B']",
     "figure_refs": [
       "Fig. 1B"
     ]
   },
   {
     "claim": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Fol",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 20",
+    "notes": "Wet lab figure: ['Fig. 1B']",
     "figure_refs": [
       "Fig. 1B"
     ]
   },
   {
     "claim": "Younger rats (n = 20) were treated with the carcinogen at 4 months of age while older rats (n = 17) were treated at 21-23 months of age (Fig. 1B). Fol",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 17",
+    "notes": "Wet lab figure: ['Fig. 1B']",
     "figure_refs": [
       "Fig. 1B"
     ]
   },
   {
     "claim": "With these quantitative and phenotypic differences tumors that developed in younger and older rats, we utilized whole exome sequencing, bulk RNA-seq, ",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.10",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Extended Data Fig. 2A",
       "Fig. 2A",
@@ -129,9 +145,12 @@
   },
   {
     "claim": "With these quantitative and phenotypic differences tumors that developed in younger and older rats, we utilized whole exome sequencing, bulk RNA-seq, ",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p < 0.05",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Extended Data Fig. 2A",
       "Fig. 2A",
@@ -148,27 +167,32 @@
   },
   {
     "claim": "We next constructed two cohorts of human specimens to investigate changes in both circulating and local factors with age: (1) matched plasma, tumor ti",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 115",
+    "notes": "Wet lab figure: ['Fig. 3A']",
     "figure_refs": [
       "Fig. 3A"
     ]
   },
   {
     "claim": "We next constructed two cohorts of human specimens to investigate changes in both circulating and local factors with age: (1) matched plasma, tumor ti",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 89",
+    "notes": "Wet lab figure: ['Fig. 3A']",
     "figure_refs": [
       "Fig. 3A"
     ]
   },
   {
     "claim": "We next investigated estrogen disposition in the normal breast microenvironment from KTB donors as well as in the TME from patients with breast cancer",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.0033",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Fig. 4A",
       "Fig. 4A",
@@ -180,9 +204,12 @@
   },
   {
     "claim": "We next investigated estrogen disposition in the normal breast microenvironment from KTB donors as well as in the TME from patients with breast cancer",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.99",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Fig. 4A",
       "Fig. 4A",
@@ -194,9 +221,12 @@
   },
   {
     "claim": "To decipher how E2 is synthesized in the breast, we examined a panel of genes encoding enzymes involved in estrogen synthesis and conversion, again us",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.012",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Extended Data Fig. 5A",
       "Fig. 4D",
@@ -206,9 +236,12 @@
   },
   {
     "claim": "To decipher how E2 is synthesized in the breast, we examined a panel of genes encoding enzymes involved in estrogen synthesis and conversion, again us",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.0061",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Extended Data Fig. 5A",
       "Fig. 4D",
@@ -219,11 +252,11 @@
   {
     "claim": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correla",
     "type": "correlation",
-    "status": "PENDING",
+    "status": "REVIEW",
     "manuscript_value": "p = 0.049",
     "code_value": null,
     "verified": null,
-    "notes": "No correlation output files found",
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Extended Data Fig. 6A",
       "Extended Data Fig. 6B",
@@ -233,11 +266,11 @@
   {
     "claim": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correla",
     "type": "correlation",
-    "status": "PENDING",
+    "status": "REVIEW",
     "manuscript_value": "p = 0.12",
     "code_value": null,
     "verified": null,
-    "notes": "No correlation output files found",
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Extended Data Fig. 6A",
       "Extended Data Fig. 6B",
@@ -247,11 +280,11 @@
   {
     "claim": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correla",
     "type": "correlation",
-    "status": "PENDING",
+    "status": "REVIEW",
     "manuscript_value": "p = 0.0012",
     "code_value": null,
     "verified": null,
-    "notes": "No correlation output files found",
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Extended Data Fig. 6A",
       "Extended Data Fig. 6B",
@@ -261,11 +294,11 @@
   {
     "claim": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correla",
     "type": "correlation",
-    "status": "PENDING",
+    "status": "REVIEW",
     "manuscript_value": "p = 0.038",
     "code_value": null,
     "verified": null,
-    "notes": "No correlation output files found",
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Extended Data Fig. 6A",
       "Extended Data Fig. 6B",
@@ -275,11 +308,11 @@
   {
     "claim": "In the same tissues in which estrogen disposition was measured, we performed bulk RNA-seq, which showed that HSD17B7 expression was positively correla",
     "type": "correlation",
-    "status": "PENDING",
+    "status": "REVIEW",
     "manuscript_value": "Spearman r = 0.26",
     "code_value": null,
     "verified": null,
-    "notes": "No correlation output files found",
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Extended Data Fig. 6A",
       "Extended Data Fig. 6B",
@@ -288,9 +321,12 @@
   },
   {
     "claim": "Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8,31, a finding compounded with increasing hypometh",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p < 0.0001",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Extended Data Fig. 7A",
       "Extended Data Fig. 7B",
@@ -302,9 +338,12 @@
   },
   {
     "claim": "Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8,31, a finding compounded with increasing hypometh",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.0090",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Extended Data Fig. 7A",
       "Extended Data Fig. 7B",
@@ -316,9 +355,12 @@
   },
   {
     "claim": "Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8,31, a finding compounded with increasing hypometh",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "correlation",
+    "status": "REVIEW",
+    "manuscript_value": "Spearman r = 0.48",
+    "code_value": null,
+    "verified": null,
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Extended Data Fig. 7A",
       "Extended Data Fig. 7B",
@@ -330,9 +372,12 @@
   },
   {
     "claim": "Consistent with prior reports, we found that ESR1 gene expression increases precipitously with age 8,31, a finding compounded with increasing hypometh",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "correlation",
+    "status": "REVIEW",
+    "manuscript_value": "Spearman r = -0.24",
+    "code_value": null,
+    "verified": null,
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Extended Data Fig. 7A",
       "Extended Data Fig. 7B",
@@ -344,9 +389,12 @@
   },
   {
     "claim": "To validate and support the scRNA-seq findings, we analyzed two additional datasets that included multispectral immunohistochemistry stained slides fr",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.0043",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Extended Data Fig. 10A",
       "Fig. 7E",
@@ -360,9 +408,12 @@
   },
   {
     "claim": "To validate and support the scRNA-seq findings, we analyzed two additional datasets that included multispectral immunohistochemistry stained slides fr",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "correlation",
+    "status": "REVIEW",
+    "manuscript_value": "Spearman r = 0.31",
+    "code_value": null,
+    "verified": null,
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Extended Data Fig. 10A",
       "Fig. 7E",
@@ -376,9 +427,10 @@
   },
   {
     "claim": "To mechanistically examine and validate the degree to which the aged TME, which is characterized not only by a chronically inflamed TME but also by hi",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 5",
+    "notes": "Wet lab figure: ['Fig. 8A', 'Figure 5', 'Fig. 8B', 'Fig. 8C', 'Fig. 8D']",
     "figure_refs": [
       "Fig. 8A",
       "Figure 5",
@@ -390,50 +442,137 @@
   {
     "claim": "Mammary tumor development and growth were monitored biweekly by palpating all six mammary gland pairs. Once a tumor formed, we assessed growth dynamic",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "10%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "Mammary tumor development and growth were monitored biweekly by palpating all six mammary gland pairs. Once a tumor formed, we assessed growth dynamic",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "70%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "A previously validated LC-MS/MS assay for the quantification of estradiol and estrone in human serum was adapted and used for this study 77. Briefly, ",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "0.1%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "We compiled single-cell RNA sequencing (scRNA-seq) datasets from ten ER+ breast tumor samples, focusing exclusively on cells from pre-treatment patien",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "15%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "PBMCs were isolated from healthy donors using Ficoll (Cytiva, #17-5446-52) and SepMate-50 tubes (STEMCELL, #85460) for density gradient centrifugation",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "4%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "PBMCs were isolated from healthy donors using Ficoll (Cytiva, #17-5446-52) and SepMate-50 tubes (STEMCELL, #85460) for density gradient centrifugation",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "NO_FIGURE_REF",
+    "manuscript_value": "0.1%",
+    "notes": "No figure reference found for this claim",
     "figure_refs": []
   },
   {
     "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "p_value",
+    "status": "WET_LAB",
+    "manuscript_value": "p < 0.0001",
+    "notes": "Wet lab figure: ['Fig. 1']",
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 20",
+    "notes": "Wet lab figure: ['Fig. 1']",
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 17",
+    "notes": "Wet lab figure: ['Fig. 1']",
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 3",
+    "notes": "Wet lab figure: ['Fig. 1']",
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 8",
+    "notes": "Wet lab figure: ['Fig. 1']",
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 3",
+    "notes": "Wet lab figure: ['Fig. 1']",
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 8",
+    "notes": "Wet lab figure: ['Fig. 1']",
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 20",
+    "notes": "Wet lab figure: ['Fig. 1']",
+    "figure_refs": [
+      "Fig. 1"
+    ]
+  },
+  {
+    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
+    "type": "sample_size",
+    "status": "WET_LAB",
+    "manuscript_value": "n = 17",
+    "notes": "Wet lab figure: ['Fig. 1']",
     "figure_refs": [
       "Fig. 1"
     ]
@@ -441,8 +580,9 @@
   {
     "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "WET_LAB",
+    "manuscript_value": "95%",
+    "notes": "Wet lab figure: ['Fig. 1']",
     "figure_refs": [
       "Fig. 1"
     ]
@@ -450,8 +590,9 @@
   {
     "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "WET_LAB",
+    "manuscript_value": "95%",
+    "notes": "Wet lab figure: ['Fig. 1']",
     "figure_refs": [
       "Fig. 1"
     ]
@@ -459,80 +600,9 @@
   {
     "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
-    "figure_refs": [
-      "Fig. 1"
-    ]
-  },
-  {
-    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
-    "figure_refs": [
-      "Fig. 1"
-    ]
-  },
-  {
-    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
-    "figure_refs": [
-      "Fig. 1"
-    ]
-  },
-  {
-    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
-    "figure_refs": [
-      "Fig. 1"
-    ]
-  },
-  {
-    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
-    "figure_refs": [
-      "Fig. 1"
-    ]
-  },
-  {
-    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
-    "figure_refs": [
-      "Fig. 1"
-    ]
-  },
-  {
-    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
-    "figure_refs": [
-      "Fig. 1"
-    ]
-  },
-  {
-    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
-    "figure_refs": [
-      "Fig. 1"
-    ]
-  },
-  {
-    "claim": "Fig. 1: The aged environment promotes accelerated yet indolent tumorigenesis in a rat model of post-menopausal ER+ breast cancer. (A) Schematic of the",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "WET_LAB",
+    "manuscript_value": "95%",
+    "notes": "Wet lab figure: ['Fig. 1']",
     "figure_refs": [
       "Fig. 1"
     ]
@@ -540,8 +610,9 @@
   {
     "claim": "Fig. 2: Accelerated tumorigenesis in older rats is unlikely related to cancer cell intrinsic factors but rather due to inflammation and immune differe",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "REVIEW",
+    "manuscript_value": "95%",
+    "notes": "Verification for other not yet implemented",
     "figure_refs": [
       "Fig. 2"
     ]
@@ -549,8 +620,9 @@
   {
     "claim": "Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant, chronically inflamed host environment. (A) Schem",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "WET_LAB",
+    "manuscript_value": "95%",
+    "notes": "Wet lab figure: ['Fig. 3']",
     "figure_refs": [
       "Fig. 3"
     ]
@@ -558,8 +630,9 @@
   {
     "claim": "Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant, chronically inflamed host environment. (A) Schem",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "WET_LAB",
+    "manuscript_value": "95%",
+    "notes": "Wet lab figure: ['Fig. 3']",
     "figure_refs": [
       "Fig. 3"
     ]
@@ -567,8 +640,9 @@
   {
     "claim": "Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant, chronically inflamed host environment. (A) Schem",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "WET_LAB",
+    "manuscript_value": "95%",
+    "notes": "Wet lab figure: ['Fig. 3']",
     "figure_refs": [
       "Fig. 3"
     ]
@@ -576,71 +650,93 @@
   {
     "claim": "Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant, chronically inflamed host environment. (A) Schem",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "WET_LAB",
+    "manuscript_value": "95%",
+    "notes": "Wet lab figure: ['Fig. 3']",
     "figure_refs": [
       "Fig. 3"
     ]
   },
   {
     "claim": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, crea",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.03",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Fig. 4"
     ]
   },
   {
     "claim": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, crea",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p < 0.0001",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Fig. 4"
     ]
   },
   {
     "claim": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, crea",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.009",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Fig. 4"
     ]
   },
   {
     "claim": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, crea",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "correlation",
+    "status": "REVIEW",
+    "manuscript_value": "Spearman r = 0.24",
+    "code_value": null,
+    "verified": null,
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Fig. 4"
     ]
   },
   {
     "claim": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, crea",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "correlation",
+    "status": "REVIEW",
+    "manuscript_value": "Spearman r = 0.45",
+    "code_value": null,
+    "verified": null,
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Fig. 4"
     ]
   },
   {
     "claim": "Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expression fuel E1-to-E2 conversion in the breast, crea",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "correlation",
+    "status": "REVIEW",
+    "manuscript_value": "Spearman r = -0.24",
+    "code_value": null,
+    "verified": null,
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Fig. 4"
     ]
   },
   {
     "claim": "Fig. 7: A chemokine-rich aged TME is associated with accumulation of immunosuppressive macrophages. (A) Using immune deconvoluted data from TCGA, META",
-    "type": "other",
+    "type": "differential_expression",
     "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "manuscript_value": "p = 0.0043",
+    "code_value": null,
+    "verified": null,
+    "notes": "No DE output files found",
     "figure_refs": [
       "Fig. 7",
       "Extended Data Fig. 10"
@@ -648,9 +744,12 @@
   },
   {
     "claim": "Fig. 7: A chemokine-rich aged TME is associated with accumulation of immunosuppressive macrophages. (A) Using immune deconvoluted data from TCGA, META",
-    "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "type": "correlation",
+    "status": "REVIEW",
+    "manuscript_value": "Spearman r = 0.31",
+    "code_value": null,
+    "verified": null,
+    "notes": "Found 3 correlation files, no close match",
     "figure_refs": [
       "Fig. 7",
       "Extended Data Fig. 10"
@@ -659,8 +758,9 @@
   {
     "claim": "Fig. 8: Aged TME polarizes macrophages to an immunosuppressive state that is targetable through the CCL2 axis or through endocrine therapies. (A) We f",
     "type": "other",
-    "status": "PENDING",
-    "notes": "Verification not yet implemented for this claim type",
+    "status": "WET_LAB",
+    "manuscript_value": "95%",
+    "notes": "Wet lab figure: ['Fig. 8']",
     "figure_refs": [
       "Fig. 8"
     ]

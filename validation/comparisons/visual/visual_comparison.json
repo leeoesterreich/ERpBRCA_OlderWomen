@@ -1,0 +1,43 @@
+[
+  {
+    "match_level": "SIMILAR",
+    "confidence": 0.88,
+    "data_patterns_match": true,
+    "numerical_values_match": true,
+    "visual_elements_match": true,
+    "same_conclusion": true,
+    "differences": [
+      "Sample order slightly differs between figures (e.g., 157_O and 158_O positions).",
+      "Color palette tones vary slightly but maintain same categorical mapping.",
+      "Font size and layout spacing differ between original and regenerated versions.",
+      "Legend placement and formatting differ (right-aligned vs. embedded)."
+    ],
+    "extracted_stats": {},
+    "recommendation": "PASS",
+    "notes": "The regenerated oncoplot reproduces the same mutation patterns, gene-sample associations, and variant consequence categories as the original. Minor visual and formatting differences do not affect interpretation or conclusions.",
+    "figure_id": "Fig. 2_A_oncoplot",
+    "manuscript_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_00.png",
+    "regenerated_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/03_rat_wes/figures/oncoplot.png"
+  },
+  {
+    "match_level": "SIMILAR",
+    "confidence": 0.88,
+    "data_patterns_match": true,
+    "numerical_values_match": true,
+    "visual_elements_match": false,
+    "same_conclusion": true,
+    "differences": [
+      "Sample order differs between figures (Y/O labels swapped or reordered)",
+      "Title present only in regenerated figure ('SBS Signature Counts per Sample')",
+      "Legend order and colors consistent but placement slightly different",
+      "Axis label capitalization differs ('Total Counts' vs 'Total counts')",
+      "Minor differences in bar height stacking order due to sample reordering"
+    ],
+    "extracted_stats": {},
+    "recommendation": "REVIEW",
+    "notes": "Both figures show consistent SBS signature distributions and relative contributions across samples, supporting the same scientific conclusion. However, sample order and minor formatting differences suggest the regenerated figure should be reviewed for label alignment and presentation consistency.",
+    "figure_id": "Fig. 2_B_cosmic",
+    "manuscript_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_02.png",
+    "regenerated_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/03_rat_wes/figures/cosmic_signatures.png"
+  }
+]

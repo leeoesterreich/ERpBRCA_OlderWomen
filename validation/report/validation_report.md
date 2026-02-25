@@ -1,6 +1,6 @@
 # Manuscript Validation Report
 
-**Generated:** 2026-02-24 10:40
+**Generated:** 2026-02-25 11:07
 **Manuscript:** Revised Manuscript_2-1-26.docx
 **Codebase:** ERpBRCA_OlderWomen (refactored)
 
@@ -8,11 +8,11 @@
 
 | Tier | Total | PASS/EXACT | REVIEW/CLOSE | FAIL/DIFFERS | PENDING |
 |------|-------|------------|--------------|--------------|---------|
-| Numerical | 65 | 0 | 0 | 0 | 65 |
-| Visual | 0 | 0 | 0 | 0 | 0 |
-| Claims | 65 | 0 | 0 | 0 | 65 |
+| Numerical | 65 | 13 | 2 | 0 | 12 |
+| Visual | 2 | 1 | 1 | 0 | 0 |
+| Claims | 65 | 0 | 13 | 0 | 13 |
 
-**Overall Status:** PASS - All Validations Successful
+**Overall Status:** REVIEW - Manual Verification Needed
 
 ---
 
@@ -37,9 +37,9 @@ Programmatic comparison of quantitative claims to code outputs.
 - ? **p_value**: p < 0.05 → None
 - ? **sample_size**: n = 115 → None
 - ? **sample_size**: n = 89 → None
-- ? **p_value**: p = 0.0033 → None
-- ? **p_value**: p = 0.99 → None
-- ? **p_value**: p = 0.012 → None
+- ✓ **p_value**: p = 0.0033 → 0.0033007519217515
+- ✓ **p_value**: p = 0.99 → 1.0
+- ~ **p_value**: p = 0.012 → 0.0092282017973772
 
 *... and 45 more claims*
 
@@ -49,7 +49,14 @@ Programmatic comparison of quantitative claims to code outputs.
 
 Azure OpenAI GPT-5 vision comparison of figure pairs.
 
-*No visual comparisons completed yet.*
+- ✓ **Fig. 2_A_oncoplot**: PASS
+  - Sample order slightly differs between figures (e.g., 157_O and 158_O positions).
+  - Color palette tones vary slightly but maintain same categorical mapping.
+  - Font size and layout spacing differ between original and regenerated versions.
+- ~ **Fig. 2_B_cosmic**: REVIEW
+  - Sample order differs between figures (Y/O labels swapped or reordered)
+  - Title present only in regenerated figure ('SBS Signature Counts per Sample')
+  - Legend order and colors consistent but placement slightly different
 
 ---
 
@@ -84,7 +91,10 @@ Text-to-data verification of manuscript claims.
 
 ## Figures Requiring Review
 
-*No figures flagged for review.*
+
+### Needs Manual Review
+
+- **Fig. 2_B_cosmic**: Both figures show consistent SBS signature distributions and relative contributions across samples, supporting the same scientific conclusion. However, sample order and minor formatting differences suggest the regenerated figure should be reviewed for label alignment and presentation consistency.
 
 ---
 
