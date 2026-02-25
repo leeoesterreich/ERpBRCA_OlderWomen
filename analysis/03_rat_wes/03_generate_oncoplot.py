@@ -128,7 +128,9 @@ def generate_oncoplot_figure(df):
 
     # Extract consequence and impact
     df = df.copy()
-    df['IMPACT'] = df['Extra'].str.extract(r'IMPACT=([^;]+)')
+    # IMPACT is now a separate column (not in Extra)
+    if 'IMPACT' not in df.columns:
+        df['IMPACT'] = df['Extra'].str.extract(r'IMPACT=([^;]+)')
 
     # Priority: HIGH > MODERATE
     impact_priority = {'HIGH': 1, 'MODERATE': 2}

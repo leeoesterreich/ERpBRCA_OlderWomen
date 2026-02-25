@@ -27,10 +27,16 @@ def read_vep_output(file_path):
 
 def filter_vep_output(df):
     """Filter for Ensembl genes with HIGH or MODERATE impact."""
-    ens_filter = df['Gene'].str.startswith('ENS', na=False)
-    high_impact = df['Extra'].str.contains('IMPACT=HIGH', na=False)
-    moderate_impact = df['Extra'].str.contains('IMPACT=MODERATE', na=False)
-    return df[ens_filter & (high_impact | moderate_impact)]
+    ens_filter = df['Gene'].astype(str).str.startswith('ENS', na=False)
+    # IMPACT is now a separate column (not in Extra)
+    if 'IMPACT' in df.columns:
+        impact_filter = df['IMPACT'].isin(['HIGH', 'MODERATE'])
+    else:
+        # Fallback for old format with IMPACT in Extra column
+        high_impact = df['Extra'].str.contains('IMPACT=HIGH', na=False)
+        moderate_impact = df['Extra'].str.contains('IMPACT=MODERATE', na=False)
+        impact_filter = high_impact | moderate_impact
+    return df[ens_filter & impact_filter]
 
 
 def main():
