@@ -114,7 +114,8 @@ tryCatch({
 ' || { echo "ERROR: TAM export failed"; exit 1; }
 
 # Write completion marker (only if we get here = success)
-MARKER_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")/.pipeline_markers"
+# Note: Single dirname to go from 04_human_scrnaseq/ up to analysis/
+MARKER_DIR="$(dirname "$SCRIPT_DIR")/.pipeline_markers"
 mkdir -p "$MARKER_DIR"
 echo "Job ${SLURM_JOB_ID:-local} completed at $(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$MARKER_DIR/04_human_scrnaseq.complete"
 echo "Marker written: $MARKER_DIR/04_human_scrnaseq.complete"
