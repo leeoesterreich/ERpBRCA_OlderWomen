@@ -18,7 +18,7 @@ module load ensembl-vep/114.2
 
 SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/03_rat_wes"
 VCF_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/NeilRatWES/RatWES_Mutect2_VCF_Input"
-VEP_CACHE="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/NeilRatWES/rattus_norvegicus"
+VEP_CACHE="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/NeilRatWES"
 OUTPUT_DIR="$SCRIPT_DIR/outputs/vep"
 
 cd "$SCRIPT_DIR"
