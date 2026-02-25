@@ -161,7 +161,8 @@ def generate_oncoplot_figure(df):
     consequence_map = {cons: i+1 for i, cons in enumerate(unique_consequences)}
 
     # Convert to numeric matrix (0 for missing)
-    plot_numeric = plot_data.map(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
+    # Use applymap for pandas 1.x compatibility (map is pandas 2.x+)
+    plot_numeric = plot_data.applymap(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
 
     # Create colormap with white for missing
     n_colors = len(unique_consequences) + 1
