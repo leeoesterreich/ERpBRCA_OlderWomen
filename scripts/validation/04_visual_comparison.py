@@ -129,16 +129,67 @@ Return ONLY valid JSON (no markdown):
 
 def find_figure_pairs() -> list[tuple]:
     """Find matching manuscript and regenerated figure pairs."""
-    # TODO: Implement proper figure matching based on extraction manifest
-    # For now, return empty list as placeholder
     pairs = []
 
-    manifest_path = EXTRACTED_DIR / "figures" / "extraction_manifest.json"
-    if manifest_path.exists():
-        with open(manifest_path) as f:
-            manifest = json.load(f)
-        # Match figures based on slide titles and computational figure list
-        # This needs customization based on actual figure organization
+    # Mapping of slide folders to figure IDs and their regenerated counterparts
+    # Only include PNG files that can be processed by vision API
+    FIGURE_MAPPING = {
+        "slide_02_Figure 2": {
+            "figure_id": "Fig. 2",
+            "analysis": "03_rat_wes",
+            "panels": {
+                # Panel A = oncoplot (typically the larger heatmap-style image)
+                "A_oncoplot": {
+                    "regenerated": "figures/oncoplot.png",
+                    "manuscript_hint": ["img_00", "img_01"],  # Try these first
+                },
+                # Panel B = COSMIC signatures (bar chart style)
+                "B_cosmic": {
+                    "regenerated": "figures/cosmic_signatures.png",
+                    "manuscript_hint": ["img_02", "img_03", "img_04"],
+                },
+            }
+        },
+    }
+
+    from config import ANALYSIS_DIR
+    main_figs_dir = EXTRACTED_DIR / "figures" / "main"
+
+    for slide_folder, mapping in FIGURE_MAPPING.items():
+        slide_path = main_figs_dir / slide_folder
+        if not slide_path.exists():
+            continue
+
+        # Get all PNG images from the slide (manuscript figures)
+        manuscript_images = {img.stem: img for img in slide_path.glob("*.png")}
+
+        # Get regenerated figures
+        analysis_dir = ANALYSIS_DIR / mapping["analysis"]
+
+        for panel_name, panel_info in mapping["panels"].items():
+            regen_path = analysis_dir / panel_info["regenerated"]
+
+            if not regen_path.exists():
+                continue
+
+            # Only use PNG files for vision API
+            if regen_path.suffix.lower() not in ['.png', '.jpg', '.jpeg']:
+                continue
+
+            # Find the best manuscript image match
+            ms_img = None
+            for hint in panel_info.get("manuscript_hint", []):
+                if hint in manuscript_images:
+                    ms_img = manuscript_images[hint]
+                    break
+
+            # Fallback: use first available PNG
+            if ms_img is None and manuscript_images:
+                ms_img = list(manuscript_images.values())[0]
+
+            if ms_img:
+                panel_id = f"{mapping['figure_id']}_{panel_name}"
+                pairs.append((panel_id, ms_img, regen_path))
 
     return pairs
 

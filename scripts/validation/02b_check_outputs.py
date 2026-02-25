@@ -16,14 +16,14 @@ EXPECTED_OUTPUTS = {
     ],
     "02_rat_snrnaseq": [
         "outputs/seurat_annotated.rds",
-        "outputs/DE_results/",
+        "../../results/corrected/rat_snrnaseq/DE_results_by_celltype.csv",
     ],
     "03_rat_wes": [
         "outputs/cosmic_signatures.csv",
         "outputs/oncoplot_data.csv",
     ],
     "04_human_scrnaseq": [
-        "outputs/seurat_processed.rds",
+        "outputs/seurat_annotated.rds",
         "outputs/tam_analysis.csv",
     ],
     "05_rat_bulk_rnaseq": [

@@ -75,12 +75,12 @@ tryCatch({
   seurat <- readRDS("outputs/seurat_annotated.rds")
 
   # Validate required column
-  if (!"celltype_major" %in% colnames(seurat@meta.data)) {
-    stop("Column celltype_major not found in Seurat metadata")
+  if (!"CellTypeAnnot" %in% colnames(seurat@meta.data)) {
+    stop("Column CellTypeAnnot not found in Seurat metadata")
   }
 
   # Get macrophage cells
-  mac_cells <- WhichCells(seurat, expression = celltype_major == "Macrophage")
+  mac_cells <- WhichCells(seurat, expression = CellTypeAnnot == "Macrophage")
 
   if (length(mac_cells) == 0) {
     warning("No macrophage cells found, creating empty TAM analysis")
@@ -96,10 +96,10 @@ tryCatch({
         .groups = "drop"
       )
 
-    # Add age_group if available
-    if ("age_group" %in% colnames(mac_subset@meta.data)) {
+    # Add AgeGroup if available
+    if ("AgeGroup" %in% colnames(mac_subset@meta.data)) {
       age_mapping <- mac_subset@meta.data %>%
-        select(orig.ident, age_group) %>%
+        select(orig.ident, AgeGroup) %>%
         distinct()
       tam_metrics <- left_join(tam_metrics, age_mapping, by = "orig.ident")
     }
