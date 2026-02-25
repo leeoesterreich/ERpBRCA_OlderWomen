@@ -81,7 +81,10 @@ def map_to_human_symbols(df):
             all_homologs = pd.concat([all_homologs, result], ignore_index=True)
 
     if all_homologs.empty:
-        print("Warning: No homologs found")
+        print("Warning: No homologs found for uncached genes")
+        # Return cached data if available
+        if not cache.empty:
+            return cache
         return pd.DataFrame()
 
     # Rename columns
@@ -97,7 +100,10 @@ def map_to_human_symbols(df):
             all_symbols = pd.concat([all_symbols, result], ignore_index=True)
 
     if all_symbols.empty:
-        print("Warning: No gene symbols found")
+        print("Warning: No gene symbols found for uncached genes")
+        # Return cached data if available
+        if not cache.empty:
+            return cache
         return all_homologs
 
     all_symbols.columns = ['human_ensembl_id', 'gene_symbol']
