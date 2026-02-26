@@ -8,6 +8,7 @@
 # Outputs:
 #   - analysis/04_human_scrnaseq/outputs/gsva_pseudobulk.rds
 #   - analysis/04_human_scrnaseq/outputs/gsva_heatmap.pdf
+#   - analysis/04_human_scrnaseq/figures/gsva_heatmap.png
 
 set.seed(12345)
 
@@ -33,6 +34,8 @@ get_script_dir <- function() {
 script_dir <- get_script_dir()
 project_root <- normalizePath(file.path(script_dir, "../.."))
 output_dir <- file.path(script_dir, "outputs")
+figures_dir <- file.path(script_dir, "figures")
+dir.create(figures_dir, showWarnings = FALSE, recursive = TRUE)
 
 cat("=== scRNA-seq GSVA (Pseudo-bulk) ===\n")
 
@@ -137,6 +140,18 @@ ann_colors <- list(
 )
 
 pdf(file.path(output_dir, "gsva_heatmap.pdf"), width = 10, height = 6)
+pheatmap(
+  gsva_result,
+  annotation_col = ann_col,
+  annotation_colors = ann_colors,
+  main = "GSVA Estrogen Pathway Scores (Pseudo-bulk)",
+  scale = "row",
+  show_colnames = TRUE
+)
+dev.off()
+
+# Save PNG for validation pipeline (pheatmap needs explicit device)
+png(file.path(figures_dir, "gsva_heatmap.png"), width = 10*300, height = 6*300, res = 300)
 pheatmap(
   gsva_result,
   annotation_col = ann_col,
