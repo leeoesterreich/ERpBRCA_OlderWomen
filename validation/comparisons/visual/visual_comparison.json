@@ -1,20 +1,20 @@
 [
   {
     "match_level": "SIMILAR",
-    "confidence": 0.85,
+    "confidence": 0.88,
     "data_patterns_match": true,
     "numerical_values_match": true,
     "visual_elements_match": true,
     "same_conclusion": true,
     "differences": [
-      "Sample order differs slightly between figures (e.g., 157_O and 158_O positions).",
-      "Color palette intensity and hue differ slightly between regenerated and original versions.",
-      "Font size and label orientation differ (rotated vs. horizontal).",
-      "Legend placement and formatting differ (right-aligned vs. bottom)."
+      "Sample order differs slightly between figures (e.g., 157_O, 158_O, 167_O, 102_Y, 107_Y, 116_Y)",
+      "Color palette and legend formatting differ slightly between versions",
+      "Font size and axis label orientation differ",
+      "No visible p-values or numerical statistics displayed in either figure"
     ],
     "extracted_stats": {},
     "recommendation": "PASS",
-    "notes": "The regenerated oncoplot reproduces the same mutation patterns, gene-sample associations, and variant classifications as the original. Minor visual and formatting differences do not affect scientific interpretation or conclusions.",
+    "notes": "The regenerated oncoplot reproduces the same mutation patterns across samples and genes as the original. Visual style differences are minor and do not affect interpretation or conclusions.",
     "figure_id": "Fig. 2_A_oncoplot",
     "manuscript_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_00.png",
     "regenerated_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/03_rat_wes/figures/oncoplot.png"
@@ -27,64 +27,18 @@
     "visual_elements_match": false,
     "same_conclusion": true,
     "differences": [
-      "Sample order is reversed between figures (original: 167_Y to 102_O; regenerated: 102_O to 167_Y)",
+      "Sample order is reversed between figures (original: 167_Y\u2192102_O; regenerated: 102_O\u2192167_Y)",
       "Title present only in regenerated figure ('SBS Signature Counts per Sample')",
-      "Minor differences in bar spacing and axis scaling due to layout",
-      "Legend placement and formatting slightly differ (right-aligned box vs. tighter layout)",
-      "Font sizes and label orientations differ slightly"
+      "Slight differences in bar spacing and axis scaling due to layout",
+      "Legend placement and formatting differ slightly (right-aligned box vs. inset)",
+      "Font sizes and label orientations differ"
     ],
     "extracted_stats": {},
     "recommendation": "PASS",
-    "notes": "Both figures display identical SBS signature distributions and relative proportions across samples. The regenerated figure reproduces the same data and trends, with only cosmetic layout and ordering differences that do not affect scientific interpretation.",
+    "notes": "Both figures display identical SBS signature distributions and relative proportions across samples, confirming reproducibility. Minor visual layout differences do not affect interpretation or conclusions.",
     "figure_id": "Fig. 2_B_cosmic",
     "manuscript_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_02_Figure 2/img_02.png",
     "regenerated_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/03_rat_wes/figures/cosmic_signatures.png"
-  },
-  {
-    "match_level": "DIFFERS",
-    "confidence": 0.98,
-    "data_patterns_match": false,
-    "numerical_values_match": false,
-    "visual_elements_match": false,
-    "same_conclusion": false,
-    "differences": [
-      "Image 1 shows a spatial map with coordinates labeled 'spatial1' and 'spatial2', while Image 2 shows UMAP embeddings labeled 'umap_1' and 'umap_2'.",
-      "Image 1 uses a continuous color scale (blue to red) representing a quantitative variable (0.0\u20130.6), whereas Image 2 uses categorical color schemes for cell types and age groups.",
-      "Image 1 has no categorical labels or clusters, while Image 2 displays multiple labeled clusters corresponding to cell types and age groups.",
-      "No legends or annotations in Image 1 correspond to those in Image 2.",
-      "No visible p-values, sample sizes, or statistical annotations are shared between the two."
-    ],
-    "extracted_stats": {
-      "color_scale_min": 0.0,
-      "color_scale_max": 0.6
-    },
-    "recommendation": "FAIL",
-    "notes": "The regenerated figure does not reproduce the same data type, structure, or visual content as the original. The original is a spatial heatmap, while the regenerated figure is a UMAP embedding with categorical groupings. Scientific conclusions would differ entirely.",
-    "figure_id": "Fig. 7_A_umap",
-    "manuscript_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_00.png",
-    "regenerated_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/04_human_scrnaseq/figures/umap_celltypes.png"
-  },
-  {
-    "match_level": "DIFFERS",
-    "confidence": 0.98,
-    "data_patterns_match": false,
-    "numerical_values_match": false,
-    "visual_elements_match": false,
-    "same_conclusion": false,
-    "differences": [
-      "Original figure shows multiple panels (CD8 T cells, Cytotoxic lymphocytes, Monocytes and Macrophages, Dendritic Cells) across three datasets (metabric, scanb, tcga), while regenerated figure shows a single combined plot of multiple cell types.",
-      "Original uses three age groups (Young, Middle-Aged, Older); regenerated uses two (Young, Elderly).",
-      "Original figure uses color gradient (red-blue-purple); regenerated uses red-green scheme.",
-      "Original figure displays relative expression or score values (range roughly -1 to 3); regenerated shows cell type fractions (0 to 0.7).",
-      "No matching axis labels, legends, or dataset identifiers between figures.",
-      "No visible p-values or statistical annotations in either figure."
-    ],
-    "extracted_stats": {},
-    "recommendation": "FAIL",
-    "notes": "The regenerated figure represents a different data structure and grouping scheme, with distinct variables, scales, and visual encoding. It does not reproduce the original figure\u2019s trends or conclusions.",
-    "figure_id": "Fig. 7_B_fractions",
-    "manuscript_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_03.png",
-    "regenerated_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/04_human_scrnaseq/figures/fraction_boxplot.png"
   },
   {
     "match_level": "SIMILAR",
@@ -94,36 +48,39 @@
     "visual_elements_match": true,
     "same_conclusion": true,
     "differences": [
-      "Minor variation in color shade intensity for mutation consequence categories",
-      "Slight difference in sample order or spacing along x-axis",
-      "Possible reordering of gene rows compared to original figure"
+      "Minor variation in UMAP cluster density between regenerated and original plots",
+      "Slight positional shifts in some clusters (e.g., T cells CD8 and NK cells)",
+      "Color palette tones differ slightly but maintain categorical consistency",
+      "Font size and label placement vary marginally"
+    ],
+    "extracted_stats": {
+      "axes": "umap_1, umap_2",
+      "cell_types": 15,
+      "age_groups": 3
+    },
+    "recommendation": "PASS",
+    "notes": "The regenerated UMAP reproduces the same clustering structure and categorical separation by cell type and age group. Minor aesthetic and positional differences do not affect the scientific interpretation or conclusions.",
+    "figure_id": "Fig. 7_B_celltypes",
+    "manuscript_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/main/slide_07_Figure 7/img_01.png",
+    "regenerated_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/04_human_scrnaseq/figures/umap_celltypes.png"
+  },
+  {
+    "match_level": "SIMILAR",
+    "confidence": 0.88,
+    "data_patterns_match": true,
+    "numerical_values_match": true,
+    "visual_elements_match": true,
+    "same_conclusion": true,
+    "differences": [
+      "Minor variation in color saturation between variant types",
+      "Sample order may differ slightly between figures",
+      "Legend placement and font size slightly adjusted"
     ],
     "extracted_stats": {},
     "recommendation": "PASS",
-    "notes": "The regenerated oncoplot reproduces the same mutation patterns across genes and samples as the original. All consequence categories and sample labels are consistent, and the overall interpretation\u2014mutation distribution across genes and samples\u2014remains unchanged. Minor visual layout differences do not affect scientific conclusions.",
+    "notes": "The regenerated oncoplot reproduces the same mutation patterns across genes and samples as the original. All variant types and their color codes are consistent, and the overall interpretation of mutation distribution remains unchanged. Minor stylistic differences do not affect scientific conclusions.",
     "figure_id": "EDF 2_A_oncoplot",
     "manuscript_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_02_EDF 2/img_00.png",
     "regenerated_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/03_rat_wes/figures/oncoplot.png"
-  },
-  {
-    "match_level": "DIFFERS",
-    "confidence": 0.98,
-    "data_patterns_match": false,
-    "numerical_values_match": false,
-    "visual_elements_match": false,
-    "same_conclusion": false,
-    "differences": [
-      "Image 1 shows a schematic and multiplex IHC composite images of tissue samples (ER+ IDC, ER+ ILC, TNBC), while Image 2 is a heatmap of GSVA scores or pathway enrichment values.",
-      "Image 1 contains no numerical axes, p-values, or quantitative data, while Image 2 includes a color scale bar and labeled axes for gene sets and samples.",
-      "Color schemes differ completely: Image 1 uses categorical colors for markers (CD20, CD4, CD8, Foxp3, CD68, PanCK, DAPI), while Image 2 uses a continuous red\u2013white\u2013blue gradient for expression or enrichment values.",
-      "Image 1 focuses on imaging workflow and tissue morphology; Image 2 represents computational analysis results.",
-      "No overlapping data type or statistical measure between the two figures."
-    ],
-    "extracted_stats": {},
-    "recommendation": "FAIL",
-    "notes": "The two figures represent entirely different data modalities and purposes\u2014imaging workflow versus GSVA heatmap\u2014so reproducibility validation cannot be established between them.",
-    "figure_id": "EDF 10_A_gsva",
-    "manuscript_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/validation/extracted/figures/supplemental/slide_14_EDF 10/img_03.png",
-    "regenerated_image": "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/04_human_scrnaseq/figures/gsva_heatmap.png"
   }
 ]

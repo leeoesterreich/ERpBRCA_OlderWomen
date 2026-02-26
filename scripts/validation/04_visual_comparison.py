@@ -150,18 +150,19 @@ def find_figure_pairs() -> list[tuple]:
                 },
             }
         },
+        # Note: Fig. 7 panels A-D are from different analyses:
+        # - Panel A: MICA bulk deconvolution (01_human_bulk_rnaseq) - NOT scRNA-seq
+        # - Panel B-D: scRNA-seq (04_human_scrnaseq)
+        # The scRNA-seq UMAP shows cell types, matching panel B content
         "slide_07_Figure 7": {
             "figure_id": "Fig. 7",
             "analysis": "04_human_scrnaseq",
             "source": "main",
             "panels": {
-                "A_umap": {
+                # Panel B shows scRNA-seq cell type differences - UMAP with cell types
+                "B_celltypes": {
                     "regenerated": "figures/umap_celltypes.png",
-                    "manuscript_hint": ["img_00", "img_01", "img_02"],
-                },
-                "B_fractions": {
-                    "regenerated": "figures/fraction_boxplot.png",
-                    "manuscript_hint": ["img_03", "img_06", "img_07"],
+                    "manuscript_hint": ["img_01", "img_02"],  # scRNA-seq embeddings
                 },
             }
         },
@@ -177,17 +178,7 @@ def find_figure_pairs() -> list[tuple]:
                 },
             }
         },
-        "slide_14_EDF 10": {
-            "figure_id": "EDF 10",
-            "analysis": "04_human_scrnaseq",
-            "source": "supplemental",
-            "panels": {
-                "A_gsva": {
-                    "regenerated": "figures/gsva_heatmap.png",
-                    "manuscript_hint": ["img_03"],
-                },
-            }
-        },
+        # Note: EDF 10 is mIHC wet lab data - excluded from computational validation
     }
 
     from config import ANALYSIS_DIR
