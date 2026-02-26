@@ -10,6 +10,7 @@
 #   - analysis/04_human_scrnaseq/outputs/cell_fractions.csv
 #   - analysis/04_human_scrnaseq/outputs/cell_fraction_stats.csv
 #   - analysis/04_human_scrnaseq/outputs/fraction_boxplot.pdf
+#   - analysis/04_human_scrnaseq/figures/fraction_boxplot.png
 
 set.seed(12345)
 
@@ -32,6 +33,8 @@ get_script_dir <- function() {
 
 script_dir <- get_script_dir()
 output_dir <- file.path(script_dir, "outputs")
+figures_dir <- file.path(script_dir, "figures")
+dir.create(figures_dir, showWarnings = FALSE, recursive = TRUE)
 
 cat("=== Cell Fraction Analysis ===\n")
 
@@ -141,5 +144,9 @@ p <- ggplot(plot_data, aes(x = CellType, y = Fraction, fill = AgeGroup)) +
 pdf(file.path(output_dir, "fraction_boxplot.pdf"), width = 12, height = 6)
 print(p)
 dev.off()
+
+# Save PNG for validation pipeline
+ggsave(file.path(figures_dir, "fraction_boxplot.png"), p,
+       width = 12, height = 6, dpi = 300, bg = "white")
 
 cat("\n=== Cell fraction analysis complete ===\n")
