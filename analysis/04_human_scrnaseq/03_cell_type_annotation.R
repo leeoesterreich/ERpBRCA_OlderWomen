@@ -9,6 +9,7 @@
 #   - analysis/04_human_scrnaseq/outputs/seurat_annotated.rds
 #   - analysis/04_human_scrnaseq/outputs/umap_celltypes.pdf
 #   - analysis/04_human_scrnaseq/outputs/metadata_annotated.txt
+#   - analysis/04_human_scrnaseq/figures/umap_celltypes.png
 
 set.seed(12345)
 
@@ -31,6 +32,8 @@ get_script_dir <- function() {
 
 script_dir <- get_script_dir()
 output_dir <- file.path(script_dir, "outputs")
+figures_dir <- file.path(script_dir, "figures")
+dir.create(figures_dir, showWarnings = FALSE, recursive = TRUE)
 
 cat("=== Cell Type Annotation ===\n")
 
@@ -90,6 +93,10 @@ p2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "AgeGroup") +
 pdf(file.path(output_dir, "umap_celltypes.pdf"), width = 14, height = 6)
 print(p1 + p2)
 dev.off()
+
+# Save PNG for validation pipeline
+ggsave(file.path(figures_dir, "umap_celltypes.png"), p1 + p2,
+       width = 14, height = 6, dpi = 300, bg = "white")
 
 # Feature plots for key markers
 markers <- c("EPCAM", "KRT19", "CD68", "CD3D", "MS4A1", "PECAM1")
