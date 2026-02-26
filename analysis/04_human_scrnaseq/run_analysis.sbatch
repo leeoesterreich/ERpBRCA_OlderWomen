@@ -23,7 +23,7 @@ SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/
 cd "$SCRIPT_DIR"
 echo "Working directory: $SCRIPT_DIR"
 
-mkdir -p logs outputs outputs/preprocessing
+mkdir -p logs outputs outputs/preprocessing figures
 
 # Check if preprocessed data already exists
 PREPROCESS_FILE="../../data/human_scrnaseq/SeuratObj_GSE176078_ERpos_AfterQCSCT.rds"
@@ -112,6 +112,20 @@ tryCatch({
   quit(status = 1)
 })
 ' || { echo "ERROR: TAM export failed"; exit 1; }
+
+echo "=== Step 11: Ensure PNG figures exist ==="
+# Convert any PDFs that don't have PNG counterparts (fallback)
+for pdf in outputs/*.pdf; do
+    [ -f "$pdf" ] || continue
+    base=$(basename "$pdf" .pdf)
+    png="figures/${base}.png"
+    if [ ! -f "$png" ]; then
+        echo "Converting $pdf -> $png"
+        env -i PATH=/usr/bin:/bin pdftoppm -png -r 300 -singlefile "$pdf" "figures/${base}" 2>/dev/null \
+            || env -i PATH=/usr/bin:/bin convert -density 300 "$pdf" "$png" 2>/dev/null \
+            || echo "WARNING: Could not convert $pdf"
+    fi
+done
 
 # Write completion marker (only if we get here = success)
 # Note: Single dirname to go from 04_human_scrnaseq/ up to analysis/
