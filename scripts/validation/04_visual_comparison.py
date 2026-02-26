@@ -159,10 +159,25 @@ def find_figure_pairs() -> list[tuple]:
             "analysis": "04_human_scrnaseq",
             "source": "main",
             "panels": {
-                # Panel B shows scRNA-seq cell type differences - UMAP with cell types
+                # Panel B: Cell type UMAP showing transcriptomic differences
                 "B_celltypes": {
                     "regenerated": "figures/umap_celltypes.png",
-                    "manuscript_hint": ["img_01", "img_02"],  # scRNA-seq embeddings
+                    "manuscript_hint": ["img_01", "img_02"],
+                },
+                # Panel C: DEG/pathway analysis - GSVA heatmap
+                "C_pathways": {
+                    "regenerated": "figures/gsva_heatmap.png",
+                    "manuscript_hint": ["img_06", "img_07"],
+                },
+                # Panel D: Cell fractions comparison
+                "D_fractions": {
+                    "regenerated": "figures/fraction_boxplot.png",
+                    "manuscript_hint": ["img_08", "img_09"],
+                },
+                # PROGENy pathway activity
+                "E_progeny": {
+                    "regenerated": "figures/progeny_heatmap.png",
+                    "manuscript_hint": ["img_10", "img_11"],
                 },
             }
         },
