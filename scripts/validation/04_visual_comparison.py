@@ -134,29 +134,69 @@ def find_figure_pairs() -> list[tuple]:
     # Mapping of slide folders to figure IDs and their regenerated counterparts
     # Only include PNG files that can be processed by vision API
     FIGURE_MAPPING = {
+        # Main figures
         "slide_02_Figure 2": {
             "figure_id": "Fig. 2",
             "analysis": "03_rat_wes",
+            "source": "main",
             "panels": {
-                # Panel A = oncoplot (typically the larger heatmap-style image)
                 "A_oncoplot": {
                     "regenerated": "figures/oncoplot.png",
-                    "manuscript_hint": ["img_00", "img_01"],  # Try these first
+                    "manuscript_hint": ["img_00", "img_01"],
                 },
-                # Panel B = COSMIC signatures (bar chart style)
                 "B_cosmic": {
                     "regenerated": "figures/cosmic_signatures.png",
                     "manuscript_hint": ["img_02", "img_03", "img_04"],
                 },
             }
         },
+        "slide_07_Figure 7": {
+            "figure_id": "Fig. 7",
+            "analysis": "04_human_scrnaseq",
+            "source": "main",
+            "panels": {
+                "A_umap": {
+                    "regenerated": "figures/umap_celltypes.png",
+                    "manuscript_hint": ["img_00", "img_01", "img_02"],
+                },
+                "B_fractions": {
+                    "regenerated": "figures/fraction_boxplot.png",
+                    "manuscript_hint": ["img_03", "img_06", "img_07"],
+                },
+            }
+        },
+        # Supplemental figures (EDF = Extended Data Figure)
+        "slide_02_EDF 2": {
+            "figure_id": "EDF 2",
+            "analysis": "03_rat_wes",
+            "source": "supplemental",
+            "panels": {
+                "A_oncoplot": {
+                    "regenerated": "figures/oncoplot.png",
+                    "manuscript_hint": ["img_00", "img_01"],
+                },
+            }
+        },
+        "slide_14_EDF 10": {
+            "figure_id": "EDF 10",
+            "analysis": "04_human_scrnaseq",
+            "source": "supplemental",
+            "panels": {
+                "A_gsva": {
+                    "regenerated": "figures/gsva_heatmap.png",
+                    "manuscript_hint": ["img_03"],
+                },
+            }
+        },
     }
 
     from config import ANALYSIS_DIR
-    main_figs_dir = EXTRACTED_DIR / "figures" / "main"
 
     for slide_folder, mapping in FIGURE_MAPPING.items():
-        slide_path = main_figs_dir / slide_folder
+        # Determine source directory (main or supplemental)
+        source = mapping.get("source", "main")
+        figs_dir = EXTRACTED_DIR / "figures" / source
+        slide_path = figs_dir / slide_folder
         if not slide_path.exists():
             continue
 

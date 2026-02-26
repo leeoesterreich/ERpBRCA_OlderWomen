@@ -79,9 +79,10 @@ def load_output_statistics(fig_ref: str) -> dict:
                         if isinstance(val, (int, float)):
                             stats[f"p_value_{len(stats)}"] = float(val)
 
-            # Extract correlations
+            # Extract correlations (check for rho, corr, r columns)
             for col in df.columns:
-                if 'corr' in col.lower() or col.lower() == 'r':
+                col_lower = col.lower()
+                if 'corr' in col_lower or 'rho' in col_lower or col_lower == 'r' or col_lower == 'spearman':
                     for val in df[col].dropna():
                         if isinstance(val, (int, float)):
                             stats[f"correlation_{len(stats)}"] = float(val)
