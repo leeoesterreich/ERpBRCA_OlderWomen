@@ -57,42 +57,17 @@ cat("  Cells:", ncol(seurat_ey), "\n")
 # -----------------------------------------------------------------------------
 cat("\nStep 2: Loading gene sets...\n")
 
-# HALLMARK - select immune/inflammation related
+# HALLMARK - use ALL pathways (50 total) for better z-score range
 hallmark_sets <- msigdbr(species = "Homo sapiens", category = "H")
 hallmark_list <- split(hallmark_sets$gene_symbol, hallmark_sets$gs_name)
+cat("  HALLMARK pathways loaded:", length(hallmark_list), "\n")
 
-# Select key pathways from manuscript
-key_hallmark <- c(
-  "HALLMARK_TNFA_SIGNALING_VIA_NFKB",
-  "HALLMARK_TGF_BETA_SIGNALING",
-  "HALLMARK_INFLAMMATORY_RESPONSE",
-  "HALLMARK_INTERFERON_GAMMA_RESPONSE",
-  "HALLMARK_INTERFERON_ALPHA_RESPONSE",
-  "HALLMARK_IL6_JAK_STAT3_SIGNALING",
-  "HALLMARK_IL2_STAT5_SIGNALING",
-  "HALLMARK_COMPLEMENT",
-  "HALLMARK_ALLOGRAFT_REJECTION",
-  "HALLMARK_APOPTOSIS"
-)
-hallmark_subset <- hallmark_list[key_hallmark[key_hallmark %in% names(hallmark_list)]]
-
-# BIOCARTA
+# BIOCARTA - use ALL pathways
 biocarta_sets <- msigdbr(species = "Homo sapiens", category = "C2", subcategory = "CP:BIOCARTA")
 biocarta_list <- split(biocarta_sets$gene_symbol, biocarta_sets$gs_name)
+cat("  BIOCARTA pathways loaded:", length(biocarta_list), "\n")
 
-# Select key BIOCARTA pathways
-key_biocarta <- c(
-  "BIOCARTA_TNFR1_PATHWAY",
-  "BIOCARTA_TNFR2_PATHWAY",
-  "BIOCARTA_TGFB_PATHWAY",
-  "BIOCARTA_NFKB_PATHWAY",
-  "BIOCARTA_INFLAM_PATHWAY",
-  "BIOCARTA_IL6_PATHWAY",
-  "BIOCARTA_IL2_PATHWAY"
-)
-biocarta_subset <- biocarta_list[key_biocarta[key_biocarta %in% names(biocarta_list)]]
-
-all_pathways <- c(hallmark_subset, biocarta_subset)
+all_pathways <- c(hallmark_list, biocarta_list)
 cat("  Total pathways:", length(all_pathways), "\n")
 
 # -----------------------------------------------------------------------------
@@ -142,7 +117,13 @@ gsva_result <- gsva(
 
 cat("  GSVA result:", nrow(gsva_result), "pathways x", ncol(gsva_result), "groups\n")
 
-# Save raw scores
+# Per-pathway z-score normalization (row-wise) to expand range
+cat("  Applying per-pathway z-score normalization...\n")
+gsva_result <- t(scale(t(gsva_result)))
+cat("  Z-score range:", round(min(gsva_result, na.rm = TRUE), 2), "to",
+    round(max(gsva_result, na.rm = TRUE), 2), "\n")
+
+# Save normalized scores
 gsva_df <- as.data.frame(gsva_result) %>%
   tibble::rownames_to_column("pathway")
 fwrite(gsva_df, file.path(output_dir, "multicelltype_pathway_scores.csv"))

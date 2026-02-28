@@ -150,37 +150,44 @@ def find_figure_pairs() -> list[tuple]:
                 },
             }
         },
-        # Note: Fig. 7 panels A-D are from different analyses:
-        # - Panel A: MICA bulk deconvolution (01_human_bulk_rnaseq) - NOT scRNA-seq
-        # - Panel B-D: scRNA-seq (04_human_scrnaseq)
-        # The scRNA-seq UMAP shows cell types, matching panel B content
+        # Figure 4 Panel E: scRNA-seq estrogen pathway heatmap
+        # Legend: "Heatmap showing selected estrogen pathway enrichment in HSD17B7+
+        # cancer epithelial cells"
+        # img_07 shows: Estrogen response early/late, Cellular response to estrogen stimulus
+        # gsva_heatmap.png shows: Same pathways (HALLMARK_ESTROGEN_RESPONSE_EARLY/LATE, etc.)
+        # Structure differs: manuscript shows HSD17B7-/+ comparison, regenerated shows samples
+        "slide_04_Figure 4": {
+            "figure_id": "Fig. 4",
+            "analysis": "04_human_scrnaseq",
+            "source": "main",
+            "panels": {
+                "E_estrogen_pathways": {
+                    "regenerated": "figures/gsva_heatmap.png",
+                    "manuscript_hint": ["img_07"],  # Estrogen pathway heatmap
+                },
+            }
+        },
+        # Figure 7 panel mapping - Multi-cell-type scRNA-seq analysis
+        # Panels B, C, D use Wu et al. scRNA-seq data (GSE176078)
         "slide_07_Figure 7": {
             "figure_id": "Fig. 7",
             "analysis": "04_human_scrnaseq",
             "source": "main",
             "panels": {
-                # Panel B: Cell type UMAP showing transcriptomic differences
-                "B_celltypes": {
-                    "regenerated": "figures/umap_celltypes.png",
-                    "manuscript_hint": ["img_01", "img_02"],
+                # Panel B/C: Dual HALLMARK/BIOCARTA pathway heatmaps
+                "BC_pathway_heatmaps": {
+                    "regenerated": "figures/fig7bc_pathway_heatmaps.png",
+                    "manuscript_hint": ["img_02"],  # Dual heatmap panel
                 },
-                # Panel C: DEG/pathway analysis - GSVA heatmap
-                "C_pathways": {
-                    "regenerated": "figures/gsva_heatmap.png",
-                    "manuscript_hint": ["img_06", "img_07"],
-                },
-                # Panel D: Cell fractions comparison
-                "D_fractions": {
-                    "regenerated": "figures/fraction_boxplot.png",
-                    "manuscript_hint": ["img_08", "img_09"],
-                },
-                # PROGENy pathway activity
-                "E_progeny": {
-                    "regenerated": "figures/progeny_heatmap.png",
-                    "manuscript_hint": ["img_10", "img_11"],
+                # Panel D: CellPhoneDB dot plot (ligand-receptor communication)
+                # Manuscript explicitly uses CellPhoneDB, not CellChat
+                "D_communication": {
+                    "regenerated": "figures/fig7d_cellphonedb_dotplot.png",
+                    "manuscript_hint": ["img_01"],  # CellPhoneDB dot plot
                 },
             }
         },
+        # Note: Figure 7 Panels A (bulk deconvolution), E-I (spatial/mIHC) use different data
         # Supplemental figures (EDF = Extended Data Figure)
         "slide_02_EDF 2": {
             "figure_id": "EDF 2",

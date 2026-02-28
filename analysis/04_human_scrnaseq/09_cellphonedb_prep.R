@@ -78,12 +78,20 @@ prepare_cellphonedb <- function(seurat_subset, name) {
 
   # Prepare metadata
   cells_keep <- colnames(counts_filtered)
-  # FIX: Match cell names after hyphen replacement
-  original_cells <- gsub("_", "-", cells_keep)
+  # The original cells use underscores (CID3948_GGCTGGTAGGGCATGT)
+  # After line 66's gsub("-", "_", ...), cells_keep still has underscores
+  # So we match directly without conversion
+  original_cells <- gsub("_", "-", cells_keep)  # Convert back to original format
+
+  # Try both formats - some datasets use hyphens, some use underscores
+  matched_idx <- match(cells_keep, colnames(seurat_subset))
+  if (all(is.na(matched_idx))) {
+    matched_idx <- match(original_cells, colnames(seurat_subset))
+  }
 
   metadata <- data.frame(
     Cell = cells_keep,
-    cell_type = gsub("-|_|\\+", "", seurat_subset$CellTypeAnnot[match(original_cells, colnames(seurat_subset))])
+    cell_type = gsub("-|_|\\+", "", seurat_subset$CellTypeAnnot[matched_idx])
   )
 
   # FIX: Verify cell IDs match between counts and metadata
