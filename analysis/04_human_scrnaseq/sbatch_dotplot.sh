@@ -18,8 +18,9 @@ cd "$SCRIPT_DIR"
 source ~/.bashrc
 conda activate /ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/erp_brca_aging
 
-echo "Running CellPhoneDB dot plot..."
-Rscript 17_cellphonedb_dotplot.R
+MODE="${1:-top50}"
+echo "Running CellPhoneDB dot plot (mode: $MODE)..."
+Rscript 17_cellphonedb_dotplot.R --mode="$MODE"
 
 echo "Done"
 ls -la figures/fig7d*.png 2>/dev/null || echo "No output file found"

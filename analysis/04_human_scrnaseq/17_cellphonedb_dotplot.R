@@ -2,14 +2,22 @@
 # analysis/04_human_scrnaseq/17_cellphonedb_dotplot.R
 # Generate Figure 7D - CellPhoneDB comparative dot plot (Young vs Elderly)
 #
+# Usage:
+#   Rscript 17_cellphonedb_dotplot.R [--mode=top50|curated]
+#
+# Modes:
+#   top50   - Statistical filtering: top 50 L-R pairs by p-value (default)
+#   curated - Use curated cytokine/chemokine list from original manuscript
+#
 # Inputs:
 #   - outputs/cellphonedb/results_elderly/pvalues.csv
 #   - outputs/cellphonedb/results_elderly/means.csv
 #   - outputs/cellphonedb/results_young/pvalues.csv
 #   - outputs/cellphonedb/results_young/means.csv
+#   - outputs/curated_lr_pairs.txt (for curated mode)
 #
 # Outputs:
-#   - figures/fig7d_cellphonedb_dotplot.png
+#   - figures/fig7d_cellphonedb_dotplot.png (or _curated.png)
 
 set.seed(12345)
 
@@ -20,6 +28,22 @@ suppressPackageStartupMessages({
   library(data.table)
   library(RColorBrewer)
 })
+
+# -----------------------------------------------------------------------------
+# Parse command line arguments
+# -----------------------------------------------------------------------------
+args <- commandArgs(trailingOnly = TRUE)
+filter_mode <- "top50"  # default
+
+for (arg in args) {
+  if (grepl("^--mode=", arg)) {
+    filter_mode <- sub("^--mode=", "", arg)
+  }
+}
+
+if (!filter_mode %in% c("top50", "curated")) {
+  stop("Invalid mode. Use --mode=top50 or --mode=curated")
+}
 
 get_script_dir <- function() {
   args <- commandArgs(trailingOnly = FALSE)
@@ -36,6 +60,7 @@ figures_dir <- file.path(script_dir, "figures")
 dir.create(figures_dir, showWarnings = FALSE, recursive = TRUE)
 
 cat("=== CellPhoneDB Comparative Dot Plot (Figure 7D) ===\n")
+cat(sprintf("Filter mode: %s\n", filter_mode))
 
 # -----------------------------------------------------------------------------
 # Step 1: Load CellPhoneDB results for both age groups
@@ -138,23 +163,65 @@ immune_data <- all_data %>%
 
 cat(sprintf("  Immune-relevant: %d rows\n", nrow(immune_data)))
 
-# Find L-R pairs significant in at least one age group
-sig_lr_pairs <- immune_data %>%
-  filter(!is.na(pvalue) & pvalue < 0.05) %>%
-  group_by(interacting_pair) %>%
-  summarise(
-    n_sig = n(),
-    n_young_sig = sum(age_group == "Young"),
-    n_elderly_sig = sum(age_group == "Elderly"),
-    min_pval = min(pvalue, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  # For macrophage-focused analysis, include pairs significant in either group
-  filter(n_sig >= 1) %>%
-  arrange(min_pval) %>%
-  head(50)  # Top 50 L-R pairs
+# -----------------------------------------------------------------------------
+# L-R pair selection based on filter_mode
+# -----------------------------------------------------------------------------
+if (filter_mode == "curated") {
+  # Load curated L-R pairs (CellPhoneDB-compatible names)
+  curated_file <- file.path(script_dir, "outputs/curated_lr_pairs.txt")
+  if (!file.exists(curated_file)) {
+    stop("Curated L-R pairs file not found: ", curated_file)
+  }
 
-cat(sprintf("  Significant L-R pairs: %d\n", nrow(sig_lr_pairs)))
+  curated_pairs <- readLines(curated_file)
+  # Remove comments and empty lines
+  curated_pairs <- curated_pairs[!grepl("^#", curated_pairs) & nchar(trimws(curated_pairs)) > 0]
+  curated_pairs <- trimws(curated_pairs)
+
+  cat(sprintf("  Loaded %d curated L-R pairs\n", length(curated_pairs)))
+
+  # Direct matching - curated list uses CellPhoneDB naming convention
+  sig_lr_pairs <- immune_data %>%
+    filter(interacting_pair %in% curated_pairs) %>%
+    filter(!is.na(pvalue) & pvalue < 0.05) %>%
+    group_by(interacting_pair) %>%
+    summarise(
+      n_sig = n(),
+      n_young_sig = sum(age_group == "Young"),
+      n_elderly_sig = sum(age_group == "Elderly"),
+      min_pval = min(pvalue, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    filter(n_sig >= 1) %>%
+    arrange(min_pval)
+
+  cat(sprintf("  Matched curated L-R pairs: %d\n", nrow(sig_lr_pairs)))
+
+  # Also show which curated pairs were NOT found (for debugging)
+  missing_pairs <- setdiff(curated_pairs, sig_lr_pairs$interacting_pair)
+  if (length(missing_pairs) > 0) {
+    cat(sprintf("  Note: %d curated pairs not significant in Macrophage-immune data\n", length(missing_pairs)))
+  }
+
+} else {
+  # Default: top50 mode - statistical filtering
+  sig_lr_pairs <- immune_data %>%
+    filter(!is.na(pvalue) & pvalue < 0.05) %>%
+    group_by(interacting_pair) %>%
+    summarise(
+      n_sig = n(),
+      n_young_sig = sum(age_group == "Young"),
+      n_elderly_sig = sum(age_group == "Elderly"),
+      min_pval = min(pvalue, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    # For macrophage-focused analysis, include pairs significant in either group
+    filter(n_sig >= 1) %>%
+    arrange(min_pval) %>%
+    head(50)  # Top 50 L-R pairs
+}
+
+cat(sprintf("  Selected L-R pairs: %d\n", nrow(sig_lr_pairs)))
 
 # Find top cell pairs with most interactions
 sig_cell_pairs <- immune_data %>%
@@ -245,16 +312,18 @@ p <- ggplot(plot_data, aes(x = cell_pair_age, y = interacting_pair)) +
   labs(
     x = "Cell type pairs",
     y = "Ligand-Receptor pairs",
-    title = "CellPhoneDB: Macrophage-Adaptive Immune Communication"
+    title = sprintf("CellPhoneDB: Macrophage-Adaptive Immune Communication (%s)",
+                    ifelse(filter_mode == "curated", "Curated Cytokines/Chemokines", "Top 50 by p-value"))
   )
 
-# Save
-output_file <- file.path(figures_dir, "fig7d_cellphonedb_dotplot.png")
+# Save with mode-specific filename
+mode_suffix <- ifelse(filter_mode == "curated", "_curated", "")
+output_file <- file.path(figures_dir, sprintf("fig7d_cellphonedb_dotplot%s.png", mode_suffix))
 ggsave(output_file, p, width = 14, height = 12, dpi = 300)
 cat(sprintf("  Saved: %s\n", output_file))
 
 # Also save as PDF
-pdf_file <- file.path(figures_dir, "fig7d_cellphonedb_dotplot.pdf")
+pdf_file <- file.path(figures_dir, sprintf("fig7d_cellphonedb_dotplot%s.pdf", mode_suffix))
 ggsave(pdf_file, p, width = 14, height = 12)
 cat(sprintf("  Saved: %s\n", pdf_file))
 
@@ -280,8 +349,8 @@ summary_df <- plot_data %>%
   ) %>%
   arrange(pmin(min_pval_Younger, min_pval_Older, na.rm = TRUE))
 
-output_csv <- file.path(script_dir, "outputs", "cellphonedb_summary.csv")
+output_csv <- file.path(script_dir, "outputs", sprintf("cellphonedb_summary%s.csv", mode_suffix))
 fwrite(summary_df, output_csv)
 cat(sprintf("  Saved: %s\n", output_csv))
 
-cat("\n=== CellPhoneDB comparative dot plot complete ===\n")
+cat(sprintf("\n=== CellPhoneDB comparative dot plot complete (mode: %s) ===\n", filter_mode))
