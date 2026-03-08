@@ -3,6 +3,9 @@
 Run CellPhoneDB analysis for Elderly and Young age groups.
 Uses CellPhoneDB Python API since CLI may not be in PATH.
 
+Usage:
+    python 16_run_cellphonedb.py [--db-path /path/to/cellphonedb.zip]
+
 Inputs:
     outputs/cellphonedb/counts_*.txt
     outputs/cellphonedb/metadata_*.txt
@@ -12,6 +15,7 @@ Outputs:
     outputs/cellphonedb/results_young/
 """
 
+import argparse
 import os
 from pathlib import Path
 import pandas as pd
@@ -23,8 +27,11 @@ from cellphonedb.src.core.methods import cpdb_statistical_analysis_method
 SCRIPT_DIR = Path(__file__).parent
 INPUT_DIR = SCRIPT_DIR / "outputs" / "cellphonedb"
 DB_DIR = INPUT_DIR / "db"
-CPDB_FILE = DB_DIR / "cellphonedb.zip"
+DEFAULT_CPDB_FILE = DB_DIR / "cellphonedb.zip"
 os.makedirs(INPUT_DIR, exist_ok=True)
+
+# Global variable for database path (set by argparse)
+CPDB_FILE = DEFAULT_CPDB_FILE
 
 
 def run_cellphonedb(group_name: str):
@@ -63,6 +70,15 @@ def run_cellphonedb(group_name: str):
         print("ERROR: Need at least 2 cell types for CellPhoneDB")
         return False
 
+    # FIX: Write filtered metadata to temp file so CellPhoneDB uses filtered data
+    import tempfile
+    filtered_meta_path = Path(tempfile.mktemp(
+        suffix=f'_metadata_{group_name}.txt',
+        dir=str(INPUT_DIR)
+    ))
+    meta_df.to_csv(filtered_meta_path, sep='\t', index=False)
+    print(f"  Wrote filtered metadata to: {filtered_meta_path.name}")
+
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
 
@@ -71,10 +87,10 @@ def run_cellphonedb(group_name: str):
     print(f"Output: {output_dir}")
 
     try:
-        # Call CellPhoneDB
+        # Call CellPhoneDB with FILTERED metadata
         cpdb_results = cpdb_statistical_analysis_method.call(
             cpdb_file_path=str(CPDB_FILE),  # Use downloaded database
-            meta_file_path=str(meta_file),
+            meta_file_path=str(filtered_meta_path),  # FIX: Use filtered metadata
             counts_file_path=str(counts_file),
             counts_data='gene_name',
             output_path=str(output_dir),
@@ -104,11 +120,39 @@ def run_cellphonedb(group_name: str):
         traceback.print_exc()
         return False
 
+    finally:
+        # Cleanup temp metadata file
+        if filtered_meta_path.exists():
+            filtered_meta_path.unlink()
+            print(f"  Cleaned up temp metadata file")
+
 
 def main():
+    global CPDB_FILE
+
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(
+        description="Run CellPhoneDB analysis for Elderly and Young age groups"
+    )
+    parser.add_argument(
+        "--db-path",
+        type=str,
+        default=str(DEFAULT_CPDB_FILE),
+        help=f"Path to CellPhoneDB database zip file (default: {DEFAULT_CPDB_FILE})"
+    )
+    args = parser.parse_args()
+
+    # Set database path from argument
+    CPDB_FILE = Path(args.db_path)
+    if not CPDB_FILE.exists():
+        print(f"ERROR: CellPhoneDB database not found: {CPDB_FILE}")
+        print("Download with: cellphonedb database download --local-path <dir>")
+        return 1
+
     print("=" * 60)
     print("CellPhoneDB Analysis Pipeline")
     print("=" * 60)
+    print(f"Database: {CPDB_FILE}")
 
     # Run for both age groups
     results = {}

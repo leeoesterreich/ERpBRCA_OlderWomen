@@ -149,17 +149,20 @@ cat(sprintf("  Combined data: %d rows\n", nrow(all_data)))
 # -----------------------------------------------------------------------------
 cat("\nStep 3: Identifying significant interactions...\n")
 
-# Focus on MACROPHAGE communication with ADAPTIVE IMMUNE cells
-# Per manuscript legend: "macrophages from older patients have less communication
-# with adaptive immune cells compared to macrophages from younger patients"
-adaptive_immune <- c("T cells", "Tcells", "Bcells", "NK", "NKT", "Plasma")
+# Focus on MACROPHAGE as SENDER only (manuscript Figure 7D)
+# Exact target names from CellPhoneDB output (with spaces)
+target_pairs <- c(
+  "Macrophage|Bcells",
+  "Macrophage|Cycling Tcells",
+  "Macrophage|NK cells",
+  "Macrophage|NKT cells",
+  "Macrophage|T cells CD4",
+  "Macrophage|T cells CD8"
+)
 
-# Filter to Macrophage | AdaptiveImmune OR AdaptiveImmune | Macrophage pairs
+# Filter to exact Macrophage|Target pairs
 immune_data <- all_data %>%
-  filter(
-    (grepl("Macrophage", cell_pair, ignore.case = TRUE) &
-     grepl(paste(adaptive_immune, collapse = "|"), cell_pair, ignore.case = TRUE))
-  )
+  filter(cell_pair %in% target_pairs)
 
 cat(sprintf("  Immune-relevant: %d rows\n", nrow(immune_data)))
 
@@ -180,9 +183,52 @@ if (filter_mode == "curated") {
 
   cat(sprintf("  Loaded %d curated L-R pairs\n", length(curated_pairs)))
 
-  # Direct matching - curated list uses CellPhoneDB naming convention
+  # FIX: Normalize L-R pair names to handle ordering differences (CD74_APP vs APP_CD74)
+  # CellPhoneDB v5 may output pairs in different order than manuscript naming
+  normalize_lr_pair <- function(pair) {
+    # Handle complex names: remove common prefixes, normalize delimiters
+    pair <- gsub("integrin_", "", pair, ignore.case = TRUE)
+    pair <- gsub(" ", "_", pair)
+    pair <- toupper(pair)
+    # Sort components alphabetically to normalize A_B vs B_A
+    parts <- strsplit(pair, "_")[[1]]
+    if (length(parts) == 2) {
+      return(paste(sort(parts), collapse = "_"))
+    }
+    # For complex pairs (3+ parts), keep as-is
+    return(pair)
+  }
+
+  # Create normalized lookup table for CellPhoneDB output
+  cpdb_pairs <- unique(immune_data$interacting_pair)
+  cpdb_normalized <- sapply(cpdb_pairs, normalize_lr_pair)
+  names(cpdb_normalized) <- cpdb_pairs
+
+  # Match curated pairs to CellPhoneDB output (try both orderings)
+  matched_pairs <- character(0)
+  for (cp in curated_pairs) {
+    cp_norm <- normalize_lr_pair(cp)
+    # Find matching CPDB pair by normalized name
+    matches <- names(cpdb_normalized)[cpdb_normalized == cp_norm]
+    if (length(matches) > 0) {
+      matched_pairs <- c(matched_pairs, matches[1])
+    }
+  }
+  matched_pairs <- unique(matched_pairs)
+  cat(sprintf("  Matched %d curated pairs via normalization\n", length(matched_pairs)))
+
+  # Show unmatched curated pairs for debugging
+  curated_normalized <- sapply(curated_pairs, normalize_lr_pair)
+  unmatched_curated <- curated_pairs[!curated_normalized %in% cpdb_normalized]
+  if (length(unmatched_curated) > 0 && length(unmatched_curated) <= 10) {
+    cat(sprintf("  Unmatched curated pairs: %s\n", paste(unmatched_curated, collapse = ", ")))
+  } else if (length(unmatched_curated) > 10) {
+    cat(sprintf("  %d curated pairs not found in CellPhoneDB output\n", length(unmatched_curated)))
+  }
+
+  # Filter using matched pairs (not original curated_pairs)
   sig_lr_pairs <- immune_data %>%
-    filter(interacting_pair %in% curated_pairs) %>%
+    filter(interacting_pair %in% matched_pairs) %>%
     filter(!is.na(pvalue) & pvalue < 0.05) %>%
     group_by(interacting_pair) %>%
     summarise(
@@ -218,26 +264,28 @@ if (filter_mode == "curated") {
     # For macrophage-focused analysis, include pairs significant in either group
     filter(n_sig >= 1) %>%
     arrange(min_pval) %>%
-    head(50)  # Top 50 L-R pairs
+    head(40)  # Top 40 L-R pairs (match manuscript ~40 rows)
 }
+
+# NOTE: Manuscript used a different CellPhoneDB database version with different L-R pair names
+# Our regenerated figure uses current CellPhoneDB v5 naming conventions
+# The biological patterns (Macrophage-immune communication by age) should be comparable
 
 cat(sprintf("  Selected L-R pairs: %d\n", nrow(sig_lr_pairs)))
 
-# Find top cell pairs with most interactions
+# Use ALL Macrophage|target cell pairs (manuscript shows all 12: 6 targets × 2 age groups)
 sig_cell_pairs <- immune_data %>%
-  filter(!is.na(pvalue) & pvalue < 0.05,
+  filter(!is.na(pvalue),
          interacting_pair %in% sig_lr_pairs$interacting_pair) %>%
-  group_by(cell_pair) %>%
-  summarise(n_interactions = n(), .groups = "drop") %>%
-  arrange(desc(n_interactions)) %>%
-  head(15)  # Top 15 cell pairs
+  distinct(cell_pair) %>%
+  pull(cell_pair)
 
-cat(sprintf("  Top cell pairs: %d\n", nrow(sig_cell_pairs)))
+cat(sprintf("  Cell pairs: %d\n", length(sig_cell_pairs)))
 
 # Create final plot data
 plot_data <- immune_data %>%
   filter(interacting_pair %in% sig_lr_pairs$interacting_pair,
-         cell_pair %in% sig_cell_pairs$cell_pair) %>%
+         cell_pair %in% sig_cell_pairs) %>%
   mutate(
     neg_log_pval = -log10(pvalue + 1e-10),
     neg_log_pval = pmin(neg_log_pval, 3),  # Cap at 3 to match manuscript scale
@@ -276,56 +324,78 @@ lr_order <- plot_data %>%
 
 plot_data$interacting_pair <- factor(plot_data$interacting_pair, levels = lr_order)
 
-# Order cell pairs: group by base pair, then by age (Younger before Older)
+# FIX: Order cell pairs by age using explicit factor levels (not alphabetical)
+# "Younger" should appear BEFORE "Older" for each cell pair
 plot_data <- plot_data %>%
+  mutate(age_label = factor(age_label, levels = c("Younger", "Older"))) %>%
   arrange(cell_pair, age_label)
 
-# Create ordered factor for cell_pair_age
+# Create ordered factor for cell_pair_age (preserves Younger-before-Older ordering)
 cell_pair_age_order <- unique(plot_data$cell_pair_age)
 plot_data$cell_pair_age <- factor(plot_data$cell_pair_age, levels = cell_pair_age_order)
 
-# Create single-panel dot plot (no faceting) - matches manuscript structure
+# Create CellPhoneDB-style dot plot matching manuscript Figure 7D EXACTLY
+# Key features: dense layout, top x-axis labels, blue-yellow-red gradient, SOLID dots
 p <- ggplot(plot_data, aes(x = cell_pair_age, y = interacting_pair)) +
-  geom_point(aes(size = neg_log_pval, color = log2_mean_plot), na.rm = TRUE) +
+  geom_point(aes(size = neg_log_pval, color = log2_mean_plot), na.rm = TRUE) +  # SOLID dots, no outline
   scale_size_continuous(
-    name = "-log10(p-value)",
-    range = c(0.5, 5),
-    breaks = c(1, 2, 3),
-    limits = c(0, 3)
+    name = expression(-log[10](p-value)),
+    range = c(2, 8),  # Larger dots like manuscript
+    breaks = c(0, 1, 2, 3),
+    limits = c(0, 3),
+    guide = guide_legend(order = 1)
   ) +
   scale_color_gradientn(
-    name = "Log2 mean",
-    colors = c("blue", "yellow", "red"),
+    name = expression(Log[2]~mean~(Molecule~1~","~Molecule~2)),
+    colors = c("#2166AC", "#4393C3", "#92C5DE", "#D1E5F0", "#F7F7F7",
+               "#FDDBC7", "#F4A582", "#D6604D", "#B2182B"),  # RdBu diverging
     na.value = "grey90",
-    limits = c(-1, 5)
+    limits = c(-10, 5),  # Manuscript range: -10 to +5
+    guide = guide_colorbar(order = 2, barheight = unit(4, "cm"))
   ) +
+  scale_x_discrete(position = "top") +  # X-axis labels on TOP (manuscript style)
   theme_minimal(base_size = 10) +
   theme(
-    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7),
-    axis.text.y = element_text(size = 6),
-    axis.title = element_text(size = 10),
-    panel.grid.major = element_line(color = "grey90", linewidth = 0.25),
+    # X-axis: rotated labels on top - LARGER font
+    axis.text.x.top = element_text(angle = 90, hjust = 0, vjust = 0.5, size = 9, color = "black"),
+    axis.text.x.bottom = element_blank(),
+    axis.ticks.x.bottom = element_blank(),
+    # Y-axis: L-R pair names - LARGER font
+    axis.text.y = element_text(size = 8, color = "black"),
+    axis.title = element_blank(),
+    # Grid: very subtle
+    panel.grid.major = element_line(color = "grey90", linewidth = 0.15),
     panel.grid.minor = element_blank(),
+    # Panel border (manuscript has box around plot area)
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
+    # Background
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    # Legend: right side
     legend.position = "right",
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 12)
-  ) +
-  labs(
-    x = "Cell type pairs",
-    y = "Ligand-Receptor pairs",
-    title = sprintf("CellPhoneDB: Macrophage-Adaptive Immune Communication (%s)",
-                    ifelse(filter_mode == "curated", "Curated Cytokines/Chemokines", "Top 50 by p-value"))
+    legend.box = "vertical",
+    legend.title = element_text(size = 9),
+    legend.text = element_text(size = 8),
+    legend.key.size = unit(0.5, "cm"),
+    # Tight margins for dense look
+    plot.margin = margin(5, 5, 5, 5, "pt")
   )
 
-# Save with mode-specific filename
+# Save with mode-specific filename - PORTRAIT orientation like manuscript
 mode_suffix <- ifelse(filter_mode == "curated", "_curated", "")
 output_file <- file.path(figures_dir, sprintf("fig7d_cellphonedb_dotplot%s.png", mode_suffix))
-ggsave(output_file, p, width = 14, height = 12, dpi = 300)
+ggsave(output_file, p, width = 8, height = 14, dpi = 300)  # Portrait: taller than wide
 cat(sprintf("  Saved: %s\n", output_file))
 
 # Also save as PDF
 pdf_file <- file.path(figures_dir, sprintf("fig7d_cellphonedb_dotplot%s.pdf", mode_suffix))
-ggsave(pdf_file, p, width = 14, height = 12)
+ggsave(pdf_file, p, width = 8, height = 14)
 cat(sprintf("  Saved: %s\n", pdf_file))
+
+# Also save as SVG
+svg_file <- file.path(figures_dir, sprintf("fig7d_cellphonedb_dotplot%s.svg", mode_suffix))
+ggsave(svg_file, p, width = 8, height = 14, device = "svg")
+cat(sprintf("  Saved: %s\n", svg_file))
 
 # -----------------------------------------------------------------------------
 # Step 5: Save summary statistics

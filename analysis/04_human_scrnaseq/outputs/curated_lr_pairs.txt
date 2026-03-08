@@ -1,53 +1,44 @@
-# Curated L-R pairs for Figure 7D (CellPhoneDB-compatible names)
-# Based on original manuscript categories, mapped to CellPhoneDB nomenclature
+# Curated L-R pairs for Figure 7D - EXTRACTED FROM MANUSCRIPT
+# These are the EXACT L-R pair names as shown in the manuscript figure
+# 40 interactions total
 #
-# Categories:
-# - Chemokines (CCL, CXCL)
-# - Interleukins (IL signaling)
-# - NOTCH signaling (DLL, JAG)
-# - HLA/MHC (HLA-E, HLA-F, HLA-G)
-# - Growth factors (EGFR ligands)
-# - Other immune (AXL, CD74)
-#
-# Chemokines
-CCL19_CCR7
-CCL21_CCR7
-CCL20_CCR6
-CCL2_ACKR1
-CCL5_ACKR1
+AXL_IL15RA
+CCL22_CCR4
+CCL3_CCR1
+CCL3_CCR5
+CCL3L1_IDE
+CCL4_CCR5
+CCL4_CCR8
+CCL4_GPRC5D
+CD74_APP
+COL22A1_a10b1 complex
+COL22A1_a11b1 complex
+COL22A1_a1b1 complex
+COL22A1_a2b1 complex
 CXCL10_CXCR3
 CXCL10_DPP4
-CXCL11_CXCR3
-CXCL12_CXCR4
-CXCL9_CXCR3
-CXCL16_CXCR6
-# Interleukins
-IL10_IL10_receptor
-IL15_IL15_receptor
-IL1B_IL1_receptor
-IL21_IL21_receptor
-IL6_IL6_receptor
-IL7_IL7_receptor
-IL34_CSF1R
-# NOTCH signaling
-DLL1_NOTCH1
-DLL1_NOTCH2
-DLL4_NOTCH1
-DLL4_NOTCH2
-JAG1_NOTCH1
-JAG1_NOTCH2
-JAG2_NOTCH1
-JAG2_NOTCH2
-# HLA/MHC
-HLA-E_KLRC1
-HLA-E_KLRC2
-HLA-E_CD94:NKG2A
-HLA-F_LILRB1
-HLA-G_LILRB1
-# Growth factors
-AREG_EGFR
-EGF_EGFR
-HBEGF_EGFR
-# Other immune-relevant
-GAS6_AXL
-APP_CD74
+EGFR_AREG
+GMCSFR_CSF2
+GPR75_CCL5
+GRN_SORT1
+HLA-C_FAM3C
+HLA-DPA1_GAL
+HLA-DPA1_TNFSF9
+HLA-DPB1_NRG1
+HLA-DPB1_TNFSF13B
+HLA-DRB1_OGN
+IL1 receptor inhibitor_IL1A
+IL1 receptor_IL1A
+IL15 receptor_IL15
+IL15_IL15RA
+IL21 receptor_IL21
+IL2RB_IL15
+IL2RG_IL15
+IL35_IL35 receptor
+L1CAM_a5b1 complex
+L1CAM_L1CAM
+NOTCH1_DLL3
+NOTCH2_DLL3
+NOTCH4_DLL3
+S100A11_AGER
+TNFRSF1A_GRN

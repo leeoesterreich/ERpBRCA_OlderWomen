@@ -1,0 +1,6 @@
+"pathway","younger_mean","older_mean","diff","direction"
+"ESTROGEN_RESPONSE_EARLY",0.0359,0.031,-0.005,"Younger > Older"
+"ESTROGEN_RESPONSE_LATE",0.0318,0.0088,-0.023,"Younger > Older"
+"INFLAMMATORY_RESPONSE",-0.1128,-0.0531,0.0597,"Older > Younger"
+"INTERFERON_GAMMA_RESPONSE",-0.0969,-0.1655,-0.0687,"Younger > Older"
+"TNFA_SIGNALING_VIA_NFKB",-0.209,-0.0504,0.1587,"Older > Younger"
