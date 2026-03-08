@@ -98,7 +98,20 @@ biocarta_sets <- msigdbr(species = "Homo sapiens", category = "C2", subcategory 
 biocarta_list <- split(biocarta_sets$gene_symbol, biocarta_sets$gs_name)
 cat("  BIOCARTA pathways loaded:", length(biocarta_list), "\n")
 
-all_pathways <- c(hallmark_list, biocarta_list)
+# Add LI_ESTROGENE E2 response signatures from local GMT files
+gmt_dir <- file.path(normalizePath(file.path(script_dir, "../..")), "data", "gmt")
+parse_gmt <- function(path) {
+  line <- readLines(path, n = 1)
+  fields <- strsplit(line, "\t")[[1]]
+  fields[-(1:2)]  # skip name and URL
+}
+li_estrogene_list <- list(
+  LI_ESTROGENE_EARLY_E2_RESPONSE_UP = parse_gmt(file.path(gmt_dir, "LI_ESTROGENE_EARLY_E2_RESPONSE_UP.v2025.1.Hs.gmt")),
+  LI_ESTROGENE_LATE_E2_RESPONSE_UP = parse_gmt(file.path(gmt_dir, "LI_ESTROGENE_LATE_E2_RESPONSE_UP.v2025.1.Hs.gmt"))
+)
+cat("  LI_ESTROGENE pathways loaded:", length(li_estrogene_list), "\n")
+
+all_pathways <- c(hallmark_list, biocarta_list, li_estrogene_list)
 cat("  Total pathways:", length(all_pathways), "\n")
 
 # -----------------------------------------------------------------------------
@@ -231,8 +244,8 @@ category_counts <- table(row_categories$Category)[category_order]
 category_counts <- category_counts[!is.na(category_counts) & category_counts > 0]
 gaps_row <- cumsum(category_counts)[-length(category_counts)]
 
-# Split into HALLMARK and BIOCARTA
-hallmark_cols <- grep("^HALLMARK_", colnames(gsva_t), value = TRUE)
+# Split into HALLMARK (+ LI_ESTROGENE) and BIOCARTA
+hallmark_cols <- grep("^(HALLMARK_|LI_ESTROGENE_)", colnames(gsva_t), value = TRUE)
 biocarta_cols <- grep("^BIOCARTA_", colnames(gsva_t), value = TRUE)
 
 # -----------------------------------------------------------------------------
@@ -295,7 +308,9 @@ if (pathway_mode == "divergent") {
     "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION",
     "HALLMARK_ANGIOGENESIS",
     "HALLMARK_HYPOXIA",
-    "HALLMARK_APOPTOSIS"
+    "HALLMARK_APOPTOSIS",
+    "LI_ESTROGENE_EARLY_E2_RESPONSE_UP",
+    "LI_ESTROGENE_LATE_E2_RESPONSE_UP"
   )
 
   biocarta_curated <- c(
@@ -345,7 +360,7 @@ gsva_hallmark <- gsva_t[, hallmark_keep, drop = FALSE]
 gsva_biocarta <- gsva_t[, biocarta_keep, drop = FALSE]
 
 # Clean column names for display
-colnames(gsva_hallmark) <- gsub("^HALLMARK_", "", colnames(gsva_hallmark))
+colnames(gsva_hallmark) <- gsub("^(HALLMARK_|LI_ESTROGENE_)", "", colnames(gsva_hallmark))
 colnames(gsva_hallmark) <- gsub("_", " ", colnames(gsva_hallmark))
 colnames(gsva_biocarta) <- gsub("^BIOCARTA_", "", colnames(gsva_biocarta))
 colnames(gsva_biocarta) <- gsub("_", " ", colnames(gsva_biocarta))
