@@ -1,0 +1,6 @@
+outputs/
+figures/
+logs/
+__pycache__/
+*.h5ad
+*.pkl

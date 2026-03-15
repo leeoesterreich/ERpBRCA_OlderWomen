@@ -27,7 +27,9 @@ This repository contains all analysis code for the study examining how the aged 
 │   ├── 03_comparison/           # Cross-species comparison
 │   ├── 03_rat_wes/              # Rat whole exome sequencing
 │   ├── 04_human_scrnaseq/       # Human ER+ scRNA-seq (Wu et al.)
-│   └── 05_rat_bulk_rnaseq/      # Rat mammary tumor bulk RNA-seq
+│   ├── 05_rat_bulk_rnaseq/      # Rat mammary tumor bulk RNA-seq
+│   ├── 06_spatial_biopsies/     # Spatial biopsy immune analysis
+│   └── 07_organoid_single_cell/ # Organoid scRNA-seq (HSD17B7 inhibitor)
 ├── data/                         # Data download scripts (GEO)
 ├── figures/                      # Generated figures
 ├── results/                      # Analysis outputs
