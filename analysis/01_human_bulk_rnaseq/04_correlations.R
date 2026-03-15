@@ -60,12 +60,14 @@ progeny_file <- file.path(output_dir, "progeny_pathway_activity.rds")
 gsva_file <- file.path(output_dir, "gsva_estrogen_pathways.rds")
 sample_file <- file.path(output_dir, "sample_annotation.rds")
 tpm_file <- file.path(data_dir, "raw/HumanERpAge_39404g168s_TPMlog2.txt")
+gene_annot_file <- file.path(data_dir, "external/Homo_sapiens.gene_info.txt")
 
 # Check all input files exist
 check_file_exists(progeny_file, "PROGENy pathway activity")
 check_file_exists(gsva_file, "GSVA results")
 check_file_exists(sample_file, "Sample annotation")
 check_file_exists(tpm_file, "TPM data")
+check_file_exists(gene_annot_file, "Gene annotation file")
 
 pathway_activity <- readRDS(progeny_file)
 gsva_result <- readRDS(gsva_file)
@@ -75,6 +77,16 @@ sample_annot <- readRDS(sample_file)
 tpm_data <- fread(tpm_file, stringsAsFactors = FALSE, header = TRUE)
 colnames(tpm_data)[1] <- "GeneSymb"
 colnames(tpm_data) <- gsub("_LEE.*", "", colnames(tpm_data))
+
+# Filter to protein-coding genes (consistent with 03_run_progeny.R)
+gene_annot <- fread(gene_annot_file, header = TRUE, stringsAsFactors = FALSE)
+prot_coding <- gene_annot %>%
+  filter(type_of_gene == "protein-coding", !grepl("^LOC\\d+", Symbol)) %>%
+  pull(Symbol)
+
+tpm_data <- tpm_data %>%
+  filter(GeneSymb %in% prot_coding)
+cat("  Filtered to protein-coding genes:", nrow(tpm_data), "\n")
 
 # -----------------------------------------------------------------------------
 # Step 2: Define Genes and Pathways of Interest

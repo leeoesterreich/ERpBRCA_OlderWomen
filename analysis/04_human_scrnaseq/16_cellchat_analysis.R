@@ -44,7 +44,7 @@ cat("=== CellChat Analysis (Figure 7D) ===\n")
 # -----------------------------------------------------------------------------
 cat("Step 1: Loading data...\n")
 
-seurat_file <- file.path(output_dir, "macrophage_seurat.rds")
+seurat_file <- file.path(output_dir, "seurat_annotated.rds")
 seurat_obj <- readRDS(seurat_file)
 
 cat("  Total cells:", ncol(seurat_obj), "\n")
@@ -157,7 +157,7 @@ if (!is.null(macro_elderly) && !is.null(macro_young)) {
 }
 
 # -----------------------------------------------------------------------------
-# Step 5: Generate Figure 7D - Dot Plot
+# Step 5: Generate Figure 7D - Dot Plot (Manuscript-matched styling)
 # -----------------------------------------------------------------------------
 cat("\nStep 5: Generating Figure 7D...\n")
 
@@ -174,20 +174,43 @@ cat("  Source cell types (Macrophage/Monocyte):", paste(macro_types, collapse = 
 cat("  Target cell types (T/NK cells):", paste(tcell_types, collapse = ", "), "\n")
 
 if (length(macro_types) > 0 && length(tcell_types) > 0) {
-  # Generate dot plot - capture ggplot object and save explicitly
+  # Generate dot plot with manuscript-matching styling
+  # Use all available signaling pathways (no filtering) for robustness
   p <- netVisual_bubble(cellchat_merged,
                         sources.use = macro_types,
                         targets.use = tcell_types,
                         comparison = c(1, 2),
                         angle.x = 45,
                         remove.isolate = TRUE,
-                        title.name = "Macrophage/Monocyte -> T/NK Cell Communication",
+                        color.heatmap = "Spectral", # Available options: Spectral or viridis
+                        font.size = 10,             # Readable fonts
+                        font.size.title = 14,
+                        line.on = TRUE,             # Vertical separator line
+                        line.size = 0.5,
+                        grid.on = TRUE,
+                        title.name = "Macrophage → T/NK Cell Communication",
                         return.data = FALSE)
+
+  # Apply additional ggplot2 theme for publication quality
+  p <- p + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    axis.text.x = element_text(size = 10, color = "black"),
+    axis.text.y = element_text(size = 10, color = "black"),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9),
+    panel.background = element_rect(fill = "white"),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
 
   # Save using ggsave for reliable output
   ggsave(file.path(figures_dir, "fig7d_cellchat_dotplot.png"),
-         plot = p, width = 14, height = 12, dpi = 300)
+         plot = p, width = 12, height = 10, dpi = 300, bg = "white")
   cat("  Saved fig7d_cellchat_dotplot.png\n")
+
+  # Also save as PDF for vector graphics
+  ggsave(file.path(figures_dir, "fig7d_cellchat_dotplot.pdf"),
+         plot = p, width = 12, height = 10, bg = "white")
+  cat("  Saved fig7d_cellchat_dotplot.pdf\n")
 } else {
   cat("  WARNING: Could not find matching cell types for dot plot\n")
 }

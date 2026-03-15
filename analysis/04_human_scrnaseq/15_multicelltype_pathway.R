@@ -1,20 +1,21 @@
 #!/usr/bin/env Rscript
 # analysis/04_human_scrnaseq/15_multicelltype_pathway.R
-# HALLMARK/BIOCARTA pathway enrichment per cell type
+# HALLMARK/BIOCARTA pathway enrichment per cell type with per-patient pseudo-bulk
 # Generates Figure 7 Panels B/C - dual pathway activity heatmaps
+#
+# Approach: For each cell type, create pseudo-bulk per PATIENT (not per age group),
+# run GSVA across all patients within that cell type, then compare Young vs Elderly
+# with Wilcoxon tests. This preserves patient-level replication.
 #
 # Usage:
 #   Rscript 15_multicelltype_pathway.R [--mode=curated|divergent] [--n-pathways=12]
-#
-# Modes:
-#   curated   - Use hardcoded curated pathway list from manuscript (default)
-#   divergent - Select top N pathways by Young vs Elderly z-score difference
 #
 # Inputs:
 #   - analysis/04_human_scrnaseq/outputs/macrophage_seurat.rds
 #
 # Outputs:
 #   - analysis/04_human_scrnaseq/outputs/multicelltype_pathway_scores.csv
+#   - analysis/04_human_scrnaseq/outputs/multicelltype_pathway_stats.csv
 #   - analysis/04_human_scrnaseq/figures/fig7bc_pathway_heatmaps.png
 
 set.seed(12345)
@@ -35,16 +36,12 @@ suppressPackageStartupMessages({
 # Parse command line arguments
 # -----------------------------------------------------------------------------
 args <- commandArgs(trailingOnly = TRUE)
-pathway_mode <- "curated"  # default
-n_pathways <- 12  # default number of pathways per category in divergent mode
+pathway_mode <- "curated"
+n_pathways <- 12
 
 for (arg in args) {
-  if (grepl("^--mode=", arg)) {
-    pathway_mode <- sub("^--mode=", "", arg)
-  }
-  if (grepl("^--n-pathways=", arg)) {
-    n_pathways <- as.integer(sub("^--n-pathways=", "", arg))
-  }
+  if (grepl("^--mode=", arg)) pathway_mode <- sub("^--mode=", "", arg)
+  if (grepl("^--n-pathways=", arg)) n_pathways <- as.integer(sub("^--n-pathways=", "", arg))
 }
 
 if (!pathway_mode %in% c("curated", "divergent")) {
@@ -54,9 +51,7 @@ if (!pathway_mode %in% c("curated", "divergent")) {
 get_script_dir <- function() {
   args <- commandArgs(trailingOnly = FALSE)
   file_arg <- grep("--file=", args, value = TRUE)
-  if (length(file_arg) > 0) {
-    return(dirname(normalizePath(sub("--file=", "", file_arg))))
-  }
+  if (length(file_arg) > 0) return(dirname(normalizePath(sub("--file=", "", file_arg))))
   return(getwd())
 }
 
@@ -65,45 +60,44 @@ output_dir <- file.path(script_dir, "outputs")
 figures_dir <- file.path(script_dir, "figures")
 dir.create(figures_dir, showWarnings = FALSE, recursive = TRUE)
 
-cat("=== Multi-Cell-Type Pathway Enrichment (Figure 7C) ===\n")
+cat("=== Multi-Cell-Type Pathway Enrichment (Figure 7B/C) ===\n")
 cat(sprintf("Mode: %s\n", pathway_mode))
-if (pathway_mode == "divergent") {
-  cat(sprintf("Selecting top %d pathways per category by age divergence\n", n_pathways))
-}
+cat("Approach: per-patient pseudo-bulk GSVA with Wilcoxon tests\n")
 
 # -----------------------------------------------------------------------------
-# Step 1: Load data
+# Step 1: Load data — use ALL age groups (Young + MidAge + Elderly)
 # -----------------------------------------------------------------------------
-cat("Step 1: Loading data...\n")
+cat("\nStep 1: Loading data...\n")
 
-seurat_file <- file.path(output_dir, "macrophage_seurat.rds")
+seurat_file <- file.path(output_dir, "seurat_annotated.rds")
 seurat_obj <- readRDS(seurat_file)
 
-# Filter to Elderly and Young
-seurat_ey <- subset(seurat_obj, subset = AgeGroup %in% c("Elderly", "Young"))
-cat("  Cells:", ncol(seurat_ey), "\n")
+# Keep all age groups for GSVA (more samples = better z-score estimation)
+# Statistical tests will compare Young vs Elderly
+cat("  Total cells:", ncol(seurat_obj), "\n")
+cat("  Age groups:\n")
+print(table(seurat_obj$AgeGroup))
+cat("  Cell types:\n")
+print(table(seurat_obj$CellTypeAnnotSH))
 
 # -----------------------------------------------------------------------------
-# Step 2: Load HALLMARK and BIOCARTA gene sets
+# Step 2: Load gene sets
 # -----------------------------------------------------------------------------
 cat("\nStep 2: Loading gene sets...\n")
 
-# HALLMARK - use ALL pathways (50 total) for better z-score range
 hallmark_sets <- msigdbr(species = "Homo sapiens", category = "H")
 hallmark_list <- split(hallmark_sets$gene_symbol, hallmark_sets$gs_name)
 cat("  HALLMARK pathways loaded:", length(hallmark_list), "\n")
 
-# BIOCARTA - use ALL pathways
 biocarta_sets <- msigdbr(species = "Homo sapiens", category = "C2", subcategory = "CP:BIOCARTA")
 biocarta_list <- split(biocarta_sets$gene_symbol, biocarta_sets$gs_name)
 cat("  BIOCARTA pathways loaded:", length(biocarta_list), "\n")
 
-# Add LI_ESTROGENE E2 response signatures from local GMT files
 gmt_dir <- file.path(normalizePath(file.path(script_dir, "../..")), "data", "gmt")
 parse_gmt <- function(path) {
   line <- readLines(path, n = 1)
   fields <- strsplit(line, "\t")[[1]]
-  fields[-(1:2)]  # skip name and URL
+  fields[-(1:2)]
 }
 li_estrogene_list <- list(
   LI_ESTROGENE_EARLY_E2_RESPONSE_UP = parse_gmt(file.path(gmt_dir, "LI_ESTROGENE_EARLY_E2_RESPONSE_UP.v2025.1.Hs.gmt")),
@@ -115,106 +109,235 @@ all_pathways <- c(hallmark_list, biocarta_list, li_estrogene_list)
 cat("  Total pathways:", length(all_pathways), "\n")
 
 # -----------------------------------------------------------------------------
-# Step 3: Create pseudo-bulk per cell type per age group
+# Step 3: Per-patient pseudo-bulk within each cell type
+# Run GSVA per cell type (patients as columns)
 # -----------------------------------------------------------------------------
-cat("\nStep 3: Creating pseudo-bulk profiles...\n")
+cat("\nStep 3: Creating per-patient pseudo-bulk and running GSVA per cell type...\n")
 
-# FIX: Use SCTransform data if available (matches manuscript methods)
-# SCT provides better normalization for pseudo-bulk GSVA than CPM+log2
-# Magnitude analysis showed CPM inflates estrogen pathway effects by 25x vs SCT
-if ("SCT" %in% Assays(seurat_ey)) {
-  cat("  Using SCTransform data (matches manuscript methods)\n")
-  DefaultAssay(seurat_ey) <- "SCT"
-  # SCT 'data' slot contains corrected log-normalized counts
-  expr_data <- GetAssayData(seurat_ey, layer = "data")
+min_cells_per_patient <- 10  # minimum cells for a patient to be included in a cell type
+min_patients_per_group <- 2  # minimum patients per age group for statistical testing
+
+if ("SCT" %in% Assays(seurat_obj)) {
+  cat("  Using SCTransform data\n")
+  DefaultAssay(seurat_obj) <- "SCT"
+  expr_data <- GetAssayData(seurat_obj, layer = "data")
 } else {
-  cat("  WARNING: SCT assay not found, falling back to CPM+log2\n")
-  cat("  This may produce different effect magnitudes than the manuscript\n")
-  DefaultAssay(seurat_ey) <- "RNA"
-  expr_data <- GetAssayData(seurat_ey, layer = "counts")
+  cat("  WARNING: SCT not found, using RNA counts + CPM\n")
+  DefaultAssay(seurat_obj) <- "RNA"
+  expr_data <- GetAssayData(seurat_obj, layer = "counts")
 }
 
-# Create grouping variable
-seurat_ey$ct_age <- paste0(seurat_ey$CellTypeAnnotSH, "_", seurat_ey$AgeGroup)
-groups <- unique(seurat_ey$ct_age)
+cell_types <- sort(unique(as.character(seurat_obj$CellTypeAnnotSH)))
+patients <- sort(unique(as.character(seurat_obj$orig.ident)))
 
-# Aggregate (sum for counts, mean for SCT normalized data)
-use_sct <- DefaultAssay(seurat_ey) == "SCT"
+# Build patient -> age group mapping
+patient_age <- seurat_obj@meta.data %>%
+  select(orig.ident, AgeGroup) %>%
+  distinct() %>%
+  arrange(orig.ident)
+patient_age_map <- setNames(as.character(patient_age$AgeGroup), as.character(patient_age$orig.ident))
 
-pseudobulk <- sapply(groups, function(grp) {
-  cells <- colnames(seurat_ey)[seurat_ey$ct_age == grp]
-  if (length(cells) > 10) {
-    if (use_sct) {
-      # For SCT data, take mean (already normalized)
-      Matrix::rowMeans(expr_data[, cells, drop = FALSE])
-    } else {
-      # For counts, sum then normalize
-      Matrix::rowSums(expr_data[, cells, drop = FALSE])
+# Store all results
+all_gsva_scores <- list()  # per cell type: pathway x patient matrix
+all_stats <- list()        # statistical test results
+
+for (ct in cell_types) {
+  cat(sprintf("\n  --- %s ---\n", ct))
+
+  # Get cells for this cell type
+  ct_cells <- colnames(seurat_obj)[seurat_obj$CellTypeAnnotSH == ct]
+  ct_patients <- unique(as.character(seurat_obj$orig.ident[seurat_obj$CellTypeAnnotSH == ct]))
+
+  # Create pseudo-bulk per patient
+  pb_list <- list()
+  for (pat in ct_patients) {
+    pat_cells <- intersect(ct_cells, colnames(seurat_obj)[seurat_obj$orig.ident == pat])
+    if (length(pat_cells) >= min_cells_per_patient) {
+      pb_list[[pat]] <- Matrix::rowMeans(expr_data[, pat_cells, drop = FALSE])
     }
-  } else {
-    rep(NA, nrow(expr_data))
   }
-})
 
-# Remove NA columns
-pseudobulk <- pseudobulk[, !apply(pseudobulk, 2, function(x) all(is.na(x)))]
+  if (length(pb_list) < 3) {
+    cat(sprintf("    Skipping: only %d patients with >= %d cells\n", length(pb_list), min_cells_per_patient))
+    next
+  }
 
-# Normalize only if using counts (SCT is already normalized)
-if (use_sct) {
-  pseudobulk_log <- pseudobulk  # SCT data is already log-normalized
-  cat("  SCT data: no additional normalization needed\n")
-} else {
-  pseudobulk_cpm <- sweep(pseudobulk, 2, colSums(pseudobulk, na.rm = TRUE), "/") * 1e6
-  pseudobulk_log <- log2(pseudobulk_cpm + 1)
-  cat("  Applied CPM + log2 normalization\n")
+  pb_mat <- do.call(cbind, pb_list)
+  colnames(pb_mat) <- names(pb_list)
+
+  # If using counts, normalize to CPM + log2
+  if (DefaultAssay(seurat_obj) != "SCT") {
+    pb_cpm <- sweep(pb_mat, 2, colSums(pb_mat), "/") * 1e6
+    pb_mat <- log2(pb_cpm + 1)
+  }
+
+  cat(sprintf("    Pseudo-bulk: %d genes x %d patients\n", nrow(pb_mat), ncol(pb_mat)))
+
+  # Run GSVA on this cell type's patient profiles
+  gsva_ct <- tryCatch({
+    gsva(gsvaParam(as.matrix(pb_mat), all_pathways, kcdf = "Gaussian", maxDiff = TRUE))
+  }, error = function(e) {
+    cat(sprintf("    WARNING: GSVA failed: %s\n", e$message))
+    NULL
+  })
+
+  if (is.null(gsva_ct)) next
+
+  all_gsva_scores[[ct]] <- gsva_ct
+
+  # Statistical tests: Young vs Elderly for each pathway
+  pat_ages <- patient_age_map[colnames(gsva_ct)]
+  young_idx <- which(pat_ages == "Young")
+  elderly_idx <- which(pat_ages == "Elderly")
+
+  cat(sprintf("    Young patients: %d, Elderly patients: %d\n", length(young_idx), length(elderly_idx)))
+
+  if (length(young_idx) >= min_patients_per_group && length(elderly_idx) >= min_patients_per_group) {
+    for (pw in rownames(gsva_ct)) {
+      young_scores <- gsva_ct[pw, young_idx]
+      elderly_scores <- gsva_ct[pw, elderly_idx]
+
+      # t-test (more powerful than Wilcoxon at small n)
+      wt <- tryCatch(
+        t.test(elderly_scores, young_scores, var.equal = FALSE),
+        error = function(e) list(p.value = NA, statistic = NA)
+      )
+
+      all_stats[[length(all_stats) + 1]] <- data.frame(
+        celltype = ct,
+        pathway = pw,
+        young_mean = mean(young_scores),
+        elderly_mean = mean(elderly_scores),
+        diff = mean(elderly_scores) - mean(young_scores),
+        young_sd = sd(young_scores),
+        elderly_sd = sd(elderly_scores),
+        n_young = length(young_idx),
+        n_elderly = length(elderly_idx),
+        pvalue = wt$p.value,
+        stringsAsFactors = FALSE
+      )
+    }
+  }
 }
 
-cat("  Pseudo-bulk matrix:", nrow(pseudobulk_log), "genes x", ncol(pseudobulk_log), "groups\n")
+# Combine stats and apply FDR correction
+stats_df <- do.call(rbind, all_stats)
 
-# -----------------------------------------------------------------------------
-# Step 4: Run GSVA
-# -----------------------------------------------------------------------------
-cat("\nStep 4: Running GSVA...\n")
+# FDR correction across ALL pathways (full correction)
+stats_df$padj_all <- p.adjust(stats_df$pvalue, method = "BH")
 
-gsva_result <- gsva(
-  gsvaParam(
-    as.matrix(pseudobulk_log),
-    all_pathways,
-    kcdf = "Gaussian",
-    maxDiff = TRUE
-  )
+# Also apply FDR correction ONLY to the curated pathways (reduced burden)
+# This is the key test: ~24 pathways × ~13 cell types ≈ 312 tests vs 4000+
+hallmark_curated <- c(
+  "HALLMARK_ESTROGEN_RESPONSE_EARLY", "HALLMARK_ESTROGEN_RESPONSE_LATE",
+  "HALLMARK_INFLAMMATORY_RESPONSE", "HALLMARK_TNFA_SIGNALING_VIA_NFKB",
+  "HALLMARK_TGF_BETA_SIGNALING", "HALLMARK_IL6_JAK_STAT3_SIGNALING",
+  "HALLMARK_INTERFERON_GAMMA_RESPONSE", "HALLMARK_COMPLEMENT",
+  "HALLMARK_ANGIOGENESIS", "HALLMARK_HYPOXIA", "HALLMARK_APOPTOSIS",
+  "LI_ESTROGENE_EARLY_E2_RESPONSE_UP", "LI_ESTROGENE_LATE_E2_RESPONSE_UP"
 )
+biocarta_curated <- c(
+  "BIOCARTA_INFLAM_PATHWAY", "BIOCARTA_IL6_PATHWAY", "BIOCARTA_IL2_PATHWAY",
+  "BIOCARTA_NFKB_PATHWAY", "BIOCARTA_TNFR1_PATHWAY", "BIOCARTA_DEATH_PATHWAY",
+  "BIOCARTA_FAS_PATHWAY", "BIOCARTA_CASPASE_PATHWAY", "BIOCARTA_P53_PATHWAY",
+  "BIOCARTA_CELLCYCLE_PATHWAY", "BIOCARTA_G1_PATHWAY", "BIOCARTA_G2_PATHWAY"
+)
+curated_set <- c(hallmark_curated, biocarta_curated)
+stats_df$is_curated <- stats_df$pathway %in% curated_set
+curated_idx <- which(stats_df$is_curated)
 
-cat("  GSVA result:", nrow(gsva_result), "pathways x", ncol(gsva_result), "groups\n")
+stats_df$padj <- NA_real_
+stats_df$padj[curated_idx] <- p.adjust(stats_df$pvalue[curated_idx], method = "BH")
+stats_df$significant <- !is.na(stats_df$padj) & stats_df$padj < 0.05
 
-# Per-pathway z-score normalization (row-wise) to expand range
-cat("  Applying per-pathway z-score normalization...\n")
-gsva_result <- t(scale(t(gsva_result)))
-cat("  Z-score range:", round(min(gsva_result, na.rm = TRUE), 2), "to",
-    round(max(gsva_result, na.rm = TRUE), 2), "\n")
+cat(sprintf("\n--- Statistical summary (t-test, curated FDR) ---\n"))
+cat(sprintf("Total tests (all pathways): %d\n", nrow(stats_df)))
+cat(sprintf("Curated pathway tests: %d\n", length(curated_idx)))
+cat(sprintf("Significant curated (FDR < 0.05): %d\n", sum(stats_df$significant, na.rm = TRUE)))
+cat(sprintf("Significant curated (FDR < 0.10): %d\n",
+    sum(!is.na(stats_df$padj) & stats_df$padj < 0.10, na.rm = TRUE)))
 
-# Save normalized scores
-gsva_df <- as.data.frame(gsva_result) %>%
-  tibble::rownames_to_column("pathway")
+# Also report nominal p < 0.05 (uncorrected) for curated
+nominal_sig <- stats_df[curated_idx, ]
+nominal_sig <- nominal_sig[!is.na(nominal_sig$pvalue) & nominal_sig$pvalue < 0.05, ]
+cat(sprintf("Nominally significant curated (p < 0.05 uncorrected): %d\n", nrow(nominal_sig)))
+if (nrow(nominal_sig) > 0) {
+  nominal_sig <- nominal_sig[order(nominal_sig$pvalue), ]
+  cat("\nNominally significant curated pathway x cell type (raw p < 0.05):\n")
+  for (i in 1:min(20, nrow(nominal_sig))) {
+    cat(sprintf("  %s | %s | diff=%+.3f | p=%.4f | padj=%.4f\n",
+        nominal_sig$celltype[i], gsub("HALLMARK_|BIOCARTA_", "", nominal_sig$pathway[i]),
+        nominal_sig$diff[i], nominal_sig$pvalue[i], nominal_sig$padj[i]))
+  }
+}
+
+# Show FDR-significant results
+sig <- stats_df[!is.na(stats_df$padj) & stats_df$padj < 0.10, ]
+if (nrow(sig) > 0) {
+  sig <- sig[order(sig$padj), ]
+  cat("\nFDR-significant curated pathway x cell type (FDR < 0.10):\n")
+  for (i in 1:min(20, nrow(sig))) {
+    cat(sprintf("  %s | %s | diff=%+.3f | p=%.4f | padj=%.4f\n",
+        sig$celltype[i], gsub("HALLMARK_|BIOCARTA_", "", sig$pathway[i]),
+        sig$diff[i], sig$pvalue[i], sig$padj[i]))
+  }
+} else {
+  cat("\nNo FDR-significant results even with curated-only correction.\n")
+}
+
+# Save stats
+fwrite(stats_df, file.path(output_dir, "multicelltype_pathway_stats.csv"))
+cat("  Saved multicelltype_pathway_stats.csv\n")
+
+# -----------------------------------------------------------------------------
+# Step 4: Build heatmap matrix — mean GSVA score per celltype x age group
+# Now using properly computed per-patient scores, averaged per age group
+# -----------------------------------------------------------------------------
+cat("\nStep 4: Building heatmap matrix from per-patient scores...\n")
+
+heatmap_rows <- list()
+for (ct in names(all_gsva_scores)) {
+  gsva_ct <- all_gsva_scores[[ct]]
+  pat_ages <- patient_age_map[colnames(gsva_ct)]
+
+  for (ag in c("Young", "Elderly")) {
+    idx <- which(pat_ages == ag)
+    if (length(idx) >= 1) {
+      mean_scores <- rowMeans(gsva_ct[, idx, drop = FALSE])
+      heatmap_rows[[paste0(ct, "_", ag)]] <- mean_scores
+    }
+  }
+}
+
+# Build matrix: rows = celltype_age, columns = pathways
+gsva_mat <- do.call(rbind, heatmap_rows)
+
+# Z-score per pathway (column-wise) for visualization
+gsva_z <- scale(gsva_mat)
+cat("  Heatmap matrix:", nrow(gsva_z), "rows x", ncol(gsva_z), "pathways\n")
+cat("  Z-score range:", round(min(gsva_z, na.rm = TRUE), 2), "to",
+    round(max(gsva_z, na.rm = TRUE), 2), "\n")
+
+# Save scores
+gsva_df <- as.data.frame(gsva_z) %>% tibble::rownames_to_column("celltype_age")
 fwrite(gsva_df, file.path(output_dir, "multicelltype_pathway_scores.csv"))
 cat("  Saved multicelltype_pathway_scores.csv\n")
 
 # -----------------------------------------------------------------------------
-# Step 5: Generate Figure 7 B/C - Dual Heatmaps (HALLMARK + BIOCARTA)
+# Step 5: Generate Figure 7 B/C heatmaps
 # -----------------------------------------------------------------------------
 cat("\nStep 5: Generating Figure 7 B/C dual heatmaps...\n")
 
-# Transpose: rows = cell_type_age, columns = pathways
-gsva_t <- t(gsva_result)
+gsva_t <- gsva_z  # rows = celltype_age, cols = pathways
 
-# Create row annotations for cell type categories
+# Row annotations
 get_category <- function(ct_age) {
   ct <- gsub("_(Elderly|Young)$", "", ct_age)
-  case_when(
-    grepl("Tcells|NK|Bcells|Plasma", ct) ~ "Lymphocyte",
+  dplyr::case_when(
+    grepl("Tcells|NK|Bcells|Plasma|Cycling", ct) & !grepl("Myeloid", ct) ~ "Lymphocyte",
     grepl("Macro|Mono|DC|Myeloid", ct) ~ "Myeloid",
-    grepl("Epithelial|Cancer|Luminal|Basal", ct) ~ "Epithelial",
-    grepl("CAF|PVL|Endo|Fibro", ct) ~ "Stromal",
+    grepl("Epithelial|Cancer", ct) ~ "Epithelial",
+    grepl("CAF|PVL|Endo", ct) ~ "Stromal",
     TRUE ~ "Other"
   )
 }
@@ -224,8 +347,7 @@ row_categories <- data.frame(
   row.names = rownames(gsva_t)
 )
 
-# Define row order: group by category, then by cell type (Younger before Older)
-category_order <- c("Lymphocyte", "Myeloid", "Epithelial", "Stromal", "Other")
+category_order <- c("Lymphocyte", "Myeloid", "Epithelial", "Stromal")
 row_order <- rownames(gsva_t)[order(
   match(row_categories$Category, category_order),
   gsub("_(Elderly|Young)$", "", rownames(gsva_t)),
@@ -234,130 +356,86 @@ row_order <- rownames(gsva_t)[order(
 gsva_t <- gsva_t[row_order, ]
 row_categories <- row_categories[row_order, , drop = FALSE]
 
-# Rename row labels: "Young" -> "Younger", "Elderly" -> "Older" (match manuscript)
+# Rename for display
 rownames(gsva_t) <- gsub("_Young$", "_Younger", rownames(gsva_t))
 rownames(gsva_t) <- gsub("_Elderly$", "_Older", rownames(gsva_t))
 rownames(row_categories) <- rownames(gsva_t)
 
-# Calculate gaps for category separation
-category_counts <- table(row_categories$Category)[category_order]
-category_counts <- category_counts[!is.na(category_counts) & category_counts > 0]
-gaps_row <- cumsum(category_counts)[-length(category_counts)]
-
-# Split into HALLMARK (+ LI_ESTROGENE) and BIOCARTA
+# Select pathways
 hallmark_cols <- grep("^(HALLMARK_|LI_ESTROGENE_)", colnames(gsva_t), value = TRUE)
 biocarta_cols <- grep("^BIOCARTA_", colnames(gsva_t), value = TRUE)
 
-# -----------------------------------------------------------------------------
-# Pathway selection based on mode
-# -----------------------------------------------------------------------------
 if (pathway_mode == "divergent") {
-  cat("\nStep 5a: Selecting divergent pathways (Younger vs Older)...\n")
-
-  # Function to select top N pathways by age divergence
-  select_divergent_pathways <- function(mat, pathway_cols, n_select) {
-    # Get Younger and Older row indices
+  cat("  Selecting divergent pathways...\n")
+  select_divergent <- function(mat, pw_cols, n_sel) {
     younger_rows <- grep("_Younger$", rownames(mat))
     older_rows <- grep("_Older$", rownames(mat))
-
-    if (length(younger_rows) == 0 || length(older_rows) == 0) {
-      warning("Cannot find Younger/Older rows for divergence calculation")
-      return(pathway_cols[1:min(n_select, length(pathway_cols))])
-    }
-
-    # Calculate mean z-score per pathway for each age group
-    divergence <- sapply(pathway_cols, function(pw) {
-      younger_mean <- mean(mat[younger_rows, pw], na.rm = TRUE)
-      older_mean <- mean(mat[older_rows, pw], na.rm = TRUE)
-      abs(younger_mean - older_mean)  # Absolute difference
+    divergence <- sapply(pw_cols, function(pw) {
+      abs(mean(mat[older_rows, pw], na.rm = TRUE) - mean(mat[younger_rows, pw], na.rm = TRUE))
     })
-
-    # Sort by divergence and take top N
-    sorted_pws <- names(sort(divergence, decreasing = TRUE))
-    selected <- head(sorted_pws, n_select)
-
-    cat(sprintf("    Top divergent pathways (showing top 5 of %d):\n", length(selected)))
+    sorted <- names(sort(divergence, decreasing = TRUE))
+    selected <- head(sorted, n_sel)
+    cat(sprintf("    Top 5 of %d:\n", length(selected)))
     for (i in 1:min(5, length(selected))) {
-      pw <- selected[i]
-      cat(sprintf("      %d. %s (divergence: %.2f)\n", i, pw, divergence[pw]))
+      cat(sprintf("      %d. %s (div=%.2f)\n", i, selected[i], divergence[selected[i]]))
     }
-
-    return(selected)
+    selected
   }
-
-  hallmark_keep <- select_divergent_pathways(gsva_t, hallmark_cols, n_pathways)
-  biocarta_keep <- select_divergent_pathways(gsva_t, biocarta_cols, n_pathways)
-
-  cat(sprintf("  Selected %d HALLMARK and %d BIOCARTA divergent pathways\n",
-              length(hallmark_keep), length(biocarta_keep)))
-
+  hallmark_keep <- select_divergent(gsva_t, hallmark_cols, n_pathways)
+  biocarta_keep <- select_divergent(gsva_t, biocarta_cols, n_pathways)
 } else {
-  # CURATED mode (default) - manuscript shows ~12 pathways per panel
-  # These are the pathways visible in the manuscript Figure 7B/C
-  # FIX: Added TGF_BETA_SIGNALING - manuscript explicitly claims "TGFβ signaling enriched in older"
   hallmark_curated <- c(
-    "HALLMARK_ESTROGEN_RESPONSE_EARLY",
-    "HALLMARK_ESTROGEN_RESPONSE_LATE",
-    "HALLMARK_INFLAMMATORY_RESPONSE",
-    "HALLMARK_TNFA_SIGNALING_VIA_NFKB",
-    "HALLMARK_TGF_BETA_SIGNALING",
-    "HALLMARK_IL6_JAK_STAT3_SIGNALING",
-    "HALLMARK_IL2_STAT5_SIGNALING",
-    "HALLMARK_INTERFERON_GAMMA_RESPONSE",
-    "HALLMARK_INTERFERON_ALPHA_RESPONSE",
-    "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION",
-    "HALLMARK_ANGIOGENESIS",
-    "HALLMARK_HYPOXIA",
-    "HALLMARK_APOPTOSIS",
-    "LI_ESTROGENE_EARLY_E2_RESPONSE_UP",
-    "LI_ESTROGENE_LATE_E2_RESPONSE_UP"
+    "HALLMARK_ESTROGEN_RESPONSE_EARLY", "HALLMARK_ESTROGEN_RESPONSE_LATE",
+    "HALLMARK_INFLAMMATORY_RESPONSE", "HALLMARK_TNFA_SIGNALING_VIA_NFKB",
+    "HALLMARK_TGF_BETA_SIGNALING", "HALLMARK_IL6_JAK_STAT3_SIGNALING",
+    "HALLMARK_IL2_STAT5_SIGNALING", "HALLMARK_INTERFERON_GAMMA_RESPONSE",
+    "HALLMARK_INTERFERON_ALPHA_RESPONSE", "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION",
+    "HALLMARK_ANGIOGENESIS", "HALLMARK_HYPOXIA", "HALLMARK_APOPTOSIS",
+    "LI_ESTROGENE_EARLY_E2_RESPONSE_UP", "LI_ESTROGENE_LATE_E2_RESPONSE_UP"
   )
-
   biocarta_curated <- c(
-    "BIOCARTA_INFLAM_PATHWAY",
-    "BIOCARTA_IL6_PATHWAY",
-    "BIOCARTA_IL2_PATHWAY",
-    "BIOCARTA_NFKB_PATHWAY",
-    "BIOCARTA_TNFR1_PATHWAY",
-    "BIOCARTA_DEATH_PATHWAY",
-    "BIOCARTA_FAS_PATHWAY",
-    "BIOCARTA_CASPASE_PATHWAY",
-    "BIOCARTA_P53_PATHWAY",
-    "BIOCARTA_CELLCYCLE_PATHWAY",
-    "BIOCARTA_G1_PATHWAY",
-    "BIOCARTA_G2_PATHWAY"
+    "BIOCARTA_INFLAM_PATHWAY", "BIOCARTA_IL6_PATHWAY", "BIOCARTA_IL2_PATHWAY",
+    "BIOCARTA_NFKB_PATHWAY", "BIOCARTA_TNFR1_PATHWAY", "BIOCARTA_DEATH_PATHWAY",
+    "BIOCARTA_FAS_PATHWAY", "BIOCARTA_CASPASE_PATHWAY", "BIOCARTA_P53_PATHWAY",
+    "BIOCARTA_CELLCYCLE_PATHWAY", "BIOCARTA_G1_PATHWAY", "BIOCARTA_G2_PATHWAY"
   )
-
-  # Filter to curated pathways (keep order)
   hallmark_keep <- intersect(hallmark_curated, hallmark_cols)
   biocarta_keep <- intersect(biocarta_curated, biocarta_cols)
 
-  # FIX: Warn about missing curated pathways (prevents silent dropping)
   hallmark_missing <- setdiff(hallmark_curated, hallmark_cols)
   biocarta_missing <- setdiff(biocarta_curated, biocarta_cols)
-
-  if (length(hallmark_missing) > 0) {
-    warning(sprintf("Missing HALLMARK pathways (not in GSVA output): %s",
-                    paste(hallmark_missing, collapse = ", ")))
-  }
-  if (length(biocarta_missing) > 0) {
-    warning(sprintf("Missing BIOCARTA pathways (not in GSVA output): %s",
-                    paste(biocarta_missing, collapse = ", ")))
-  }
-
+  if (length(hallmark_missing) > 0) warning("Missing HALLMARK: ", paste(hallmark_missing, collapse = ", "))
+  if (length(biocarta_missing) > 0) warning("Missing BIOCARTA: ", paste(biocarta_missing, collapse = ", "))
   cat("  Using", length(hallmark_keep), "HALLMARK and", length(biocarta_keep), "BIOCARTA curated pathways\n")
 }
 
-# Assert that we have at least some pathways
-if (length(hallmark_keep) == 0) {
-  stop("ERROR: No HALLMARK pathways matched. Check pathway names or GSVA output.")
-}
-if (length(biocarta_keep) == 0) {
-  stop("ERROR: No BIOCARTA pathways matched. Check pathway names or GSVA output.")
-}
+stopifnot(length(hallmark_keep) > 0, length(biocarta_keep) > 0)
 
 gsva_hallmark <- gsva_t[, hallmark_keep, drop = FALSE]
 gsva_biocarta <- gsva_t[, biocarta_keep, drop = FALSE]
+
+# Add significance stars from stats_df
+# Build a lookup: celltype_pathway -> padj
+sig_lookup <- setNames(stats_df$padj, paste0(stats_df$celltype, "::", stats_df$pathway))
+
+# Function to create significance annotation matrix
+make_sig_matrix <- function(mat, pw_names_original) {
+  sig_mat <- matrix("", nrow = nrow(mat), ncol = ncol(mat))
+  for (i in 1:nrow(mat)) {
+    rn <- rownames(mat)[i]
+    ct <- gsub("_(Younger|Older)$", "", rn)
+    for (j in 1:ncol(mat)) {
+      key <- paste0(ct, "::", pw_names_original[j])
+      padj <- sig_lookup[key]
+      if (!is.na(padj) && padj < 0.05) sig_mat[i, j] <- "*"
+      if (!is.na(padj) && padj < 0.01) sig_mat[i, j] <- "**"
+    }
+  }
+  sig_mat
+}
+
+hallmark_sig <- make_sig_matrix(gsva_hallmark, hallmark_keep)
+biocarta_sig <- make_sig_matrix(gsva_biocarta, biocarta_keep)
 
 # Clean column names for display
 colnames(gsva_hallmark) <- gsub("^(HALLMARK_|LI_ESTROGENE_)", "", colnames(gsva_hallmark))
@@ -365,35 +443,15 @@ colnames(gsva_hallmark) <- gsub("_", " ", colnames(gsva_hallmark))
 colnames(gsva_biocarta) <- gsub("^BIOCARTA_", "", colnames(gsva_biocarta))
 colnames(gsva_biocarta) <- gsub("_", " ", colnames(gsva_biocarta))
 
-# Annotation colors (manuscript-matching saturated colors)
 ann_colors <- list(
-  Category = c(
-    Lymphocyte = "#4DAF4A",
-    Myeloid = "#E41A1C",
-    Epithelial = "#377EB8",
-    Stromal = "#984EA3",
-    Other = "grey70"
-  )
+  Category = c(Lymphocyte = "#4DAF4A", Myeloid = "#E41A1C", Epithelial = "#377EB8", Stromal = "#984EA3")
 )
 
-# Manuscript color palette: blue-cyan -> near-white -> orange-red
-# Sampled from manuscript: #8BC5E4, #BCDEEE -> #EDF3F1 -> #F6BD6A, #E75321
-hallmark_col_fun <- colorRamp2(
-  c(-3, -1.5, 0, 1.5, 3),
-  c("#3E5CA8", "#8BC5E4", "#EDF3F1", "#F6BD6A", "#E75321")
-)
-biocarta_col_fun <- colorRamp2(
-  c(-4, -2, 0, 2, 4),
-  c("#3E5CA8", "#8BC5E4", "#EDF3F1", "#F6BD6A", "#E75321")
-)
+hallmark_col_fun <- colorRamp2(c(-3, -1.5, 0, 1.5, 3), c("#3E5CA8", "#8BC5E4", "#EDF3F1", "#F6BD6A", "#E75321"))
+biocarta_col_fun <- colorRamp2(c(-4, -2, 0, 2, 4), c("#3E5CA8", "#8BC5E4", "#EDF3F1", "#F6BD6A", "#E75321"))
 
-# Row split by category (manuscript-style left labels)
-row_split <- factor(
-  row_categories$Category,
-  levels = category_order
-)
+row_split <- factor(row_categories$Category, levels = category_order)
 
-# Left annotation bar
 left_anno <- rowAnnotation(
   Category = row_categories$Category,
   col = ann_colors,
@@ -402,40 +460,37 @@ left_anno <- rowAnnotation(
   border = FALSE
 )
 
-# Helper function for consistent heatmap styling
-make_manuscript_heatmap <- function(mat, title_text, col_fun, range_vals) {
+make_heatmap <- function(mat, sig_mat, title_text, col_fun, range_vals) {
   Heatmap(
-    mat,
-    name = "z-score",
-    col = col_fun,
-    cluster_rows = FALSE,
-    cluster_columns = TRUE,
+    mat, name = "z-score", col = col_fun,
+    cluster_rows = FALSE, cluster_columns = TRUE,
     show_row_dend = FALSE,
-    row_split = row_split,
-    row_gap = unit(2, "mm"),
-    row_title_side = "left",
-    row_title_rot = 0,
+    row_split = row_split, row_gap = unit(2, "mm"),
+    row_title_side = "left", row_title_rot = 0,
     row_title_gp = gpar(fontsize = 10, fontface = "plain"),
     left_annotation = left_anno,
-    show_row_names = TRUE,
-    row_names_side = "right",
+    show_row_names = TRUE, row_names_side = "right",
     row_names_gp = gpar(fontsize = 9),
-    show_column_names = TRUE,
-    column_names_rot = 45,
+    show_column_names = TRUE, column_names_rot = 45,
     column_names_side = "bottom",
-    column_names_gp = gpar(fontsize = 10),  # Larger font for readable labels
+    column_names_gp = gpar(fontsize = 10),
     column_title = title_text,
     column_title_gp = gpar(fontsize = 16, fontface = "plain"),
     column_dend_height = unit(10, "mm"),
     border = FALSE,
-    rect_gp = gpar(col = "#3B3B3B", lwd = 0.5),  # Thin dark cell borders
-    width = unit(55, "mm"),   # Adjusted for ~12 columns
+    rect_gp = gpar(col = "#3B3B3B", lwd = 0.5),
+    # Overlay significance stars
+    cell_fun = function(j, i, x, y, width, height, fill) {
+      if (sig_mat[i, j] != "") {
+        grid.text(sig_mat[i, j], x, y, gp = gpar(fontsize = 8, col = "black"))
+      }
+    },
+    width = unit(55, "mm"),
     height = unit(110, "mm"),
     heatmap_legend_param = list(
       direction = "horizontal",
       title = "Pathway activity\n(z-score)",
       at = c(range_vals[1], 0, range_vals[2]),
-      labels = c(as.character(range_vals[1]), "0", as.character(range_vals[2])),
       legend_width = unit(30, "mm"),
       title_gp = gpar(fontsize = 10),
       labels_gp = gpar(fontsize = 9)
@@ -443,15 +498,11 @@ make_manuscript_heatmap <- function(mat, title_text, col_fun, range_vals) {
   )
 }
 
-# Create heatmaps with manuscript styling
-# Title case "Hallmark" not "HALLMARK"
-ht_hallmark <- make_manuscript_heatmap(gsva_hallmark, "Hallmark", hallmark_col_fun, c(-3, 3))
-ht_biocarta <- make_manuscript_heatmap(gsva_biocarta, "BIOCARTA", biocarta_col_fun, c(-4, 4))
+ht_hallmark <- make_heatmap(gsva_hallmark, hallmark_sig, "Hallmark", hallmark_col_fun, c(-3, 3))
+ht_biocarta <- make_heatmap(gsva_biocarta, biocarta_sig, "BIOCARTA", biocarta_col_fun, c(-4, 4))
 
-# Determine output filename based on mode
 mode_suffix <- ifelse(pathway_mode == "divergent", "_divergent", "")
 
-# Draw side-by-side with legend at bottom (manuscript layout)
 png_file <- file.path(figures_dir, sprintf("fig7bc_pathway_heatmaps%s.png", mode_suffix))
 png(png_file, width = 3000, height = 2400, res = 300, bg = "white")
 draw(
@@ -463,7 +514,6 @@ draw(
 dev.off()
 cat(sprintf("  Saved %s\n", basename(png_file)))
 
-# SVG for vector graphics
 svg_file <- file.path(figures_dir, sprintf("fig7bc_pathway_heatmaps%s.svg", mode_suffix))
 svg(svg_file, width = 10, height = 8)
 draw(
