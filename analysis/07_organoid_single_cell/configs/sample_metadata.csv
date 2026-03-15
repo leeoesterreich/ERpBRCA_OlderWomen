@@ -1,0 +1,8 @@
+sample_id,treatment,estrogen,inhibitor,pool,probe_barcode,cell_line
+OS01,Vehicle,none,none,1,BC001,296
+OS02,E1,E1,none,1,BC002,296
+OS03,E1+ICI,E1,ICI,1,BC003,296
+OS04,E1+HSD17B7i,E1,HSD17B7i,1,BC004,296
+OS05,E2,E2,none,2,BC005,296
+OS06,E2+ICI,E2,ICI,2,BC006,296
+OS07,E2+HSD17B7i,E2,HSD17B7i,2,BC007,296
