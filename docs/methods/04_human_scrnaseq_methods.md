@@ -12,7 +12,7 @@
 
 > **[WARNING] Dense matrix conversion OOM risk:** `06_run_gsva.R` converts the full sparse count matrix to a dense matrix at line 283 (`as.matrix(counts_all)`). For the Xu et al. 2024 atlas (~59K genes x ~115K cells), this requires approximately 50 GB of RAM and may cause out-of-memory failures on standard compute nodes.
 
-> **[WARNING] CellPhoneDB p-values not adjusted at plot stage:** `17_cellphonedb_dotplot.R` filters interactions at nominal p < 0.05 (lines 233, 254) without applying multiple testing correction across the thousands of ligand-receptor pairs tested. The raw permutation-based p-values from CellPhoneDB are displayed directly.
+> **[RESOLVED]** CellPhoneDB p-values are now BH-FDR corrected across all L-R pair tests before filtering. The dotplot displays FDR-corrected significance (FDR < 0.05) rather than raw permutation p-values.
 
 > **[WARNING] Missing random seeds in Python CellPhoneDB scripts:** `16_run_cellphonedb.py` does not set `np.random.seed()` or pass a `debug_seed` parameter, making its 1,000-iteration permutation test non-reproducible. `16b_run_cellphonedb_v4.py` does pass `debug_seed=42` (line 68). `12_enrichr_pathway_analysis.py` sets `np.random.seed(12345)` but the ENRICHR API calls are server-side and inherently non-deterministic.
 

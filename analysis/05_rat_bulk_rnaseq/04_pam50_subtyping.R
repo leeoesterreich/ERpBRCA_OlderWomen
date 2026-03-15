@@ -74,8 +74,8 @@ cat("  PAM50 genes mapped:", sum(!is.na(pam50_genes_rat)), "/", length(pam50_gen
 # -----------------------------------------------------------------------------
 cat("Step 2: Loading expression data...\n")
 
-# Assume normalized TPM data exists or compute from counts
-tpm_file <- file.path(output_dir, "normalized_tpm.csv")
+# Load size-factor-normalized CPM data from DESeq2
+tpm_file <- file.path(output_dir, "normalized_cpm.csv")
 if (file.exists(tpm_file)) {
   pam50_data <- read.csv(tpm_file, row.names = 1)
 } else {

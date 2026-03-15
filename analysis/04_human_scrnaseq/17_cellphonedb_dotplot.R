@@ -142,7 +142,13 @@ data_young <- process_cpdb(results_young)
 
 # Combine both groups
 all_data <- bind_rows(data_young, data_elderly)
+
+# Apply BH-FDR correction across all L-R pair tests
+all_data <- all_data %>%
+  mutate(pvalue_fdr = p.adjust(pvalue, method = "BH"))
+
 cat(sprintf("  Combined data: %d rows\n", nrow(all_data)))
+cat(sprintf("  FDR-corrected p-values applied (BH method)\n"))
 
 # -----------------------------------------------------------------------------
 # Step 3: Identify significant interactions in either group
@@ -229,13 +235,13 @@ if (filter_mode == "curated") {
   # Filter using matched pairs (not original curated_pairs)
   sig_lr_pairs <- immune_data %>%
     filter(interacting_pair %in% matched_pairs) %>%
-    filter(!is.na(pvalue) & pvalue < 0.05) %>%
+    filter(!is.na(pvalue_fdr) & pvalue_fdr < 0.05) %>%
     group_by(interacting_pair) %>%
     summarise(
       n_sig = n(),
       n_young_sig = sum(age_group == "Young"),
       n_elderly_sig = sum(age_group == "Elderly"),
-      min_pval = min(pvalue, na.rm = TRUE),
+      min_pval = min(pvalue_fdr, na.rm = TRUE),
       .groups = "drop"
     ) %>%
     filter(n_sig >= 1) %>%
@@ -250,15 +256,15 @@ if (filter_mode == "curated") {
   }
 
 } else {
-  # Default: top50 mode - statistical filtering
+  # Default: top50 mode - statistical filtering with FDR correction
   sig_lr_pairs <- immune_data %>%
-    filter(!is.na(pvalue) & pvalue < 0.05) %>%
+    filter(!is.na(pvalue_fdr) & pvalue_fdr < 0.05) %>%
     group_by(interacting_pair) %>%
     summarise(
       n_sig = n(),
       n_young_sig = sum(age_group == "Young"),
       n_elderly_sig = sum(age_group == "Elderly"),
-      min_pval = min(pvalue, na.rm = TRUE),
+      min_pval = min(pvalue_fdr, na.rm = TRUE),
       .groups = "drop"
     ) %>%
     # For macrophage-focused analysis, include pairs significant in either group
@@ -287,12 +293,12 @@ plot_data <- immune_data %>%
   filter(interacting_pair %in% sig_lr_pairs$interacting_pair,
          cell_pair %in% sig_cell_pairs) %>%
   mutate(
-    neg_log_pval = -log10(pvalue + 1e-10),
+    neg_log_pval = -log10(pvalue_fdr + 1e-10),
     neg_log_pval = pmin(neg_log_pval, 3),  # Cap at 3 to match manuscript scale
     # Use log2 mean expression to match manuscript
     log2_mean = log2(mean_expr + 1),
-    # Set non-significant to NA for cleaner plot
-    log2_mean_plot = ifelse(pvalue < 0.05, log2_mean, NA)
+    # Set non-significant (FDR >= 0.05) to NA for cleaner plot
+    log2_mean_plot = ifelse(pvalue_fdr < 0.05, log2_mean, NA)
   )
 
 cat(sprintf("  Final plot data: %d points\n", nrow(plot_data)))

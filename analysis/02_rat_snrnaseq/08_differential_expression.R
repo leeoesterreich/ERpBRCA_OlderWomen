@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # analysis/02_rat_snrnaseq/08_differential_expression.R
 # Differential expression analysis: Young vs Aged per cell type
-# BIOSTATISTICAL FIX: This analysis was missing from original
+# Uses pseudobulk DESeq2 to avoid pseudoreplication (Squair et al. 2021)
 #
 # Inputs:
 #   - analysis/02_rat_snrnaseq/outputs/seurat_annotated.rds
@@ -14,6 +14,7 @@ set.seed(12345)
 
 suppressPackageStartupMessages({
   library(Seurat)
+  library(DESeq2)
   library(dplyr)
   library(ggplot2)
   library(ggrepel)
@@ -98,13 +99,17 @@ if ("JoinLayers" %in% ls("package:SeuratObject")) {
 seurat_obj <- NormalizeData(seurat_obj, verbose = FALSE)
 
 # -----------------------------------------------------------------------------
-# Step 2: Run DE for Each Cell Type
+# Step 2: Pseudobulk DE for Each Cell Type (DESeq2)
 # -----------------------------------------------------------------------------
-cat("\nStep 2: Running differential expression per cell type...\n")
+cat("\nStep 2: Running pseudobulk differential expression per cell type...\n")
+cat("  Method: DESeq2 on aggregated counts per sample (avoids pseudoreplication)\n\n")
 
 cell_types <- unique(seurat_obj$CellTypeByMarker_RatsnRNAseq)
 cell_types <- cell_types[!is.na(cell_types)]
 all_de_results <- data.frame()
+
+MIN_CELLS_PER_SAMPLE <- 10
+MIN_SAMPLES_PER_GROUP <- 2
 
 cat("  Cell types to analyze:", length(cell_types), "\n")
 cat("    ", paste(cell_types, collapse = ", "), "\n\n")
@@ -115,41 +120,81 @@ for (ct in cell_types) {
   # Subset to cell type
   seurat_ct <- subset(seurat_obj, CellTypeByMarker_RatsnRNAseq == ct)
 
-  # Check sample sizes
-  n_aged <- sum(seurat_ct$AgeGroup == "Aged")
-  n_young <- sum(seurat_ct$AgeGroup == "Young")
-  cat("    Aged:", n_aged, "| Young:", n_young, "\n")
+  # Check cells per sample and filter
+  cells_per_sample <- table(seurat_ct$orig.ident)
+  valid_samples <- names(cells_per_sample[cells_per_sample >= MIN_CELLS_PER_SAMPLE])
 
-  # Skip if too few cells
-  if (n_aged < 10 || n_young < 10) {
-    cat("    Skipping - too few cells (min 10 per group required)\n")
+  if (length(valid_samples) == 0) {
+    cat("    Skipping - no samples with >=", MIN_CELLS_PER_SAMPLE, "cells\n")
     next
   }
 
-  # Set identity to AgeGroup
-  Idents(seurat_ct) <- "AgeGroup"
+  seurat_ct <- subset(seurat_ct, orig.ident %in% valid_samples)
 
-  # Run FindMarkers (Wilcoxon test with BH correction)
+  # Check biological replicates per group
+  sample_groups <- unique(data.frame(
+    sample = seurat_ct$orig.ident,
+    group = seurat_ct$AgeGroup,
+    stringsAsFactors = FALSE
+  ))
+  n_aged_samples <- sum(sample_groups$group == "Aged")
+  n_young_samples <- sum(sample_groups$group == "Young")
+  cat("    Aged samples:", n_aged_samples, "| Young samples:", n_young_samples, "\n")
+
+  if (n_aged_samples < MIN_SAMPLES_PER_GROUP || n_young_samples < MIN_SAMPLES_PER_GROUP) {
+    cat("    Skipping - need >=", MIN_SAMPLES_PER_GROUP, "samples per group\n")
+    next
+  }
+
+  # Aggregate counts per sample (pseudobulk)
   tryCatch({
-    de_results <- FindMarkers(
+    pseudo_counts <- AggregateExpression(
       seurat_ct,
-      ident.1 = "Aged",
-      ident.2 = "Young",
-      test.use = "wilcox",
-      min.pct = 0.1,
-      logfc.threshold = 0.25,
-      verbose = FALSE
+      group.by = "orig.ident",
+      assays = "RNA",
+      slot = "counts",
+      return.seurat = FALSE
+    )$RNA
+
+    # Build sample metadata for DESeq2
+    sample_meta <- sample_groups[!duplicated(sample_groups$sample), ]
+    rownames(sample_meta) <- sample_meta$sample
+    sample_meta <- sample_meta[colnames(pseudo_counts), , drop = FALSE]
+    sample_meta$group <- factor(sample_meta$group, levels = c("Young", "Aged"))
+
+    # Filter low-count genes: require >= 10 counts in >= 2 samples
+    keep <- rowSums(pseudo_counts >= 10) >= 2
+    pseudo_counts <- pseudo_counts[keep, ]
+
+    if (nrow(pseudo_counts) < 10) {
+      cat("    Skipping - too few genes pass filter (", nrow(pseudo_counts), ")\n")
+      next
+    }
+
+    # Run DESeq2
+    dds <- DESeqDataSetFromMatrix(
+      countData = pseudo_counts,
+      colData = sample_meta,
+      design = ~ group
     )
+    dds <- DESeq(dds, quiet = TRUE)
+    res <- results(dds, contrast = c("group", "Aged", "Young"), alpha = 0.05)
+
+    de_results <- as.data.frame(res) %>%
+      tibble::rownames_to_column("gene") %>%
+      filter(!is.na(padj)) %>%
+      mutate(
+        celltype = ct,
+        FDR = padj,
+        avg_log2FC = log2FoldChange
+      )
 
     if (nrow(de_results) > 0) {
-      de_results$gene <- rownames(de_results)
-      de_results$celltype <- ct
-      # BIOSTATISTICAL FIX: Apply BH FDR correction
-      de_results$FDR <- p.adjust(de_results$p_val, method = "BH")
       all_de_results <- rbind(all_de_results, de_results)
-      cat("    DE genes:", nrow(de_results), "\n")
+      n_sig <- sum(de_results$FDR < 0.05, na.rm = TRUE)
+      cat("    Tested genes:", nrow(de_results), "| Significant (FDR<0.05):", n_sig, "\n")
     } else {
-      cat("    No DE genes found\n")
+      cat("    No genes passed filters\n")
     }
   }, error = function(e) {
     cat("    Error:", e$message, "\n")
@@ -173,9 +218,9 @@ if (nrow(all_de_results) == 0) {
 cat("\nStep 3: Summarizing results...\n")
 
 all_de_results <- all_de_results %>%
-  arrange(FDR, p_val) %>%
+  arrange(FDR, pvalue) %>%
   mutate(
-    Sig_nominal = p_val < 0.05,
+    Sig_nominal = pvalue < 0.05,
     Sig_FDR = FDR < 0.05,
     Direction = ifelse(avg_log2FC > 0, "Up_in_Aged", "Down_in_Aged")
   )

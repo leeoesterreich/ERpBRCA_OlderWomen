@@ -37,15 +37,15 @@ The following issues were identified during code review and methods extraction. 
 
 | # | Subsection | Issue |
 |---|-----------|-------|
-| W1 | 02_rat_snrnaseq | Cell-level DE (`FindMarkers`) with n=3 biological replicates per group constitutes pseudoreplication; p-values likely inflated |
-| W2 | 05_rat_bulk_rnaseq | `normalized_tpm.csv` is CPM (lacks gene-length normalization), not true TPM; used for PAM50 input |
+| W1 | 02_rat_snrnaseq | ~~Cell-level DE pseudoreplication~~ | **RESOLVED** — converted to pseudobulk DESeq2 with per-sample aggregation |
+| W2 | 05_rat_bulk_rnaseq | ~~CPM mislabeled as TPM~~ | **RESOLVED** — renamed to `normalized_cpm.csv`, updated all references |
 | W3 | 04_human_scrnaseq | Script 15 comment says Wilcoxon but code runs Welch t-test |
 | W4 | 04_human_scrnaseq | Dense matrix conversion in GSVA (~50 GB) risks OOM on standard nodes |
-| W5 | 04_human_scrnaseq | CellPhoneDB p-values not FDR-corrected at visualization stage |
+| W5 | 04_human_scrnaseq | ~~CellPhoneDB p-values unadjusted~~ | **RESOLVED** — BH-FDR correction now applied before filtering/display |
 | W6 | 03_rat_wes | VEP cache v95 paired with VEP software v114.2 — major version mismatch |
 | W7 | 03_rat_wes | SigProfilerAssignment and pybiomart not in environment.yml; separate untracked env used |
 | W8 | 03_rat_wes | BioMart live API dependency (no archive host pinned) introduces non-reproducibility |
-| W9 | 01_human_bulk_rnaseq | PROGENy reads raw TPM independently from GSVA's preprocessed matrix |
+| W9 | 01_human_bulk_rnaseq | ~~PROGENy reads raw TPM independently~~ | **RESOLVED** — PROGENy now uses same VST matrix as GSVA |
 | W10 | 01_human_bulk_rnaseq | Two different conda environments referenced across sbatch scripts |
 | W11 | 02_rat_snrnaseq | Annotation ambiguity: primary vs scType pipeline outputs diverge; unclear which feeds DE/DA |
 | W12 | 02_rat_snrnaseq | Fixed 5% doublet rate not calibrated to loading density |

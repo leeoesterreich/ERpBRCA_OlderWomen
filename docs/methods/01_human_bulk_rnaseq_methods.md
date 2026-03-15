@@ -97,7 +97,7 @@ PROGENy pathway activity inference was performed in `03_run_progeny.R`.
 - `top = 100` (number of footprint genes per pathway)
 - `perm = 1000` (permutations for significance assessment)
 
-> **[WARNING]** PROGENy was run on log2(TPM) data (`HumanERpAge_39404g168s_TPMlog2.txt`) rather than the VST-normalized matrix produced by `01_preprocess.R`. This creates an inconsistency: GSVA used the VST/log2(TPM) output from `01_preprocess.R`, while PROGENy re-read and re-filtered the raw TPM file independently. The two matrices may differ in gene content or sample order.
+> **[RESOLVED]** PROGENy now uses the same VST-normalized matrix (`vst_normalized_matrix.rds`) produced by `01_preprocess.R`, consistent with the GSVA input. This eliminates the prior inconsistency where PROGENy independently re-read the raw TPM file.
 
 ### 3.3 Correlation Analysis
 

@@ -28,7 +28,7 @@ Significantly differentially expressed genes were defined as those with Benjamin
 
 DESeq2 size-factor-normalized counts were also exported. These normalized counts were rescaled to a per-million basis via `sweep(norm_counts, 2, colSums(norm_counts), "/") * 1e6` and saved as `normalized_tpm.csv` for use in PAM50 subtyping.
 
-> **[WARNING: Misleading "TPM" nomenclature]** The file `normalized_tpm.csv` does not contain true transcripts-per-million (TPM) values. True TPM requires division by effective gene length prior to per-million scaling. The values produced here are DESeq2 size-factor-normalized counts rescaled to counts-per-million (CPM), which lack gene-length normalization. This distinction is relevant because PAM50 classifiers were trained on microarray data (log2-scaled, median-centered). The genefu `molecular.subtyping()` function internally median-centers the input, which may partially compensate, but cross-study comparability with length-normalized expression (TPM/FPKM) is not guaranteed. Verify whether genefu's PAM50 implementation is robust to this input basis or whether proper TPM normalization (requiring gene lengths from the GTF) is needed.
+> **[RESOLVED]** The output file was renamed from `normalized_tpm.csv` to `normalized_cpm.csv` to accurately reflect that these are DESeq2 size-factor-normalized counts rescaled to counts-per-million (CPM), not true TPM (which requires gene-length normalization). The PAM50 script was updated to reference the renamed file. Note: genefu's `molecular.subtyping()` internally median-centers the input, which partially compensates for the lack of gene-length normalization.
 
 ## 6. PAM50 Molecular Subtyping
 

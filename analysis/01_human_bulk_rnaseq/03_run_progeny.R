@@ -45,53 +45,38 @@ data_dir <- file.path(project_root, "data/human_bulk_rnaseq")
 cat("=== PROGENy Analysis ===\n")
 
 # -----------------------------------------------------------------------------
-# Step 1: Load TPM Data
+# Step 1: Load Preprocessed Expression Data
 # -----------------------------------------------------------------------------
-cat("Step 1: Loading TPM data...\n")
-tpm_file <- file.path(data_dir, "raw/HumanERpAge_39404g168s_TPMlog2.txt")
-gene_annot_file <- file.path(data_dir, "external/Homo_sapiens.gene_info.txt")
+cat("Step 1: Loading preprocessed expression data...\n")
+vst_file <- file.path(output_dir, "vst_normalized_matrix.rds")
 sample_annot_file <- file.path(output_dir, "sample_annotation.rds")
 
-check_file_exists(tpm_file, "TPM data file")
-check_file_exists(gene_annot_file, "Gene annotation file")
+check_file_exists(vst_file, "VST-normalized matrix (from 01_preprocess.R)")
 check_file_exists(sample_annot_file, "Sample annotation file")
 
-tpm_data <- fread(tpm_file, stringsAsFactors = FALSE, header = TRUE)
-colnames(tpm_data)[1] <- "GeneSymb"
-colnames(tpm_data) <- gsub("_LEE.*", "", colnames(tpm_data))
+# Use the same preprocessed matrix as GSVA (consistency)
+vst_matrix <- readRDS(vst_file)
+sample_annot <- readRDS(sample_annot_file)
 
-# Load gene annotation for filtering
-gene_annot <- fread(gene_annot_file, header = TRUE, stringsAsFactors = FALSE)
-prot_coding <- gene_annot %>%
-  filter(type_of_gene == "protein-coding", !grepl("^LOC\\d+", Symbol)) %>%
-  pull(Symbol)
-
-tpm_filtered <- tpm_data %>%
-  filter(GeneSymb %in% prot_coding)
-
-cat("  TPM matrix:", nrow(tpm_filtered), "genes x", ncol(tpm_filtered) - 1, "samples\n")
+cat("  VST matrix:", nrow(vst_matrix), "genes x", ncol(vst_matrix), "samples\n")
 
 # -----------------------------------------------------------------------------
 # Step 2: Prepare Expression Matrix
 # -----------------------------------------------------------------------------
 cat("Step 2: Preparing expression matrix...\n")
-sample_annot <- readRDS(sample_annot_file)
 
-tpm_t <- tpm_filtered %>%
-  column_to_rownames("GeneSymb") %>%
-  t() %>%
-  as.data.frame() %>%
-  rownames_to_column("SampleName")
-
-tpm_annot <- inner_join(
-  sample_annot[, c("SampleName", "SampleNameGroup")],
-  tpm_t,
-  by = "SampleName"
-) %>%
-  select(-SampleName) %>%
-  column_to_rownames("SampleNameGroup") %>%
-  t() %>%
-  as.data.frame()
+# Align sample names with annotation
+common_samples <- intersect(colnames(vst_matrix), sample_annot$SampleName)
+if (length(common_samples) == 0) {
+  # Try SampleNameGroup matching
+  common_samples <- intersect(colnames(vst_matrix), sample_annot$SampleNameGroup)
+  tpm_annot <- as.data.frame(vst_matrix[, common_samples])
+} else {
+  # Rename to SampleNameGroup for downstream compatibility
+  name_map <- setNames(sample_annot$SampleNameGroup, sample_annot$SampleName)
+  tpm_annot <- as.data.frame(vst_matrix[, common_samples])
+  colnames(tpm_annot) <- name_map[common_samples]
+}
 
 cat("  Expression matrix:", nrow(tpm_annot), "genes x", ncol(tpm_annot), "samples\n")
 

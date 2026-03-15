@@ -116,7 +116,7 @@ Differential expression testing between Aged and Young groups was performed per 
 
 Cell types with fewer than 10 cells in either group were excluded. P-values were corrected for multiple testing using the Benjamini-Hochberg method (`p.adjust(method = "BH")`) applied within each cell type. Genes were classified as significant at FDR < 0.05 and further annotated by direction (upregulated or downregulated in Aged).
 
-> **[WARNING]** Differential expression was performed at the single-cell level using `FindMarkers()` rather than pseudobulk aggregation. With only 3 biological replicates per group, this constitutes pseudoreplication and p-values are likely inflated. The Wilcoxon test treats each cell as an independent observation, ignoring within-sample correlation. Consider pseudobulk DE (e.g., DESeq2 on aggregated counts per sample) before publication.
+> **[RESOLVED]** Differential expression was converted from cell-level `FindMarkers()` (pseudoreplication) to pseudobulk DESeq2. Raw counts are now aggregated per sample using `AggregateExpression()`, with DESeq2 `~ group` design and Aged vs Young contrast. This properly treats biological replicates (n=3 per group) as the unit of analysis.
 
 > **[WARNING]** The BH correction is applied within each cell type independently. No correction is applied for testing across multiple cell types.
 

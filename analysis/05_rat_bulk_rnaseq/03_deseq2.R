@@ -9,7 +9,7 @@
 # Outputs:
 #   - analysis/05_rat_bulk_rnaseq/outputs/deseq2_results.csv
 #   - analysis/05_rat_bulk_rnaseq/outputs/deseq2_results_significant.csv
-#   - analysis/05_rat_bulk_rnaseq/outputs/normalized_tpm.csv (for PAM50)
+#   - analysis/05_rat_bulk_rnaseq/outputs/normalized_cpm.csv (for PAM50)
 
 set.seed(12345)
 
@@ -164,9 +164,9 @@ cat("\nSummary:\n")
 cat("  Upregulated (log2FC > 0):", sum(res_sig$log2FoldChange > 0, na.rm = TRUE), "\n")
 cat("  Downregulated (log2FC < 0):", sum(res_sig$log2FoldChange < 0, na.rm = TRUE), "\n")
 
-# Save normalized counts for PAM50
-norm_tpm <- sweep(norm_counts, 2, colSums(norm_counts), "/") * 1e6
-write.csv(norm_tpm, file.path(output_dir, "normalized_tpm.csv"))
-cat("  Saved: normalized_tpm.csv\n")
+# Save normalized counts for PAM50 (CPM: counts-per-million from size-factor-normalized counts)
+norm_cpm <- sweep(norm_counts, 2, colSums(norm_counts), "/") * 1e6
+write.csv(norm_cpm, file.path(output_dir, "normalized_cpm.csv"))
+cat("  Saved: normalized_cpm.csv (size-factor-normalized CPM)\n")
 
 cat("\n=== DESeq2 complete ===\n")
