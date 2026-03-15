@@ -27,6 +27,7 @@
 ### Reproducibility Requirements
 
 1. **Set seeds**: All scripts must set `set.seed(12345)` (R) or `np.random.seed(12345)` (Python)
+   - **Exception**: Section `07_organoid_single_cell` uses `seed=42` / `random_state=42` to preserve consistency with original analysis results. Do not change to 12345.
 2. **Fixed ordering**: Use explicit ordering for pathways, genes, cell types - never rely on hash order
 3. **Version pinning**: Document package versions in environment files
 4. **Deterministic outputs**: Same inputs must produce identical outputs
@@ -47,6 +48,7 @@ analysis/
 ├── 04_human_scrnaseq/      # Human ER+ scRNA-seq (Wu et al.)
 ├── 05_rat_bulk_rnaseq/     # Rat bulk RNA-seq
 ├── 06_spatial_biopsies/   # Spatial biopsy immune analysis (HCC22-088)
+├── 07_organoid_single_cell/ # Organoid scRNA-seq (PDO-296 HSD17B7i)
 └── .pipeline_markers/      # Job completion markers
 
 validation/
