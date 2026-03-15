@@ -70,6 +70,17 @@ Before submission, run the 3-tier validation:
 
 Contains: R 4.3.3, Seurat 5.3.0, GSVA, msigdbr, CellChat, decoupleR, DESeq2
 
+## Methods Documentation
+
+Nature methods (main text + supplementary) are in `docs/methods/`. Issue tracker in `00b_supplementary_methods.md`.
+
+## Analytical Conventions
+
+1. **Pseudobulk DE**: All single-cell/single-nucleus DE must use pseudobulk aggregation (DESeq2 on `AggregateExpression()` counts per sample), not cell-level `FindMarkers()`. This avoids pseudoreplication (Squair et al. 2021).
+2. **Consistent input matrices**: All pathway analyses (GSVA, PROGENy) in a given section must use the same preprocessed expression matrix. Do not independently re-read raw data files.
+3. **Column schema**: DESeq2-based DEG tables use `log2FoldChange`, `padj`. Seurat-based tables use `avg_log2FC`, `p_val_adj`. Downstream scripts must match the upstream output format.
+4. **CPM vs TPM**: Size-factor-normalized CPM (no gene-length correction) must be labeled as CPM, not TPM. File: `normalized_cpm.csv`.
+
 ## Duplicate Sample Warning
 
 **`135938ERPRnoNAC` is a duplicate of `1410354A13KECKHE`** - always exclude from analyses.
