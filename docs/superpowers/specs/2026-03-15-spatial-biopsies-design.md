@@ -22,14 +22,13 @@ and env references, no logic changes.
 analysis/06_spatial_biopsies/
 ├── 01_immune_secretion.py      # Spatial cytokine plots (from CITEgeist script 12)
 ├── 02_immune_pathways.py       # Enrichment + GSEA (from CITEgeist script 13)
-├── utils.py                    # log_memory_usage helper (copied from CITEgeist)
+├── utils.py                    # log_memory_usage only (extracted, not full copy)
 ├── figure_config.py            # Standardized figure params (copied from CITEgeist)
 ├── data/
 │   └── biopsy_adatas.pkl       # Symlink to CITEgeist data
 ├── run_analysis.sbatch         # Combined sbatch runner
 ├── run_analysis.sh             # Shell runner script
 ├── logs/
-├── outputs/
 └── figures/
     ├── immune_secretion/
     └── immune_pathways/
@@ -41,17 +40,25 @@ analysis/06_spatial_biopsies/
 ## Changes from Originals
 
 1. **Renumbered**: 12 → 01, 13 → 02 (per-section convention)
-2. **Log filenames**: Updated to match new numbering (01_immune_secretion.log, etc.)
+2. **Log filenames**: `logs/12_immune_secretion.log` → `logs/01_immune_secretion.log`,
+   `logs/13_immune_pathways.log` → `logs/02_immune_pathways.log`
 3. **Conda env**: sbatch points to `erp_brca_aging` instead of `CITEgeist_env_neil`
 4. **sbatch**: Single `run_analysis.sbatch` running both scripts sequentially, with
-   `cd` into section directory, mail directives per project standards
+   `cd` into section directory, mail directives per project standards. Supports
+   optional `--figures-only` flag passed through to script 02.
 5. **Data**: Symlink from `data/biopsy_adatas.pkl` to CITEgeist source
-6. **No analysis logic changes**: Cytokine lists, sample mappings, pathway filters all
-   kept identical
+6. **utils.py**: Extract only `log_memory_usage()` (~5 lines, needs `psutil`, `os`,
+   `logging`) rather than copying the full 600-line file with unneeded dependencies
+7. **figure_config.py docstring**: Update "CITEgeist" reference to current project
+8. **GSEA seed**: Change `seed=42` to `seed=12345` in `gp.prerank()` call to match
+   CLAUDE.md reproducibility standard
+9. **No other analysis logic changes**: Cytokine lists, sample mappings, pathway
+   filters all kept identical
 
 ## Dependencies
 
-- Python packages needed in `erp_brca_aging`: scanpy, gseapy, seaborn (verify/install)
+- Python packages needed in `erp_brca_aging`: scanpy, gseapy, seaborn, psutil
+  (verify/install)
 - Data: `/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/CITEgeistNeilAnalysis/CITEgeist/analysis/data/biopsy_adatas.pkl`
 - Font: `/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf` (already on cluster)
 
@@ -59,12 +66,15 @@ analysis/06_spatial_biopsies/
 
 From Codex review — accepted as-is for minimal copy approach:
 
-- **obsm shape mismatch** (script 13 line 431): likely dead code path for this dataset
+- **obsm shape mismatch** (script 13 line 431): likely dead code path for this dataset;
+  no obsm keys in biopsy_adatas match macrophage keywords
 - **Scanpy show_ prefix workaround** (script 12): brittle but functional
 - **No input file validation**: violates CLAUDE.md but scripts already work
 - **Hardcoded Arial path**: fine on this cluster
 - **Hardcoded 6-sample order**: correct for this dataset
-- **Missing np.random.seed(12345)**: script 13 uses seed=42 for GSEA permutations
+- **Figure format**: Script 12 saves PNG only, script 13 saves PNG+SVG (not PDF).
+  CLAUDE.md asks for PDF+PNG but these are spatial plots where SVG/PNG is sufficient.
+  Accepted deviation.
 
 ## CLAUDE.md Update
 
