@@ -299,7 +299,7 @@ def create_pathway_dotplot(all_results, output_path):
     plot_df = plot_df[available_samples]
 
     # Create dot plot with adjusted figure size for full pathway names
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=(12, max(6, 0.45 * len(plot_df))))
 
     # Create heatmap
     heatmap = sns.heatmap(-np.log10(plot_df.fillna(1)),
@@ -315,12 +315,12 @@ def create_pathway_dotplot(all_results, output_path):
 
     # Customize x-axis labels using sample_map (S1-S6)
     x_labels = [sample_map.get(col, col) for col in plot_df.columns]
-    ax.set_xticklabels(x_labels, rotation=0, ha='center', fontsize=14)
+    ax.set_xticklabels(x_labels, rotation=0, ha='center', fontsize=11)
 
     # Customize y-axis labels - show full pathway names (no truncation)
-    ax.set_yticklabels(plot_df.index, rotation=0, fontsize=14)
-    
-    plt.tight_layout()
+    ax.set_yticklabels(plot_df.index, rotation=0, fontsize=9)
+
+    plt.subplots_adjust(left=0.42, right=0.97, top=0.90, bottom=0.12)
 
     # Save as PNG
     plt.savefig(output_path, dpi=600, bbox_inches='tight')

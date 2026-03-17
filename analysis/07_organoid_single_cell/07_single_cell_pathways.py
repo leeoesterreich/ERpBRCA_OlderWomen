@@ -32,7 +32,7 @@ from pathlib import Path
 warnings.filterwarnings('ignore')
 
 from _config import (
-    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists
+    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments
 )
 
 # =============================================================================
@@ -178,17 +178,17 @@ def run_all_comparisons(adata):
 
 def plot_pathway_violins(adata, pathway_name, score_col):
     """Create violin plot comparing pathway scores across treatments"""
-    treatment_order = ["Vehicle", "E1", "E1+ICI", "E1+HSD17B7i", "E2", "E2+ICI", "E2+HSD17B7i"]
+    treatment_order = ["Vehicle", "E1", "E1+fulv", "E1+HSD17B7i", "E2", "E2+fulv", "E2+HSD17B7i"]
     treatment_order = [t for t in treatment_order if t in adata.obs["treatment"].unique()]
 
     # Color palette - E1 conditions in blues, E2 in reds
     colors = {
         "Vehicle": "#808080",
         "E1": "#3498db",
-        "E1+ICI": "#85c1e9",
+        "E1+fulv": "#85c1e9",
         "E1+HSD17B7i": "#1a5276",
         "E2": "#e74c3c",
-        "E2+ICI": "#f1948a",
+        "E2+fulv": "#f1948a",
         "E2+HSD17B7i": "#922b21"
     }
     palette = [colors.get(t, "#333333") for t in treatment_order]
@@ -216,7 +216,7 @@ def plot_pathway_violins(adata, pathway_name, score_col):
 
 def plot_pathway_ridge(adata, pathway_name, score_col):
     """Create ridge plot showing full distributions"""
-    treatment_order = ["Vehicle", "E1", "E1+ICI", "E1+HSD17B7i", "E2", "E2+ICI", "E2+HSD17B7i"]
+    treatment_order = ["Vehicle", "E1", "E1+fulv", "E1+HSD17B7i", "E2", "E2+fulv", "E2+HSD17B7i"]
     treatment_order = [t for t in treatment_order if t in adata.obs["treatment"].unique()]
 
     fig, axes = plt.subplots(len(treatment_order), 1, figsize=(8, len(treatment_order)*1.2),
@@ -225,10 +225,10 @@ def plot_pathway_ridge(adata, pathway_name, score_col):
     colors = {
         "Vehicle": "#808080",
         "E1": "#3498db",
-        "E1+ICI": "#85c1e9",
+        "E1+fulv": "#85c1e9",
         "E1+HSD17B7i": "#1a5276",
         "E2": "#e74c3c",
-        "E2+ICI": "#f1948a",
+        "E2+fulv": "#f1948a",
         "E2+HSD17B7i": "#922b21"
     }
 
@@ -409,6 +409,7 @@ def main():
     log_msg(f"Loading data from {INPUT_H5AD}")
     check_file_exists(INPUT_H5AD, "Preprocessed h5ad")
     adata = sc.read_h5ad(INPUT_H5AD)
+    standardize_treatments(adata)
     log_msg(f"Loaded {adata.n_obs} cells, {adata.n_vars} genes")
     log_msg(f"Treatments: {adata.obs['treatment'].value_counts().to_dict()}")
 

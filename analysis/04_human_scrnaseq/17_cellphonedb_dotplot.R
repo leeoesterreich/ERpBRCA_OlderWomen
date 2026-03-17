@@ -235,7 +235,6 @@ if (filter_mode == "curated") {
   # Filter using matched pairs (not original curated_pairs)
   sig_lr_pairs <- immune_data %>%
     filter(interacting_pair %in% matched_pairs) %>%
-    filter(!is.na(pvalue_fdr) & pvalue_fdr < 0.05) %>%
     group_by(interacting_pair) %>%
     summarise(
       n_sig = n(),
@@ -298,7 +297,7 @@ plot_data <- immune_data %>%
     # Use log2 mean expression to match manuscript
     log2_mean = log2(mean_expr + 1),
     # Set non-significant (FDR >= 0.05) to NA for cleaner plot
-    log2_mean_plot = ifelse(pvalue_fdr < 0.05, log2_mean, NA)
+    log2_mean_plot = ifelse(filter_mode == "curated" | pvalue_fdr < 0.05, log2_mean, NA)
   )
 
 cat(sprintf("  Final plot data: %d points\n", nrow(plot_data)))
@@ -363,11 +362,11 @@ p <- ggplot(plot_data, aes(x = cell_pair_age, y = interacting_pair)) +
   theme_minimal(base_size = 10) +
   theme(
     # X-axis: rotated labels on top - LARGER font
-    axis.text.x.top = element_text(angle = 90, hjust = 0, vjust = 0.5, size = 9, color = "black"),
+    axis.text.x.top = element_text(angle = 90, hjust = 0, vjust = 0.5, size = 7, color = "black"),
     axis.text.x.bottom = element_blank(),
     axis.ticks.x.bottom = element_blank(),
     # Y-axis: L-R pair names - LARGER font
-    axis.text.y = element_text(size = 8, color = "black"),
+    axis.text.y = element_text(size = 6.5, color = "black"),
     axis.title = element_blank(),
     # Grid: very subtle
     panel.grid.major = element_line(color = "grey90", linewidth = 0.15),
@@ -390,17 +389,17 @@ p <- ggplot(plot_data, aes(x = cell_pair_age, y = interacting_pair)) +
 # Save with mode-specific filename - PORTRAIT orientation like manuscript
 mode_suffix <- ifelse(filter_mode == "curated", "_curated", "")
 output_file <- file.path(figures_dir, sprintf("fig7d_cellphonedb_dotplot%s.png", mode_suffix))
-ggsave(output_file, p, width = 8, height = 14, dpi = 300)  # Portrait: taller than wide
+ggsave(output_file, p, width = 9.5, height = 16, dpi = 300)  # Portrait: taller than wide
 cat(sprintf("  Saved: %s\n", output_file))
 
 # Also save as PDF
 pdf_file <- file.path(figures_dir, sprintf("fig7d_cellphonedb_dotplot%s.pdf", mode_suffix))
-ggsave(pdf_file, p, width = 8, height = 14)
+ggsave(pdf_file, p, width = 9.5, height = 16)
 cat(sprintf("  Saved: %s\n", pdf_file))
 
 # Also save as SVG
 svg_file <- file.path(figures_dir, sprintf("fig7d_cellphonedb_dotplot%s.svg", mode_suffix))
-ggsave(svg_file, p, width = 8, height = 14, device = "svg")
+ggsave(svg_file, p, width = 9.5, height = 16, device = "svg")
 cat(sprintf("  Saved: %s\n", svg_file))
 
 # -----------------------------------------------------------------------------

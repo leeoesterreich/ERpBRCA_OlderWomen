@@ -85,11 +85,17 @@ print(table(seurat_obj$CellTypeAnnotSH))
 # -----------------------------------------------------------------------------
 cat("\nStep 2: Loading gene sets...\n")
 
-hallmark_sets <- msigdbr(species = "Homo sapiens", category = "H")
+hallmark_sets <- tryCatch(
+  msigdbr(species = "Homo sapiens", collection = "H"),
+  error = function(e) msigdbr(species = "Homo sapiens", category = "H")
+)
 hallmark_list <- split(hallmark_sets$gene_symbol, hallmark_sets$gs_name)
 cat("  HALLMARK pathways loaded:", length(hallmark_list), "\n")
 
-biocarta_sets <- msigdbr(species = "Homo sapiens", category = "C2", subcategory = "CP:BIOCARTA")
+biocarta_sets <- tryCatch(
+  msigdbr(species = "Homo sapiens", collection = "C2", subcollection = "CP:BIOCARTA"),
+  error = function(e) msigdbr(species = "Homo sapiens", category = "C2", subcategory = "CP:BIOCARTA")
+)
 biocarta_list <- split(biocarta_sets$gene_symbol, biocarta_sets$gs_name)
 cat("  BIOCARTA pathways loaded:", length(biocarta_list), "\n")
 
@@ -467,22 +473,22 @@ make_heatmap <- function(mat, sig_mat, title_text, col_fun, range_vals) {
     show_row_dend = FALSE,
     row_split = row_split, row_gap = unit(2, "mm"),
     row_title_side = "left", row_title_rot = 0,
-    row_title_gp = gpar(fontsize = 10, fontface = "plain"),
+    row_title_gp = gpar(fontsize = 12, fontface = "plain", fontfamily = "Arial"),
     left_annotation = left_anno,
     show_row_names = TRUE, row_names_side = "right",
-    row_names_gp = gpar(fontsize = 9),
+    row_names_gp = gpar(fontsize = 11, fontfamily = "Arial"),
     show_column_names = TRUE, column_names_rot = 45,
     column_names_side = "bottom",
-    column_names_gp = gpar(fontsize = 10),
+    column_names_gp = gpar(fontsize = 12, fontfamily = "Arial"),
     column_title = title_text,
-    column_title_gp = gpar(fontsize = 16, fontface = "plain"),
+    column_title_gp = gpar(fontsize = 18, fontface = "plain", fontfamily = "Arial"),
     column_dend_height = unit(10, "mm"),
     border = FALSE,
     rect_gp = gpar(col = "#3B3B3B", lwd = 0.5),
     # Overlay significance stars
     cell_fun = function(j, i, x, y, width, height, fill) {
       if (sig_mat[i, j] != "") {
-        grid.text(sig_mat[i, j], x, y, gp = gpar(fontsize = 8, col = "black"))
+        grid.text(sig_mat[i, j], x, y, gp = gpar(fontsize = 10, col = "black", fontfamily = "Arial"))
       }
     },
     width = unit(55, "mm"),
@@ -492,8 +498,8 @@ make_heatmap <- function(mat, sig_mat, title_text, col_fun, range_vals) {
       title = "Pathway activity\n(z-score)",
       at = c(range_vals[1], 0, range_vals[2]),
       legend_width = unit(30, "mm"),
-      title_gp = gpar(fontsize = 10),
-      labels_gp = gpar(fontsize = 9)
+      title_gp = gpar(fontsize = 12, fontfamily = "Arial"),
+      labels_gp = gpar(fontsize = 11, fontfamily = "Arial")
     )
   )
 }

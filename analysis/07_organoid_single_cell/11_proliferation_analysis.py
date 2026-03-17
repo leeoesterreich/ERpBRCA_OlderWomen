@@ -45,7 +45,7 @@ from pathlib import Path
 warnings.filterwarnings('ignore')
 
 from _config import (
-    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists
+    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments
 )
 
 # =============================================================================
@@ -60,14 +60,14 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Treatment ordering and colors (E1 conditions blue, E2 conditions red)
-TREATMENT_ORDER = ['Vehicle', 'E1', 'E1+ICI', 'E1+HSD17B7i', 'E2', 'E2+ICI', 'E2+HSD17B7i']
+TREATMENT_ORDER = ['Vehicle', 'E1', 'E1+fulv', 'E1+HSD17B7i', 'E2', 'E2+fulv', 'E2+HSD17B7i']
 TREATMENT_COLORS = {
     'Vehicle': '#808080',
     'E1': '#3498db',
-    'E1+ICI': '#85c1e9',
+    'E1+fulv': '#85c1e9',
     'E1+HSD17B7i': '#1a5276',
     'E2': '#e74c3c',
-    'E2+ICI': '#f1948a',
+    'E2+fulv': '#f1948a',
     'E2+HSD17B7i': '#922b21',
 }
 
@@ -82,8 +82,8 @@ COMPARISONS = [
     ('Vehicle', 'E1', 'Vehicle vs E1'),
     ('Vehicle', 'E2', 'Vehicle vs E2'),
     ('E1', 'E2', 'E1 vs E2'),
-    ('E1', 'E1+ICI', 'E1 vs E1+ICI'),
-    ('E2', 'E2+ICI', 'E2 vs E2+ICI'),
+    ('E1', 'E1+fulv', 'E1 vs E1+fulv'),
+    ('E2', 'E2+fulv', 'E2 vs E2+fulv'),
     ('E1', 'E1+HSD17B7i', 'E1 vs E1+HSD17B7i'),
     ('E1+HSD17B7i', 'E2+HSD17B7i', 'E1+HSD17B7i vs E2+HSD17B7i'),
 ]
@@ -431,7 +431,7 @@ def plot_cycling_fraction(adata):
 
     ax.set_xlabel('')
     ax.set_ylabel('Proportion', fontsize=11)
-    ax.set_title('Cycling vs Non-Cycling Cells by Treatment', fontsize=12)
+    ax.set_title('Cycling vs Non-Cycling Cells by Treatment', fontsize=12, pad=14)
     ax.set_xticks(x)
     ax.set_xticklabels(available, rotation=45, ha='right')
     ax.set_ylim(0, 1)
@@ -441,7 +441,7 @@ def plot_cycling_fraction(adata):
     for i, t in enumerate(available):
         n_total = counts.loc[t].sum()
         n_cyc = counts.loc[t].get('cycling', 0)
-        ax.text(i, 1.02, f'n={n_total}\n({n_cyc} cyc)', ha='center', va='bottom', fontsize=8, color='gray')
+        ax.text(i, 0.98, f'n={n_total}\n({n_cyc} cyc)', ha='center', va='top', fontsize=8, color='gray')
 
     plt.tight_layout()
     plt.savefig(FIG_DIR / "panel2_cycling_fraction.png", dpi=150, bbox_inches='tight')
@@ -655,7 +655,7 @@ def plot_umap_overlays(adata):
 def plot_cluster_cycling_heatmap(adata):
     """Panel 6: Heatmap of cycling fraction per Leiden cluster per treatment.
 
-    Identifies resistant subpopulations that keep cycling under ICI.
+    Identifies resistant subpopulations that keep cycling under fulvestrant.
     """
     log_msg("Creating Panel 6: Per-cluster cycling heatmap...")
 
@@ -673,7 +673,7 @@ def plot_cluster_cycling_heatmap(adata):
         for treatment in available:
             mask = (adata.obs['leiden'] == cluster) & (adata.obs['treatment'] == treatment)
             n_total = mask.sum()
-            if n_total < 5:
+            if n_total == 0:
                 continue
             n_cycling = (adata.obs.loc[mask, 'cycling_status'] == 'cycling').sum()
             cluster_cycling.append({
@@ -689,14 +689,13 @@ def plot_cluster_cycling_heatmap(adata):
     # Save CSV
     cluster_df.to_csv(RESULTS_DIR / "per_cluster_cycling.csv", index=False)
 
-    # Pivot for heatmap
+    # Pivot for heatmap — fill missing combos with 0 (no cells = 0 cycling)
     pivot = cluster_df.pivot(index='cluster', columns='treatment', values='frac_cycling')
-    pivot = pivot[available]
+    pivot = pivot.reindex(columns=available).fillna(0)
 
     fig, ax = plt.subplots(figsize=(10, max(4, len(pivot) * 0.5)))
 
-    # Format annotations: show fractions, display '-' for missing cluster-treatment combos
-    annot_labels = pivot.copy().applymap(lambda x: f'{x:.2f}' if pd.notna(x) else '-')
+    annot_labels = pivot.copy().applymap(lambda x: f'{x:.2f}')
 
     sns.heatmap(
         pivot, cmap='RdYlBu_r', vmin=0, vmax=1, annot=annot_labels, fmt='s',
@@ -759,10 +758,10 @@ def plot_proliferation_estrogen_coupling(adata):
     corr_df.to_csv(RESULTS_DIR / "proliferation_estrogen_correlation.csv", index=False)
 
     # Scatter plot: one panel per treatment
-    ncols = 4
-    nrows = (len(available) + ncols - 1) // ncols
-    fig, axes = plt.subplots(nrows, ncols, figsize=(4.5 * ncols, 4 * nrows), sharex=True, sharey=True)
-    axes = axes.flatten()
+    ncols = len(available)
+    nrows = 1
+    fig, axes = plt.subplots(nrows, ncols, figsize=(4.0 * ncols, 4), sharex=True, sharey=True)
+    axes = np.atleast_1d(axes).flatten()
 
     for i, treatment in enumerate(available):
         ax = axes[i]
@@ -783,9 +782,6 @@ def plot_proliferation_estrogen_coupling(adata):
             ax.set_ylabel(er_score_col.replace('_score', '').replace('_', ' '))
         if i >= (nrows - 1) * ncols:
             ax.set_xlabel('Proliferation Score')
-
-    for j in range(len(available), len(axes)):
-        axes[j].set_visible(False)
 
     plt.suptitle('Proliferation-Estrogen Response Coupling by Treatment', fontsize=12, y=1.01)
     plt.tight_layout()
@@ -811,6 +807,7 @@ def main():
     log_msg(f"\nLoading data from {INPUT_H5AD}")
     check_file_exists(INPUT_H5AD, "Pathway-scored h5ad")
     adata = sc.read_h5ad(INPUT_H5AD)
+    standardize_treatments(adata)
     log_msg(f"Loaded {adata.n_obs} cells, {adata.n_vars} genes")
     log_msg(f"Treatments: {adata.obs['treatment'].value_counts().to_dict()}")
 

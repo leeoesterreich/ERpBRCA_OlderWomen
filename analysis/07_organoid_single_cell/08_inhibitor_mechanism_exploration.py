@@ -21,7 +21,7 @@
 #   - figures/inhibitor_mechanism/e1_vs_e2_lfc_scatter.png/.pdf
 #   - figures/inhibitor_mechanism/signature_projection.png/.pdf
 #   - figures/inhibitor_mechanism/heatmap_*.png/.pdf
-#   - figures/inhibitor_mechanism/ici_calibration_kde.png/.pdf
+#   - figures/inhibitor_mechanism/fulv_calibration_kde.png/.pdf
 #   - figures/inhibitor_mechanism/dose_response_hsd17b7.png/.pdf
 #   - figures/inhibitor_mechanism/subprogram_violins.png/.pdf
 #   - figures/inhibitor_mechanism/subprogram_effect_heatmap.png/.pdf
@@ -41,7 +41,7 @@ from pathlib import Path
 warnings.filterwarnings('ignore')
 
 from _config import (
-    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists
+    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments
 )
 
 # =============================================================================
@@ -237,13 +237,13 @@ def project_signatures(adata, gene_lists):
             log_msg(f"  {name}: Only {len(genes_present)} genes, skipping")
 
     # Plot signature scores across all conditions
-    treatment_order = ["Vehicle", "E1", "E1+ICI", "E1+HSD17B7i",
-                       "E2", "E2+ICI", "E2+HSD17B7i"]
+    treatment_order = ["Vehicle", "E1", "E1+fulv", "E1+HSD17B7i",
+                       "E2", "E2+fulv", "E2+HSD17B7i"]
     treatment_order = [t for t in treatment_order if t in adata.obs["treatment"].unique()]
 
     colors = {
-        "Vehicle": "#808080", "E1": "#3498db", "E1+ICI": "#85c1e9",
-        "E1+HSD17B7i": "#1a5276", "E2": "#e74c3c", "E2+ICI": "#f1948a",
+        "Vehicle": "#808080", "E1": "#3498db", "E1+fulv": "#85c1e9",
+        "E1+HSD17B7i": "#1a5276", "E2": "#e74c3c", "E2+fulv": "#f1948a",
         "E2+HSD17B7i": "#922b21"
     }
 
@@ -327,8 +327,8 @@ def profile_steroidogenic_genes(adata):
     """Profile expression of HSD17B family and steroidogenic enzymes."""
     log_msg("MODULE 3: HSD17B family and steroidogenic enzyme profiling")
 
-    treatment_order = ["Vehicle", "E1", "E1+ICI", "E1+HSD17B7i",
-                       "E2", "E2+ICI", "E2+HSD17B7i"]
+    treatment_order = ["Vehicle", "E1", "E1+fulv", "E1+HSD17B7i",
+                       "E2", "E2+fulv", "E2+HSD17B7i"]
     treatment_order = [t for t in treatment_order if t in adata.obs["treatment"].unique()]
 
     all_results = []
@@ -418,11 +418,11 @@ def profile_steroidogenic_genes(adata):
 
 
 # =============================================================================
-# MODULE 4: ICI calibration
+# MODULE 4: Fulvestrant calibration
 # =============================================================================
-def ici_calibration(adata):
-    """Use ICI conditions to calibrate blocked vs shifted signaling."""
-    log_msg("MODULE 4: ICI calibration - blocked vs shifted signaling")
+def fulv_calibration(adata):
+    """Use fulvestrant conditions to calibrate blocked vs shifted signaling."""
+    log_msg("MODULE 4: Fulvestrant calibration - blocked vs shifted signaling")
 
     # Get estrogen response scores
     er_scores = [c for c in adata.obs.columns if "ESTROGEN_RESPONSE" in c and c.endswith("_score")]
@@ -430,11 +430,11 @@ def ici_calibration(adata):
         log_msg("  No estrogen response scores found, skipping")
         return
 
-    treatment_order = ["Vehicle", "E1", "E1+ICI", "E1+HSD17B7i",
-                       "E2", "E2+ICI", "E2+HSD17B7i"]
+    treatment_order = ["Vehicle", "E1", "E1+fulv", "E1+HSD17B7i",
+                       "E2", "E2+fulv", "E2+HSD17B7i"]
     treatment_order = [t for t in treatment_order if t in adata.obs["treatment"].unique()]
 
-    # Compare: does E1+HSD17B7i look more like E1+ICI (blocked) or something in between?
+    # Compare: does E1+HSD17B7i look more like E1+fulv (blocked) or something in between?
     n_plots = min(len(er_scores), 2)
     fig, axes = plt.subplots(1, n_plots, figsize=(7 * n_plots, 5))
     if n_plots == 1:
@@ -451,9 +451,9 @@ def ici_calibration(adata):
 
         # KDE overlay
         ax = axes[idx]
-        for t, color, ls in [("E1", "#3498db", "-"), ("E1+ICI", "#85c1e9", "--"),
+        for t, color, ls in [("E1", "#3498db", "-"), ("E1+fulv", "#85c1e9", "--"),
                                ("E1+HSD17B7i", "#1a5276", ":"),
-                               ("E2", "#e74c3c", "-"), ("E2+ICI", "#f1948a", "--"),
+                               ("E2", "#e74c3c", "-"), ("E2+fulv", "#f1948a", "--"),
                                ("E2+HSD17B7i", "#922b21", ":")]:
             if t in distributions and len(distributions[t]) > 0:
                 kde = stats.gaussian_kde(distributions[t])
@@ -463,30 +463,30 @@ def ici_calibration(adata):
                 )
                 ax.plot(x, kde(x), color=color, linestyle=ls, label=t, linewidth=2)
 
-        ax.set_title(f"{pathway_name}\nICI (blocked) vs HSD17B7i (shifted?)")
+        ax.set_title(f"{pathway_name}\nfulv (blocked) vs HSD17B7i (shifted?)")
         ax.set_xlabel("Pathway Score")
         ax.set_ylabel("Density")
         ax.legend(fontsize=7)
 
     plt.tight_layout()
-    plt.savefig(FIG_DIR / "ici_calibration_kde.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / "ici_calibration_kde.pdf", bbox_inches="tight")
+    plt.savefig(FIG_DIR / "fulv_calibration_kde.png", dpi=150, bbox_inches="tight")
+    plt.savefig(FIG_DIR / "fulv_calibration_kde.pdf", bbox_inches="tight")
     plt.close()
 
-    # Quantify: how far is each inhibitor condition from ICI (blocked) vs estrogen (active)?
-    log_msg("\n  Inhibitor position between ICI (blocked) and estrogen (active):")
+    # Quantify: how far is each inhibitor condition from fulv (blocked) vs estrogen (active)?
+    log_msg("\n  Inhibitor position between fulv (blocked) and estrogen (active):")
     for score_col in er_scores:
         pathway = score_col.replace("_score", "")
         log_msg(f"  {pathway}:")
 
-        for estrogen, ici, inhib in [("E1", "E1+ICI", "E1+HSD17B7i"),
-                                      ("E2", "E2+ICI", "E2+HSD17B7i")]:
+        for estrogen, ici, inhib in [("E1", "E1+fulv", "E1+HSD17B7i"),
+                                      ("E2", "E2+fulv", "E2+HSD17B7i")]:
             means = {}
             for t in [estrogen, ici, inhib]:
                 mask = adata.obs["treatment"] == t
                 means[t] = adata.obs.loc[mask, score_col].mean()
 
-            # Position: 0 = same as ICI (fully blocked), 1 = same as estrogen (fully active)
+            # Position: 0 = same as fulv (fully blocked), 1 = same as estrogen (fully active)
             denom = means[estrogen] - means[ici]
             if abs(denom) > 0.001:
                 position = (means[inhib] - means[ici]) / denom
@@ -494,7 +494,7 @@ def ici_calibration(adata):
                 position = float('nan')
 
             log_msg(f"    {inhib:20s}: position = {position:.2f} "
-                   f"(0=ICI/blocked, 1=estrogen/active)")
+                   f"(0=fulv/blocked, 1=estrogen/active)")
             log_msg(f"      {ici}: {means[ici]:.4f}, {inhib}: {means[inhib]:.4f}, "
                    f"{estrogen}: {means[estrogen]:.4f}")
 
@@ -607,13 +607,13 @@ def subprogram_decomposition(adata):
         else:
             log_msg(f"  {name}: Only {len(genes_present)} genes, skipping")
 
-    treatment_order = ["Vehicle", "E1", "E1+ICI", "E1+HSD17B7i",
-                       "E2", "E2+ICI", "E2+HSD17B7i"]
+    treatment_order = ["Vehicle", "E1", "E1+fulv", "E1+HSD17B7i",
+                       "E2", "E2+fulv", "E2+HSD17B7i"]
     treatment_order = [t for t in treatment_order if t in adata.obs["treatment"].unique()]
 
     colors = {
-        "Vehicle": "#808080", "E1": "#3498db", "E1+ICI": "#85c1e9",
-        "E1+HSD17B7i": "#1a5276", "E2": "#e74c3c", "E2+ICI": "#f1948a",
+        "Vehicle": "#808080", "E1": "#3498db", "E1+fulv": "#85c1e9",
+        "E1+HSD17B7i": "#1a5276", "E2": "#e74c3c", "E2+fulv": "#f1948a",
         "E2+HSD17B7i": "#922b21"
     }
 
@@ -654,8 +654,8 @@ def subprogram_decomposition(adata):
         for group1, group2, label in [
             ("E1", "E1+HSD17B7i", "E1 -> E1+inh"),
             ("E2", "E2+HSD17B7i", "E2 -> E2+inh"),
-            ("E1+ICI", "E1+HSD17B7i", "E1+ICI vs E1+inh"),
-            ("E2+ICI", "E2+HSD17B7i", "E2+ICI vs E2+inh"),
+            ("E1+fulv", "E1+HSD17B7i", "E1+fulv vs E1+inh"),
+            ("E2+fulv", "E2+HSD17B7i", "E2+fulv vs E2+inh"),
         ]:
             mask1 = adata.obs["treatment"] == group1
             mask2 = adata.obs["treatment"] == group2
@@ -681,7 +681,7 @@ def subprogram_decomposition(adata):
     # Heatmap
     if len(effect_df) > 0:
         pivot = effect_df.pivot(index="subprogram", columns="comparison", values="cohens_d")
-        comp_order = ["E1 -> E1+inh", "E2 -> E2+inh", "E1+ICI vs E1+inh", "E2+ICI vs E2+inh"]
+        comp_order = ["E1 -> E1+inh", "E2 -> E2+inh", "E1+fulv vs E1+inh", "E2+fulv vs E2+inh"]
         pivot = pivot[[c for c in comp_order if c in pivot.columns]]
 
         fig, ax = plt.subplots(figsize=(8, max(4, len(pivot) * 0.6)))
@@ -690,7 +690,7 @@ def subprogram_decomposition(adata):
                    cbar_kws={"label": "Cohen's d (positive = higher in first group)"})
         ax.set_title("Estrogen Sub-program Response to Inhibitor\n"
                     "(Which programs are differentially affected?)")
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 0.94, 1])
         plt.savefig(FIG_DIR / "subprogram_effect_heatmap.png", dpi=150, bbox_inches="tight")
         plt.savefig(FIG_DIR / "subprogram_effect_heatmap.pdf", bbox_inches="tight")
         plt.close()
@@ -709,6 +709,7 @@ def main():
     log_msg(f"Loading data from {INPUT_H5AD}")
     check_file_exists(INPUT_H5AD, "Pathway-scored h5ad")
     adata = sc.read_h5ad(INPUT_H5AD)
+    standardize_treatments(adata)
     log_msg(f"Loaded {adata.n_obs} cells, {adata.n_vars} genes")
     log_msg(f"Treatments: {adata.obs['treatment'].value_counts().to_dict()}")
 
@@ -721,8 +722,8 @@ def main():
     # Module 3: Steroidogenic gene profiling
     steroid_results = profile_steroidogenic_genes(adata)
 
-    # Module 4: ICI calibration
-    ici_calibration(adata)
+    # Module 4: Fulvestrant calibration
+    fulv_calibration(adata)
 
     # Module 5: Dose-response
     dose_results = dose_response_analysis(adata)

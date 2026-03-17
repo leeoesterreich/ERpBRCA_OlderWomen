@@ -24,7 +24,7 @@ from datetime import datetime
 from scipy.stats import chi2_contingency
 
 from _config import (
-    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists
+    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments
 )
 
 # =============================================================================
@@ -38,7 +38,7 @@ CELL_CYCLE_RESULTS_DIR = OUTPUT_DIR / "cell_cycle"
 CELL_CYCLE_FIGURES_DIR = FIGURES_DIR / "cell_cycle"
 
 # Treatment order for consistent plotting
-TREATMENT_ORDER = ["Vehicle", "E1", "E1+ICI", "E1+HSD17B7i", "E2", "E2+ICI", "E2+HSD17B7i"]
+TREATMENT_ORDER = ["Vehicle", "E1", "E1+fulv", "E1+HSD17B7i", "E2", "E2+fulv", "E2+HSD17B7i"]
 
 # Phase colors (G1=green, S=yellow, G2M=red)
 PHASE_COLORS = ["#2ecc71", "#f1c40f", "#e74c3c"]
@@ -73,6 +73,7 @@ def load_final_data():
     check_file_exists(FINAL_FILE, "Final file")
 
     adata = sc.read_h5ad(FINAL_FILE)
+    standardize_treatments(adata)
     log_message(f"  Loaded: {adata.n_obs} cells, {adata.n_vars} genes")
 
     # Check for required columns

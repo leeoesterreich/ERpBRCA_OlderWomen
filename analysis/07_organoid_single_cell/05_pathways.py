@@ -216,21 +216,13 @@ def run_decoupler_progeny(adata):
 
     # Run MLM (Multivariate Linear Model)
     log_message("  Running MLM...")
-    dc.mt.mlm(
-        mat=adata,
-        net=progeny,
-        source="source",
-        target="target",
-        weight="weight",
-        use_raw=False
-    )
+    dc.mt.mlm(data=adata, net=progeny, raw=False)
 
-    # Store results (decoupler 2.x stores as score_mlm)
-    if "score_mlm" in adata.obsm:
-        adata.obsm["progeny"] = adata.obsm["score_mlm"].copy()
-    elif "mlm_estimate" in adata.obsm:
-        # Fallback for older API
-        adata.obsm["progeny"] = adata.obsm["mlm_estimate"].copy()
+    # Store results
+    for key in ["score_mlm", "mlm_estimate", "mlm_scores"]:
+        if key in adata.obsm:
+            adata.obsm["progeny"] = adata.obsm[key].copy()
+            break
     log_message(f"  Stored PROGENy scores in adata.obsm['progeny']")
     log_message(f"    Shape: {adata.obsm['progeny'].shape}")
 
@@ -260,21 +252,13 @@ def run_decoupler_dorothea(adata):
 
     # Run MLM (Multivariate Linear Model)
     log_message("  Running MLM...")
-    dc.mt.mlm(
-        mat=adata,
-        net=dorothea,
-        source="source",
-        target="target",
-        weight="weight",
-        use_raw=False
-    )
+    dc.mt.mlm(data=adata, net=dorothea, raw=False)
 
-    # Store results (decoupler 2.x stores as score_mlm)
-    if "score_mlm" in adata.obsm:
-        adata.obsm["dorothea"] = adata.obsm["score_mlm"].copy()
-    elif "mlm_estimate" in adata.obsm:
-        # Fallback for older API
-        adata.obsm["dorothea"] = adata.obsm["mlm_estimate"].copy()
+    # Store results
+    for key in ["score_mlm", "mlm_estimate", "mlm_scores"]:
+        if key in adata.obsm:
+            adata.obsm["dorothea"] = adata.obsm[key].copy()
+            break
     log_message(f"  Stored DoRothEA scores in adata.obsm['dorothea']")
     log_message(f"    Shape: {adata.obsm['dorothea'].shape}")
 

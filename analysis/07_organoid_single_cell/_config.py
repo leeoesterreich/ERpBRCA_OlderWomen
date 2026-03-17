@@ -67,3 +67,15 @@ def check_file_exists(filepath, description="file"):
         raise FileNotFoundError(f"ERROR: {description} not found: {filepath}")
     print(f"  Found: {p.name}")
     return p
+
+
+# Treatment label standardization: ICI → fulv (fulvestrant)
+# h5ad files store "E1+ICI"/"E2+ICI" but figures should show "fulv"
+TREATMENT_RENAME = {"E1+ICI": "E1+fulv", "E2+ICI": "E2+fulv"}
+
+
+def standardize_treatments(adata):
+    """Rename ICI→fulv in adata.obs['treatment'] for figure clarity."""
+    if "treatment" in adata.obs.columns:
+        adata.obs["treatment"] = adata.obs["treatment"].replace(TREATMENT_RENAME)
+    return adata

@@ -55,7 +55,7 @@ from pathlib import Path
 warnings.filterwarnings('ignore')
 
 from _config import (
-    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists
+    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments
 )
 
 # =============================================================================
@@ -70,14 +70,14 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Treatment ordering and colors
-TREATMENT_ORDER = ['Vehicle', 'E1', 'E1+ICI', 'E1+HSD17B7i', 'E2', 'E2+ICI', 'E2+HSD17B7i']
+TREATMENT_ORDER = ['Vehicle', 'E1', 'E1+fulv', 'E1+HSD17B7i', 'E2', 'E2+fulv', 'E2+HSD17B7i']
 TREATMENT_COLORS = {
     'Vehicle': '#999999',
     'E1': '#E41A1C',
-    'E1+ICI': '#FF7F00',
+    'E1+fulv': '#FF7F00',
     'E1+HSD17B7i': '#984EA3',
     'E2': '#377EB8',
-    'E2+ICI': '#4DAF4A',
+    'E2+fulv': '#4DAF4A',
     'E2+HSD17B7i': '#A65628',
 }
 
@@ -97,6 +97,7 @@ def load_data():
     print(f"[{datetime.now()}] Loading data from {INPUT_H5AD}")
     check_file_exists(INPUT_H5AD, "Mechanism-explored h5ad")
     adata = sc.read_h5ad(INPUT_H5AD)
+    standardize_treatments(adata)
     print(f"  Loaded {adata.n_obs} cells x {adata.n_vars} genes")
     # Ensure treatment is categorical with correct order
     adata.obs['treatment'] = pd.Categorical(
@@ -643,8 +644,8 @@ def module6_estrogen_continuum(adata):
     # --- Figure 1: KDE density curves ---
     fig, axes = plt.subplots(1, 2, figsize=(16, 5))
 
-    e1_group = ['Vehicle', 'E1', 'E1+ICI', 'E1+HSD17B7i']
-    e2_group = ['Vehicle', 'E2', 'E2+ICI', 'E2+HSD17B7i']
+    e1_group = ['Vehicle', 'E1', 'E1+fulv', 'E1+HSD17B7i']
+    e2_group = ['Vehicle', 'E2', 'E2+fulv', 'E2+HSD17B7i']
 
     for ax, group, title in [(axes[0], e1_group, 'E1 Group'),
                               (axes[1], e2_group, 'E2 Group')]:

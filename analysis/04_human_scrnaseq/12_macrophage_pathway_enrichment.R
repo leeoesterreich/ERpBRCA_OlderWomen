@@ -246,7 +246,9 @@ if (nrow(top_pathways) > 0 && any(!is.na(top_pathways$signed_score) & is.finite(
       main = "Pathway Enrichment: Macrophages Elderly vs Young",
       color = colorRampPalette(c("#377EB8", "white", "#E41A1C"))(100),
       breaks = seq(-max_val, max_val, length.out = 101),
-      fontsize_row = 9,
+      fontsize_row = 11,
+      fontsize_col = 12,
+      fontsize = 12,
       show_colnames = TRUE
     )
     dev.off()
