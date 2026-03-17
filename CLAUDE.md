@@ -22,7 +22,18 @@
 **decoupleR 2.x API changes:**
 - `dc.get_dorothea()` → `dc.op.dorothea()`
 - `dc.decouple()` → `dc.mt.decouple()` or `dc.mt.ulm()`
+- `dc.mt.mlm(mat=adata, ..., use_raw=False)` → `dc.mt.mlm(data=adata, ..., raw=False)` (keyword `mat` renamed to `data`, `use_raw` to `raw`; `source`/`target`/`weight` args removed — inferred from net columns)
 - Results: `adata.obsm['score_ulm']` not `adata.obsm['ulm_estimate']`
+
+**msigdbr v10 API changes:**
+- `msigdbr(species, category="H")` → `msigdbr(species, collection="H")`
+- `subcategory` → `subcollection`
+- Gene ID matching may fail after upgrade; `regenerate_fig7bc_fonts.R` bypasses by reading pre-computed GSVA scores from CSV
+
+**Treatment label convention (section 07):**
+- h5ad files store treatment values as `E1+ICI` / `E2+ICI` (historical)
+- All figures must show `E1+fulv` / `E2+fulv` (fulvestrant, to avoid confusion with immune checkpoint inhibitors)
+- `_config.py:standardize_treatments(adata)` handles the rename on load
 
 ### Reproducibility Requirements
 
