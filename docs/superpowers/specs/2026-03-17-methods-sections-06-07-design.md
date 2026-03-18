@@ -26,7 +26,7 @@ Clean supplementary methods covering:
 - Enrichment: gseapy enrichr (MSigDB_Hallmark_2020, KEGG_2021_Human, Reactome_2022), FDR<0.05
 - GSEA prerank: gene scores = mean expression, 1,000 permutations, seed=12345, min pathway size=5, max=1,000
 - IL/TGF pathway filtering via regex
-- Summary dotplot: CD163+ macrophage pathway significance (-log10 adjusted p-value) across 6 samples
+- Summary dotplot: CD163+ macrophage interleukin pathway significance (-log10 adjusted p-value) across 6 samples; final dotplot filters to predefined interleukin targets (IL-1, IL-4, IL-6, IL-10, IL-12, IL-13, IL-23), excluding TGF terms at this visualization stage
 
 **Software**
 - Python (scanpy, gseapy, seaborn, matplotlib)
@@ -59,7 +59,7 @@ Clean supplementary methods covering:
 - HVG selection: 3,000 genes (seurat_v3 method on counts layer)
 - Scaling: unit variance, max_value=10
 - PCA: 50 components on HVGs
-- Cell cycle scoring: Tirosh et al. 2016 (43 S-phase genes, 47 G2M genes)
+- Cell cycle scoring: Tirosh et al. 2016 (43 S-phase genes, 54 G2M genes)
 - Neighbors: k=15, n_pcs=30
 - UMAP: default parameters
 - Clustering: Leiden, resolution=0.5
@@ -78,6 +78,11 @@ Clean supplementary methods covering:
 - DoRothEA: levels A/B/C, multivariate linear model (decoupler 2.x), organism=human
 - Target TFs: ESR1, E2F1, E2F4, MYC, TP53
 - Note: pseudobulk DE (PyDESeq2, script 04) and cell-level Wilcoxon DE (script 09) serve different purposes — pseudobulk for the 3 primary comparisons, cell-level for pathway enrichment input
+
+**Cell Cycle Distribution Analysis**
+- Phase proportions (G1/S/G2M) computed per treatment condition as contingency table
+- Chi-square tests for independence on phase × treatment contingency tables for key comparisons: E1 vs E2, E1 vs E1+HSD17B7i, E1+HSD17B7i vs E2+HSD17B7i
+- Stacked bar plots of phase proportions; boxplots of S_score and G2M_score by treatment
 
 **Single-Cell Pathway Scoring**
 - 8 custom gene sets: Estrogen Response Early (23 genes), Estrogen Response Late (20 genes), E2F Targets (24 genes), G2M Checkpoint (20 genes), MYC Targets (22 genes), Proliferation (14 genes), Steroid Biosynthesis (12 genes), ER Targets Direct (15 genes)
@@ -105,6 +110,7 @@ Clean supplementary methods covering:
 - Quiescence scoring: 8-gene set (CDKN1A, CDKN1B, BTG1, BTG2, TOB1, GAS1, CDKN2A, CCNG2) via sc.tl.score_genes()
 - Cycling sub-classification: S vs G2M based on score comparison
 - Statistics: Mann-Whitney U (score distributions), Fisher's exact (cycling fractions), Spearman correlation (proliferation-ER coupling)
+- Comparisons: 7 predefined treatment pairs (Vehicle vs E1, Vehicle vs E2, E1 vs E2, E1 vs E1+fulv, E2 vs E2+fulv, E1 vs E1+HSD17B7i, E1+HSD17B7i vs E2+HSD17B7i)
 
 **Treatment Label Convention**
 - h5ad files store treatment values as E1+ICI / E2+ICI (historical); all figures display E1+fulv / E2+fulv (fulvestrant, to avoid confusion with immune checkpoint inhibitors)
@@ -112,7 +118,7 @@ Clean supplementary methods covering:
 **Software**
 - Python (scanpy, PyDESeq2, decoupler 2.x, gseapy, scikit-learn GMM, scipy)
 - Conda environment: erp_brca_aging
-- Seed: 42 throughout (exception to project default of 12345, preserved for reproducibility with original analysis)
+- Seed: 42 where stochastic steps are seeded (scripts 05, 09, 10, 11); scripts 02, 03, 06, 07, 08 use scanpy/scipy defaults without explicit seed. Exception to project default of 12345, preserved for reproducibility with original analysis.
 - Figures: dual PNG (150 DPI) + PDF (vector)
 
 ---
@@ -156,6 +162,10 @@ Dense paragraph covering: HCC22-088 biopsies, CITEgeist deconvolution, 3 macroph
 
 **Organoid Single-Cell RNA-seq (Section 07):**
 Dense paragraph covering: PDO-296 from study cohort, 7 conditions (E1/E2 x Vehicle/fulvestrant/HSD17B7i), 10x Flex with custom reference (filter-probes=false for HSD17B7), Scrublet QC, CPM+log1p, Leiden clustering, PyDESeq2 pseudobulk DE, GSEA/PROGENy/DoRothEA pathway analysis, custom gene set scoring (Mann-Whitney U, Cohen's d, BH-FDR), GMM-based cycling classification, inhibitor mechanism analysis, seed 42.
+
+## Formatting Guidance
+
+New methods files (06, 07) and cleaned existing files should follow the style of existing docs in `docs/methods/`: numbered sections, parameterized prose (not bullet lists), parameter tables where appropriate, tool versions documented inline. The spec above uses bullets for content specification; the implementation should convert these to flowing prose with embedded parameter values, matching the tone of `01_human_bulk_rnaseq_methods.md` and `05_rat_bulk_rnaseq_methods.md`.
 
 ## File Structure After Implementation
 
