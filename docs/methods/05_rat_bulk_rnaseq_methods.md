@@ -26,9 +26,7 @@ Gene symbols were annotated by querying the Ensembl BioMart database (`rnorvegic
 
 Significantly differentially expressed genes were defined as those with Benjamini-Hochberg adjusted p-value (FDR) < 0.05. Results were saved as both the full result table (`deseq2_results.csv`) and the FDR-filtered subset sorted by ascending adjusted p-value (`deseq2_results_significant.csv`).
 
-DESeq2 size-factor-normalized counts were also exported. These normalized counts were rescaled to a per-million basis via `sweep(norm_counts, 2, colSums(norm_counts), "/") * 1e6` and saved as `normalized_tpm.csv` for use in PAM50 subtyping.
-
-> **[RESOLVED]** The output file was renamed from `normalized_tpm.csv` to `normalized_cpm.csv` to accurately reflect that these are DESeq2 size-factor-normalized counts rescaled to counts-per-million (CPM), not true TPM (which requires gene-length normalization). The PAM50 script was updated to reference the renamed file. Note: genefu's `molecular.subtyping()` internally median-centers the input, which partially compensates for the lack of gene-length normalization.
+DESeq2 size-factor-normalized counts were also exported. These normalized counts were rescaled to a per-million basis via `sweep(norm_counts, 2, colSums(norm_counts), "/") * 1e6` and saved as `normalized_cpm.csv` for use in PAM50 subtyping. Note: these are DESeq2 size-factor-normalized counts rescaled to counts-per-million (CPM), not true TPM (which requires gene-length normalization). The PAM50 script (`genefu::molecular.subtyping()`) internally median-centers the input, which partially compensates for the lack of gene-length normalization.
 
 ## 6. PAM50 Molecular Subtyping
 
@@ -40,7 +38,7 @@ A hardcoded human-to-rat gene symbol mapping was defined for all 50 PAM50 genes 
 
 ### 6.2 Expression Data Preparation
 
-The CPM-normalized expression matrix (`normalized_tpm.csv`) was loaded. Ensembl gene IDs (detected by the `ENSRNOG` prefix) were converted to gene symbols via BioMart query (`rnorvegicus_gene_ensembl` dataset). For duplicated gene symbols, the row with the highest mean expression across samples was retained. The expression matrix was then subset to available PAM50 ortholog genes and transposed to samples-by-genes orientation. Column names were remapped to human gene symbols for compatibility with genefu centroids.
+The CPM-normalized expression matrix (`normalized_cpm.csv`) was loaded. Ensembl gene IDs (detected by the `ENSRNOG` prefix) were converted to gene symbols via BioMart query (`rnorvegicus_gene_ensembl` dataset). For duplicated gene symbols, the row with the highest mean expression across samples was retained. The expression matrix was then subset to available PAM50 ortholog genes and transposed to samples-by-genes orientation. Column names were remapped to human gene symbols for compatibility with genefu centroids.
 
 ### 6.3 Classification
 
@@ -71,8 +69,6 @@ Significant gene sets (FDR < 0.05) from both analyses were compared. Rahul's res
 Per-sample PAM50 subtype assignments were compared between the two analyses. Rahul's subtypes were loaded from `PAM50/PAM50.csv`. Matching was performed by fuzzy name matching (removing the `-Tumor` suffix). The pass criterion was 100% concordance across all matched samples.
 
 Validation results were saved as an RDS object (`validation_results.rds`).
-
-> **[WARNING: Hardcoded external path]** The validation script references Rahul's analysis directory at `/ix1/alee/LO_LAB/Personal/Rahul/Neil_RNAseq`. This hardcoded path creates a dependency on a specific user's directory structure and will break if the reference data are relocated. Consider copying reference files into the project's `data/` directory or parameterizing the path.
 
 ## 8. Pipeline Orchestration
 
@@ -114,18 +110,6 @@ From `environment.yml` and module loads:
 - STAR alignment and HTSeq counting include skip-if-exists logic to support idempotent re-runs.
 - BioMart queries (for gene symbol annotation) depend on external Ensembl server availability and may return different results if the database version changes. No specific Ensembl archive release was pinned.
 - The `environment.yml` does not pin exact versions for DESeq2, genefu, or biomaRt; only R base (4.4.1) and Seurat (>=5.0) are version-constrained. Exact installed versions should be recorded at runtime.
-
-## 11. Additional Warnings
-
-> **[WARNING: No gene-length file for true TPM]** The pipeline does not extract or use gene lengths from the GTF annotation. Without gene lengths, true TPM cannot be computed. If PAM50 classification accuracy is critical, consider computing TPM using effective gene lengths derived from the GTF (sum of exon lengths per gene) or from featureCounts output.
-
-> **[WARNING: BioMart version not pinned]** Both `03_deseq2.R` and `04_pam50_subtyping.R` query the live Ensembl BioMart endpoint (`useMart("ensembl", ...)`) without specifying an archive host (e.g., `host = "jan2024.archive.ensembl.org"`). Gene symbol mappings may differ between Ensembl releases, affecting reproducibility.
-
-> **[WARNING: STAR genome index provenance]** The STAR genome index at `/ix1/alee/LO_LAB/Personal/Rahul/Reference_genome/Rat` was generated externally. The STAR version used to build the index is not documented; STAR indices are not portable across major versions, which could cause silent alignment errors if the index was built with a different STAR version.
-
-> **[WARNING: Duplicate PAM50 ortholog mapping]** The human-to-rat mapping contains a redundant entry: both `"CDCA1"` and `"NUF2"` map to rat `"Nuf2"`. Since CDCA1 is an alias for NUF2 (also known as KNTC2/NDC80), this does not cause an error but introduces ambiguity. Similarly, `"ORC6L"` and `"ORC6"` both implicitly map to rat `"Orc6"`.
-
-> **[WARNING: No PNG output for figures]** The project's CLAUDE.md specifies dual-format output (PDF + PNG at 300 DPI), but the PAM50 heatmaps are saved only as PDF. PNG versions were not generated.
 
 ## Main Text Summary
 

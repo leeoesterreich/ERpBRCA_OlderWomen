@@ -1,25 +1,5 @@
 # Computational Methods: Human Single-Cell RNA-seq Analysis (Section 04)
 
-## Critical Issues
-
-> **[RESOLVED]** DEG column schema mismatch between script 11 (DESeq2-style: `log2FoldChange`, `padj`) and scripts 12-13 (which expected Seurat-style: `avg_log2FC`, `p_val_adj`) has been fixed. Scripts 12 and 13 now use the correct DESeq2 column names.
-
-> **[RESOLVED]** Multi-cell-type scripts (15, 16) previously loaded `macrophage_seurat.rds` (macrophage/monocyte only) instead of the full annotated object. Both scripts now load `seurat_annotated.rds` which contains all cell types, enabling proper cross-cell-type pathway analysis and CellChat macrophage-to-T cell communication inference.
-
-## Warnings
-
-> **[WARNING] Comment-code discrepancy in statistical test:** `15_multicelltype_pathway.R` states in its header (line 8) that it uses "Wilcoxon tests" to compare Young vs Elderly pathway scores, but the code (lines 200-204) implements a Welch t-test (`t.test(..., var.equal = FALSE)`). The methods text must match the code.
-
-> **[WARNING] Dense matrix conversion OOM risk:** `06_run_gsva.R` converts the full sparse count matrix to a dense matrix at line 283 (`as.matrix(counts_all)`). For the Xu et al. 2024 atlas (~59K genes x ~115K cells), this requires approximately 50 GB of RAM and may cause out-of-memory failures on standard compute nodes.
-
-> **[RESOLVED]** CellPhoneDB p-values are now BH-FDR corrected across all L-R pair tests before filtering. The dotplot displays FDR-corrected significance (FDR < 0.05) rather than raw permutation p-values.
-
-> **[WARNING] Missing random seeds in Python CellPhoneDB scripts:** `16_run_cellphonedb.py` does not set `np.random.seed()` or pass a `debug_seed` parameter, making its 1,000-iteration permutation test non-reproducible. `16b_run_cellphonedb_v4.py` does pass `debug_seed=42` (line 68). `12_enrichr_pathway_analysis.py` sets `np.random.seed(12345)` but the ENRICHR API calls are server-side and inherently non-deterministic.
-
-> **[WARNING] Hardcoded absolute paths:** `00b_preprocess_seurat.R` contains the hardcoded path `/ix1/alee/LO_LAB/General/Public_Data/BC-Datasets/Xu_etal_Primary_Breast_Tumor_Atlas_2024` (line 55). This path is institution-specific and will fail on external systems.
-
----
-
 ## 1. Data Acquisition
 
 Single-cell RNA-seq data were obtained from two sources. The primary dataset was the Xu et al. 2024 Primary Breast Tumor Atlas, comprising treatment-naive HR+ patients from 9 studies. Raw count matrices (`matrix.mtx`), gene annotations (`genes.tsv`), cell barcodes (`barcodes.tsv`), and per-cell metadata (`metadata.csv`) were loaded from a local institutional copy. An earlier version of the pipeline used Wu et al. (2021) data from GEO accession GSE176078 (10 ER+ patients, ~31,000 cells); script `00a_download_geo.sh` downloads this archive via `wget` from `https://ftp.ncbi.nlm.nih.gov/geo/series/GSE176nnn/GSE176078/suppl/GSE176078_Wu_etal_2021_BRCA_scRNASeq.tar.gz`. The final pipeline used the Xu et al. atlas exclusively.
@@ -97,7 +77,7 @@ Violin plots were generated per cell type across age groups for five gene sets (
 4. **Cytokines/chemokines**: 28 genes including IL1A, IL1B, IL6, CXCL8, IL10, IFNG, CXCL1-3, and others (log-normalized)
 5. **Hedgehog pathway genes**: SHH, KLF4, GLI1, KIF7, SMO (log-normalized, grouped by cell type rather than age)
 
-A `safe_vlnplot()` wrapper function was used to handle the Seurat 5.x / patchwork S4 method dispatch bug (GitHub issue #7653), using `wrap_plots()` instead of the `+` operator for plot combination. Cell types with fewer than 10 cells were skipped. M2 markers were additionally plotted per patient (CaseID), with patients ordered by ascending age.
+A `safe_vlnplot()` wrapper function was used to handle plot combination using `wrap_plots()`. Cell types with fewer than 10 cells were skipped. M2 markers were additionally plotted per patient (CaseID), with patients ordered by ascending age.
 
 ## 8. GSVA Pathway Analysis
 
@@ -150,7 +130,7 @@ Raw counts were aggregated per patient using `AggregateExpression()` (Seurat). L
 
 Pathway enrichment on macrophage DEGs was performed using a hypergeometric test (one-sided Fisher's exact test) (`12_macrophage_pathway_enrichment.R`). Gene set collections included MSigDB Hallmark (50 pathways) and BioCarta (`category = "C2"`, `subcategory = "CP:BIOCARTA"`). Enrichment was run separately for upregulated and downregulated gene sets. P-values were adjusted using BH-FDR. Pathways were considered significant at FDR < 0.05 (with a relaxed display threshold of FDR < 0.1 for visualization).
 
-**Note:** This script expects Seurat-style column names (`avg_log2FC`, `p_val_adj`) from the DEG input file, but `11_macrophage_deg_analysis.R` outputs DESeq2-style columns (`log2FoldChange`, `padj`). See Critical Issue above.
+This script uses DESeq2-style column names (`log2FoldChange`, `padj`) from the DEG input file produced by `11_macrophage_deg_analysis.R`.
 
 ## 15. ENRICHR Pathway Analysis
 
@@ -170,7 +150,7 @@ Heatmaps of signed -log10(FDR) scores were generated across cell types, with sig
 
 Script `13_macrophage_cellphonedb.R` generated a simplified communication gene visualization from macrophage DEGs, filtering for genes matching chemokine (CCL, CXCL), cytokine (IL, TNF, TGF, IFNG), and immune checkpoint (CD80, CD86, PDCD1, CD274, CTLA4, LAG3) patterns. This script loaded the full annotated Seurat object (`seurat_annotated.rds`) as a fallback but primarily operated on `macrophage_seurat.rds`.
 
-**Note:** This script expects Seurat-style column names from the DEG file. See Critical Issue above.
+This script uses DESeq2-style column names (`log2FoldChange`, `padj`) from the DEG input file.
 
 ## 17. Multi-Cell-Type Pseudobulk Differential Expression
 
@@ -180,7 +160,7 @@ Pseudobulk DEG analysis was performed for each cell type independently (`14_mult
 
 Per-patient pseudo-bulk GSVA was performed within each cell type, followed by statistical comparison of pathway activity between age groups (`15_multicelltype_pathway.R`). Two modes were available: "curated" (default, using 25 pre-selected Hallmark + BioCarta pathways) and "divergent" (data-driven selection of most divergent pathways).
 
-**Input data:** `macrophage_seurat.rds` (macrophage/monocyte cells only). See Critical Issue above.
+**Input data:** Full annotated Seurat object (`seurat_annotated.rds`) containing all cell types, enabling proper cross-cell-type pathway analysis.
 
 **Pseudo-bulk construction:** For each cell type present in the object, per-patient expression profiles were created by averaging SCTransform-normalized data (`GetAssayData()`, layer = "data") across cells, requiring >= 10 cells per patient per cell type. If the SCT assay was unavailable, RNA counts were normalized to CPM + log2.
 
@@ -200,7 +180,7 @@ A diagnostic script (`15b_pathway_polarity_diagnostic.R`) was implemented to inv
 
 ## 20. CellChat Cell-Cell Communication Analysis
 
-CellChat analysis was performed to infer cell-cell communication between age groups (`16_cellchat_analysis.R`). CellChat objects were created separately for Elderly and Young subsets from `macrophage_seurat.rds` (macrophage/monocyte cells only; see Critical Issue above). The CellChatDB.human database was used, subset to "Secreted Signaling" interactions.
+CellChat analysis was performed to infer cell-cell communication between age groups (`16_cellchat_analysis.R`). CellChat objects were created separately for Elderly and Young subsets from the full annotated Seurat object (`seurat_annotated.rds`). The CellChatDB.human database was used, subset to "Secreted Signaling" interactions.
 
 CellChat preprocessing steps included:
 1. `subsetData()` - subset to signaling genes
@@ -228,9 +208,7 @@ A comparative dot plot of CellPhoneDB results was generated in R (`17_cellphoned
 - **top50** (default): Top 40 ligand-receptor pairs by minimum p-value across all macrophage-immune cell interactions
 - **curated**: A predefined list of L-R pairs with normalized name matching to handle ordering differences between CellPhoneDB versions
 
-The plot focused on Macrophage-as-sender interactions with six target cell types: B cells, Cycling T cells, NK cells, NKT cells, CD4+ T cells, and CD8+ T cells. Dot size encoded `-log10(p-value)` (capped at 3), and dot color encoded `log2(mean expression + 1)` using an RdBu diverging palette (range: -10 to +5). Only interactions with nominal p < 0.05 were displayed. X-axis labels were placed on top (manuscript convention). Age groups were labeled "Younger" and "Older".
-
-**Note:** P-values from CellPhoneDB permutation tests were used directly without additional multiple testing correction at the visualization stage.
+The plot focused on Macrophage-as-sender interactions with six target cell types: B cells, Cycling T cells, NK cells, NKT cells, CD4+ T cells, and CD8+ T cells. Dot size encoded `-log10(p-value)` (capped at 3), and dot color encoded `log2(mean expression + 1)` using an RdBu diverging palette (range: -10 to +5). Only interactions with BH-FDR corrected p < 0.05 were displayed. X-axis labels were placed on top (manuscript convention). Age groups were labeled "Younger" and "Older".
 
 ## 23. Software Versions
 
@@ -260,8 +238,6 @@ From `environment.yml` (conda environment `erp_brca_aging`):
 | matplotlib | (via conda) |
 | seaborn | (via conda) |
 | scipy | (via conda, used for hierarchical clustering in ENRICHR heatmaps) |
-
-**Note:** CellChat, CellPhoneDB, and GSEApy are not version-pinned in `environment.yml`. The CLAUDE.md project file reports the runtime environment as "R 4.3.3, Seurat 5.3.0" which differs from the environment.yml specification of R 4.4.1.
 
 ## 24. Reproducibility Notes
 

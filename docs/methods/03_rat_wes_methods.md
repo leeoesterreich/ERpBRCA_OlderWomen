@@ -4,8 +4,6 @@
 
 Whole exome sequencing (WES) was performed on mammary tumors from six rats, comprising three old (sample IDs: 102, 107, 116) and three young (sample IDs: 157, 158, 167) animals. Matched spleen tissue served as the germline reference for each animal. Somatic variants were called using Mutect2 (upstream of this pipeline); input VCF files were located in a shared directory (`NeilRatWES/RatWES_Mutect2_VCF_Input/`). Sample naming in the input VCFs followed the format `Rat_O_<ID>` (old) or `Rat_Y_<ID>` (young), which was parsed via regex to extract the three-digit numeric sample identifier.
 
-> **[WARNING]** Hardcoded external input path for VCF files (`/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/NeilRatWES/RatWES_Mutect2_VCF_Input`) reduces portability. This path is duplicated in both `00_run_vep.sbatch` and `02_cosmic_signatures.py`.
-
 ## 2. Variant Annotation with VEP
 
 Somatic variants were annotated using Ensembl Variant Effect Predictor (VEP) v114.2 (module `ensembl-vep/114.2`), run in offline mode against a local cache (`00_run_vep.sbatch`). VEP was executed with the following parameters:
@@ -22,8 +20,6 @@ Somatic variants were annotated using Ensembl Variant Effect Predictor (VEP) v11
 
 Output files were named `<ID>_tumor_vs_<ID>_spleen.mutect2.txt` and organized into per-sample subdirectories. The SLURM job requested 4 CPUs and 16 GB memory with a 2-hour time limit.
 
-> **[WARNING]** VEP cache version 95 (Ensembl 95, January 2019) paired with VEP software v114.2 represents a substantial version mismatch. Cache version 95 corresponds to the Rnor_6.0 assembly, but annotations may lack updates from later Ensembl releases. This should be documented as a limitation or the cache should be updated.
-
 ## 3. VEP Output Parsing and Filtering
 
 Annotated variants were parsed and filtered using a custom Python script (`01_parse_vep.py`). The VEP tab-delimited output was read with custom header parsing: the script identified the header line as the first line beginning with a single `#` (but not `##`), stripped the leading `#`, and used the resulting fields as column names. All subsequent non-comment lines were loaded via `pd.read_csv()` with `comment='#'`.
@@ -33,8 +29,6 @@ Variants were retained if they met two criteria:
 2. **Impact filter**: The `IMPACT` field (either as a standalone column or extracted from the `Extra` column) was `'HIGH'` or `'MODERATE'`.
 
 Only subfolders whose names ended in `'spleen'` (matching the `<ID>_tumor_vs_<ID>_spleen` convention) were processed. Filtered variants from each sample were saved as individual CSV files (`<sample>_filtered.csv`) and concatenated into a combined file (`all_samples_filtered.csv`) using `pd.concat()` with sample names as hierarchical index keys.
-
-> **[WARNING]** Python scripts do not set random seeds despite project requirement (`set.seed(12345)` / `np.random.seed(12345)`). While `01_parse_vep.py` is deterministic (no stochastic operations), this violates the project-wide reproducibility standard stated in `CLAUDE.md`.
 
 ## 4. Mutational Signature Analysis
 
@@ -53,12 +47,6 @@ After fitting, the script parsed the SigProfiler output file (`Assignment_Soluti
 
 A stacked bar chart was generated showing signature activities per sample. Samples were ordered with Young first (descending numeric ID: 167, 158, 157) then Old (descending: 116, 107, 102). Display labels appended an age suffix (e.g., `"157_Y"`, `"102_O"`). The figure used the `tab20` colormap, `figsize=(14, 8)`, axis label font size 18, tick font size 14/12, and was saved as both SVG and PNG (300 DPI).
 
-> **[WARNING]** Young/old sample suffix labeling is inconsistent between scripts, risking interpretation errors. In `02_cosmic_signatures.py`, Young samples (157, 158, 167) receive the suffix `_Y` and Old samples (102, 107, 116) receive `_O`. However, in `03_generate_oncoplot.py` (line 217), the comment states the opposite convention: "Per legend: Young (102, 107, 116) = '_Y', Old (157, 158, 167) = '_O'". The actual code in `03_generate_oncoplot.py` assigns `_Y` to samples in the `YOUNG_SAMPLES` list (157, 158, 167), which is consistent with `02_cosmic_signatures.py`. The misleading comment could cause confusion during review or future edits.
-
-> **[WARNING]** Python scripts do not set random seeds despite project requirement. SigProfilerAssignment may use non-deterministic optimization internally; without explicit seed setting, exact reproducibility of signature activities is not guaranteed.
-
-> **[WARNING]** Hardcoded external input path for COSMIC reference data reduces portability. The VCF input path (`/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/NeilRatWES/RatWES_Mutect2_VCF_Input`) is hardcoded rather than parameterized.
-
 ## 5. Oncoplot Generation
 
 An oncoplot was generated from the filtered variant data (`03_generate_oncoplot.py`) through the following steps:
@@ -71,8 +59,6 @@ Rat Ensembl gene IDs were mapped to human gene symbols via a two-step BioMart qu
 2. **Symbol resolution**: The resulting human Ensembl IDs were queried against the `hsapiens_gene_ensembl` dataset for `external_gene_name` attributes, also in chunks of 200.
 
 Results were cached to `homolog_cache.csv` to avoid redundant API calls on re-runs. Genes without a human homolog or without a resolved symbol were excluded.
-
-> **[WARNING]** BioMart queries depend on the live Ensembl REST API (`http://www.ensembl.org`), which introduces a non-reproducibility risk. The BioMart database is updated with each Ensembl release; gene symbol mappings and homolog assignments may change over time. The cache file mitigates this for repeated runs but the initial query results are not version-locked.
 
 ### 5.2 Cancer Gene Filtering
 
@@ -90,13 +76,9 @@ The oncoplot was constructed as follows:
 
 X-axis labels displayed sample IDs with age suffixes (e.g., `"167_Y"`, `"102_O"`).
 
-> **[WARNING]** The script uses `applymap()` (line 187), which was deprecated in pandas 2.1.0 in favor of `map()`. This will raise a `FutureWarning` in current pandas versions and will fail in future releases.
-
 ## 6. Pipeline Orchestration
 
 The analysis pipeline was orchestrated via `run_analysis.sbatch`, which executed steps 01 through 03 sequentially under the `aging_wes` conda environment. The SLURM job requested 8 CPUs, 32 GB memory, and an 8-hour time limit. VEP annotation (`00_run_vep.sbatch`) was submitted as a separate job (4 CPUs, 16 GB, 2-hour limit) and was a prerequisite for the main pipeline. Upon completion, a marker file (`.pipeline_markers/03_rat_wes.complete`) was written with the job ID and UTC timestamp.
-
-> **[WARNING]** No explicit dependency is enforced between `00_run_vep.sbatch` and `run_analysis.sbatch`. The pipeline relies on the user submitting them in the correct order and waiting for VEP completion, rather than using SLURM `--dependency=afterok:<jobid>`.
 
 ## 7. Software Versions
 
@@ -118,8 +100,6 @@ Additional dependencies not in `environment.yml` but required by the scripts:
 | VEP cache | 95 | Rnor_6.0, offline cache |
 | SigProfilerAssignment | (not pinned) | `cosmic_fit()` with COSMIC v3.4 |
 | pybiomart | (not pinned) | BioMart API queries |
-
-> **[WARNING]** Key Python dependencies (`SigProfilerAssignment`, `pybiomart`) are not listed in the project `environment.yml`. The pipeline uses a separate conda environment (`aging_wes`) whose specification is not tracked in this repository. This impedes reproducibility.
 
 ## 8. Reproducibility Notes
 
