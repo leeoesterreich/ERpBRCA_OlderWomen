@@ -16,6 +16,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 
 import scanpy as sc
 import scrublet as scr
@@ -253,13 +254,11 @@ def plot_qc_violin(adata, suffix, title_prefix=""):
         axes[2].axhline(y=MAX_PCT_MITO, color='red', linestyle='--', alpha=0.7, label=f'threshold={MAX_PCT_MITO}%')
         axes[2].legend()
 
-    plt.tight_layout()
-
     # Save figure (PNG + PDF)
     out_path_png = QC_FIGURES_DIR / f"qc_violin_{suffix}.png"
     out_path_pdf = QC_FIGURES_DIR / f"qc_violin_{suffix}.pdf"
-    plt.savefig(out_path_png, dpi=150, bbox_inches='tight')
-    plt.savefig(out_path_pdf, bbox_inches='tight')
+    save_fig(out_path_png)
+    save_fig(out_path_pdf)
     plt.close()
     log_message(f"  Saved: {out_path_png}")
     log_message(f"  Saved: {out_path_pdf}")

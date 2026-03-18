@@ -30,6 +30,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 import seaborn as sns
 import scanpy as sc
 import pandas as pd
@@ -400,11 +401,9 @@ def plot_score_violins(adata):
         for i, t in enumerate(available):
             n = (adata.obs['treatment'] == t).sum()
             ax.text(i, ax.get_ylim()[0] - 0.02 * (ax.get_ylim()[1] - ax.get_ylim()[0]),
-                    f'n={n}', ha='center', va='top', fontsize=8, color='gray')
+                    f'n={n}', ha='center', va='top', fontsize=10, color='gray')
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "panel1_score_violins.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "panel1_score_violins.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "panel1_score_violins.png")
     plt.close()
     log_msg(f"  Saved: panel1_score_violins.png/.pdf")
 
@@ -441,11 +440,9 @@ def plot_cycling_fraction(adata):
     for i, t in enumerate(available):
         n_total = counts.loc[t].sum()
         n_cyc = counts.loc[t].get('cycling', 0)
-        ax.text(i, 0.98, f'n={n_total}\n({n_cyc} cyc)', ha='center', va='top', fontsize=8, color='gray')
+        ax.text(i, 0.98, f'n={n_total}\n({n_cyc} cyc)', ha='center', va='top', fontsize=10, color='gray')
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "panel2_cycling_fraction.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "panel2_cycling_fraction.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "panel2_cycling_fraction.png")
     plt.close()
     log_msg(f"  Saved: panel2_cycling_fraction.png/.pdf")
 
@@ -499,9 +496,7 @@ def plot_key_markers(adata):
         axes[j].set_visible(False)
 
     plt.suptitle('Key Proliferation & Arrest Markers by Treatment', fontsize=13, y=1.02)
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "panel3_key_markers.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "panel3_key_markers.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "panel3_key_markers.png")
     plt.close()
     log_msg(f"  Saved: panel3_key_markers.png/.pdf")
 
@@ -535,7 +530,7 @@ def plot_score_ridges(adata):
         if 'cycling_threshold' in adata.uns:
             ax.axvline(adata.uns['cycling_threshold'], color='red', linestyle=':', alpha=0.5, linewidth=1)
 
-        ax.set_ylabel(treatment, rotation=0, ha='right', va='center', fontsize=9)
+        ax.set_ylabel(treatment, rotation=0, ha='right', va='center', fontsize=10)
         ax.set_yticks([])
 
         for spine in ['top', 'right', 'left']:
@@ -547,9 +542,7 @@ def plot_score_ridges(adata):
     fig.suptitle('Proliferation Score Distributions by Treatment\n(dashed black = median, dotted red = cycling threshold)',
                  fontsize=11, y=1.02)
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "panel4_score_ridges.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "panel4_score_ridges.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "panel4_score_ridges.png")
     plt.close()
     log_msg(f"  Saved: panel4_score_ridges.png/.pdf")
 
@@ -599,9 +592,7 @@ def plot_umap_overlays(adata):
     axes[2].set_xlabel('UMAP1')
     axes[2].set_ylabel('')
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "panel5a_umap_scores.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "panel5a_umap_scores.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "panel5a_umap_scores.png")
     plt.close()
 
     # 5b: Treatment-split UMAPs colored by cycling status
@@ -629,7 +620,7 @@ def plot_umap_overlays(adata):
 
         n_cyc = (mask & (adata.obs['cycling_status'] == 'cycling')).sum()
         n_total = mask.sum()
-        ax.set_title(f"{treatment}\n({n_cyc}/{n_total} cycling, {100*n_cyc/n_total:.0f}%)", fontsize=9)
+        ax.set_title(f"{treatment}\n({n_cyc}/{n_total} cycling, {100*n_cyc/n_total:.0f}%)", fontsize=10)
         ax.set_xticks([])
         ax.set_yticks([])
 
@@ -644,9 +635,7 @@ def plot_umap_overlays(adata):
     fig.legend(handles=legend_elements, loc='lower right', fontsize=10)
 
     plt.suptitle('Cycling Status by Treatment (UMAP)', fontsize=12, y=1.01)
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "panel5b_umap_cycling_by_treatment.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "panel5b_umap_cycling_by_treatment.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "panel5b_umap_cycling_by_treatment.png")
     plt.close()
     log_msg(f"  Saved: panel5a_umap_scores.png/.pdf")
     log_msg(f"  Saved: panel5b_umap_cycling_by_treatment.png/.pdf")
@@ -706,9 +695,7 @@ def plot_cluster_cycling_heatmap(adata):
     ax.set_ylabel('Leiden Cluster')
     ax.set_title('Cycling Fraction per Cluster per Treatment')
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "panel6_cluster_cycling_heatmap.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "panel6_cluster_cycling_heatmap.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "panel6_cluster_cycling_heatmap.png")
     plt.close()
     log_msg(f"  Saved: panel6_cluster_cycling_heatmap.png/.pdf")
     log_msg(f"  Saved: {RESULTS_DIR / 'per_cluster_cycling.csv'}")
@@ -784,9 +771,7 @@ def plot_proliferation_estrogen_coupling(adata):
             ax.set_xlabel('Proliferation Score')
 
     plt.suptitle('Proliferation-Estrogen Response Coupling by Treatment', fontsize=12, y=1.01)
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "panel7_prolif_er_coupling.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "panel7_prolif_er_coupling.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "panel7_prolif_er_coupling.png")
     plt.close()
     log_msg(f"  Saved: panel7_prolif_er_coupling.png/.pdf")
     log_msg(f"  Saved: {RESULTS_DIR / 'proliferation_estrogen_correlation.csv'}")

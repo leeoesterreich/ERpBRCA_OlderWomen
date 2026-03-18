@@ -20,6 +20,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -214,7 +215,7 @@ def plot_gsea_dotplot(gsea_df, name, top_n=25):
 
     ax.scatter(plot_df['NES'], range(len(plot_df)), c=colors, s=sizes, alpha=0.7, edgecolors='k', linewidths=0.5)
     ax.set_yticks(range(len(plot_df)))
-    ax.set_yticklabels(plot_df['Term_short'], fontsize=9)
+    ax.set_yticklabels(plot_df['Term_short'], fontsize=10)
     ax.invert_yaxis()
     ax.axvline(x=0, color='black', linestyle='-', alpha=0.3)
     ax.set_xlabel('Normalized Enrichment Score (NES)', fontsize=11)
@@ -222,12 +223,10 @@ def plot_gsea_dotplot(gsea_df, name, top_n=25):
 
     # Add FDR threshold note
     ax.text(0.02, 0.98, 'Dot size = -log10(FDR)', transform=ax.transAxes,
-            fontsize=8, va='top', ha='left', style='italic', color='gray')
+            fontsize=10, va='top', ha='left', style='italic', color='gray')
 
-    plt.tight_layout()
     fname = f"gsea_{name.lower().replace(' ', '_').replace('+', '_')}"
-    plt.savefig(FIG_DIR / f"{fname}.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / f"{fname}.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / f"{fname}.png")
     plt.close()
     log_msg(f"  Saved: {fname}.png/.pdf")
 
@@ -261,7 +260,7 @@ def plot_enrichr_barplot(enr_df, name, top_n=20):
 
     ax.barh(range(len(sig_df)), sig_df['-log10(padj)'], color=colors, alpha=0.8)
     ax.set_yticks(range(len(sig_df)))
-    ax.set_yticklabels(sig_df['Term_short'], fontsize=9)
+    ax.set_yticklabels(sig_df['Term_short'], fontsize=10)
     ax.invert_yaxis()
     ax.set_xlabel('-log10(adjusted p-value)', fontsize=11)
     ax.set_title(f'Enriched Pathways: {name}', fontsize=12)
@@ -271,12 +270,10 @@ def plot_enrichr_barplot(enr_df, name, top_n=20):
     # Legend for libraries present
     used_libs = sig_df['Library'].unique()
     legend_handles = [plt.Rectangle((0, 0), 1, 1, color=lib_colors.get(l, '#333'), alpha=0.8) for l in used_libs]
-    ax.legend(legend_handles, used_libs, loc='lower right', fontsize=8)
+    ax.legend(legend_handles, used_libs, loc='lower right', fontsize=10)
 
-    plt.tight_layout()
     fname = f"enrichr_{name.lower().replace(' ', '_').replace('+', '_')}"
-    plt.savefig(FIG_DIR / f"{fname}.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / f"{fname}.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / f"{fname}.png")
     plt.close()
     log_msg(f"  Saved: {fname}.png/.pdf")
 

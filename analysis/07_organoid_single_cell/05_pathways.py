@@ -16,6 +16,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 import seaborn as sns
 
 import scanpy as sc
@@ -341,11 +342,10 @@ def plot_tf_boxplots(adata, tfs_to_plot):
     for j in range(len(available_tfs), len(axes)):
         axes[j].axis('off')
 
-    plt.tight_layout()
     out_path_png = PATHWAYS_FIGURES_DIR / "tf_boxplots.png"
     out_path_pdf = PATHWAYS_FIGURES_DIR / "tf_boxplots.pdf"
-    plt.savefig(out_path_png, dpi=150, bbox_inches='tight')
-    plt.savefig(out_path_pdf, bbox_inches='tight')
+    save_fig(out_path_png)
+    save_fig(out_path_pdf)
     plt.close()
     log_message(f"  Saved: {out_path_png}")
 
@@ -397,11 +397,10 @@ def plot_progeny_heatmap(adata):
     ax.set_xlabel("Treatment", fontsize=12)
     ax.set_ylabel("Pathway", fontsize=12)
 
-    plt.tight_layout()
     out_path_png = PATHWAYS_FIGURES_DIR / "progeny_heatmap.png"
     out_path_pdf = PATHWAYS_FIGURES_DIR / "progeny_heatmap.pdf"
-    plt.savefig(out_path_png, dpi=150, bbox_inches='tight')
-    plt.savefig(out_path_pdf, bbox_inches='tight')
+    save_fig(out_path_png)
+    save_fig(out_path_pdf)
     plt.close()
     log_message(f"  Saved: {out_path_png}")
 
@@ -458,11 +457,10 @@ def plot_gsea_summary(gsea_results):
     ax.set_xlabel("Comparison", fontsize=12)
     ax.set_ylabel("Pathway", fontsize=12)
 
-    plt.tight_layout()
     out_path_png = PATHWAYS_FIGURES_DIR / "gsea_summary_heatmap.png"
     out_path_pdf = PATHWAYS_FIGURES_DIR / "gsea_summary_heatmap.pdf"
-    plt.savefig(out_path_png, dpi=150, bbox_inches='tight')
-    plt.savefig(out_path_pdf, bbox_inches='tight')
+    save_fig(out_path_png)
+    save_fig(out_path_pdf)
     plt.close()
     log_message(f"  Saved: {out_path_png}")
 

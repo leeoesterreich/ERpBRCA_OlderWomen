@@ -20,6 +20,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 import seaborn as sns
 import scanpy as sc
 import pandas as pd
@@ -209,9 +210,7 @@ def plot_pathway_violins(adata, pathway_name, score_col):
     ax.set_title(f"{pathway_name.replace('_', ' ')} Activity by Treatment")
     plt.xticks(rotation=45, ha="right")
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / f"violin_{pathway_name}.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / f"violin_{pathway_name}.pdf", bbox_inches="tight")
+    save_fig(FIG_DIR / f"violin_{pathway_name}.png")
     plt.close()
 
 def plot_pathway_ridge(adata, pathway_name, score_col):
@@ -256,9 +255,7 @@ def plot_pathway_ridge(adata, pathway_name, score_col):
     axes[-1].set_xlabel("Pathway Score")
     fig.suptitle(f"{pathway_name.replace('_', ' ')} Distribution", y=1.02)
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / f"ridge_{pathway_name}.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / f"ridge_{pathway_name}.pdf", bbox_inches="tight")
+    save_fig(FIG_DIR / f"ridge_{pathway_name}.png")
     plt.close()
 
 def plot_heatmap_summary(results_df):
@@ -282,9 +279,7 @@ def plot_heatmap_summary(results_df):
     ax.set_ylabel("Pathway")
     ax.set_title("Pathway Activity Differences\n(positive = higher in first group)")
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "heatmap_effect_sizes.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / "heatmap_effect_sizes.pdf", bbox_inches="tight")
+    save_fig(FIG_DIR / "heatmap_effect_sizes.png")
     plt.close()
 
 def plot_key_comparisons(adata):
@@ -332,9 +327,7 @@ def plot_key_comparisons(adata):
             axes[i].set_xlabel("")
             axes[i].tick_params(axis='x', rotation=45)
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "key_genes_violin.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / "key_genes_violin.pdf", bbox_inches="tight")
+    save_fig(FIG_DIR / "key_genes_violin.png")
     plt.close()
 
 def plot_hypothesis_test(adata, results_df):
@@ -395,9 +388,7 @@ def plot_hypothesis_test(adata, results_df):
                  "Hypothesis: Inhibitor reduces E1->E2 conversion, blocking E1 but not E2 effects",
                  fontsize=12, y=1.02)
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "hypothesis_summary.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / "hypothesis_summary.pdf", bbox_inches="tight")
+    save_fig(FIG_DIR / "hypothesis_summary.png")
     plt.close()
 
 def main():

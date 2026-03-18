@@ -14,6 +14,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 import seaborn as sns
 
 import scanpy as sc
@@ -272,15 +273,14 @@ def plot_stacked_bar(phase_props, phase_counts):
             xycoords=("data", "axes fraction"),
             ha="center",
             va="top",
-            fontsize=9,
+            fontsize=10,
             color="gray"
         )
 
-    plt.tight_layout()
     out_path_png = CELL_CYCLE_FIGURES_DIR / "phase_stacked_bar.png"
     out_path_pdf = CELL_CYCLE_FIGURES_DIR / "phase_stacked_bar.pdf"
-    plt.savefig(out_path_png, dpi=150, bbox_inches="tight")
-    plt.savefig(out_path_pdf, bbox_inches="tight")
+    save_fig(out_path_png)
+    save_fig(out_path_pdf)
     plt.close()
     log_message(f"  Saved: {out_path_png}")
 
@@ -364,11 +364,10 @@ def plot_cell_cycle_scores(adata):
     ax.set_title("G2/M Phase Score by Treatment", fontsize=14)
     ax.tick_params(axis="x", rotation=45)
 
-    plt.tight_layout()
     out_path_png = CELL_CYCLE_FIGURES_DIR / "cell_cycle_scores_boxplot.png"
     out_path_pdf = CELL_CYCLE_FIGURES_DIR / "cell_cycle_scores_boxplot.pdf"
-    plt.savefig(out_path_png, dpi=150, bbox_inches="tight")
-    plt.savefig(out_path_pdf, bbox_inches="tight")
+    save_fig(out_path_png)
+    save_fig(out_path_pdf)
     plt.close()
     log_message(f"  Saved: {out_path_png}")
 

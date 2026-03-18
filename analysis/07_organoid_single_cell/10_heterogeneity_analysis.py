@@ -38,6 +38,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 import seaborn as sns
 import scanpy as sc
 import pandas as pd
@@ -121,8 +122,8 @@ def module1_umap_density(adata):
     ax = axes[0]
     ax.scatter(umap[:, 0], umap[:, 1], s=0.5, alpha=0.1, c='grey', rasterized=True)
     ax.set_title('All Cells', fontsize=11, fontweight='bold')
-    ax.set_xlabel('UMAP1', fontsize=9)
-    ax.set_ylabel('UMAP2', fontsize=9)
+    ax.set_xlabel('UMAP1', fontsize=10)
+    ax.set_ylabel('UMAP2', fontsize=10)
 
     for i, treat in enumerate(TREATMENT_ORDER):
         ax = axes[i + 1]
@@ -154,13 +155,11 @@ def module1_umap_density(adata):
             print(f"  KDE failed for {treat}: {e}")
 
         ax.set_title(f'{treat} (n={mask.sum():,})', fontsize=11, fontweight='bold')
-        ax.set_xlabel('UMAP1', fontsize=9)
-        ax.set_ylabel('UMAP2', fontsize=9)
+        ax.set_xlabel('UMAP1', fontsize=10)
+        ax.set_ylabel('UMAP2', fontsize=10)
 
     plt.suptitle('Per-Condition UMAP Density', fontsize=14, fontweight='bold', y=1.02)
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "01_umap_density_per_condition.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "01_umap_density_per_condition.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "01_umap_density_per_condition.png")
     plt.close()
     print(f"  Saved UMAP density figure")
 
@@ -219,7 +218,7 @@ def module2_neighborhood_mixing(adata):
     print(f"  Saved mixing matrix")
 
     # --- Figures ---
-    fig, axes = plt.subplots(1, 3, figsize=(20, 6))
+    fig, axes = plt.subplots(1, 3, figsize=(24, 7))
 
     # UMAP colored by entropy
     ax = axes[0]
@@ -228,7 +227,7 @@ def module2_neighborhood_mixing(adata):
         c=entropy, cmap='viridis', s=0.5, alpha=0.3, rasterized=True
     )
     plt.colorbar(sc_plot, ax=ax, label='Mixing Entropy')
-    ax.set_title('Neighborhood Mixing Entropy', fontsize=11, fontweight='bold')
+    ax.set_title('Neighborhood Mixing Entropy', fontsize=14, fontweight='bold')
     ax.set_xlabel('UMAP1')
     ax.set_ylabel('UMAP2')
 
@@ -236,9 +235,11 @@ def module2_neighborhood_mixing(adata):
     ax = axes[1]
     sns.heatmap(mixing_matrix, annot=True, fmt='.2f', cmap='YlOrRd',
                 ax=ax, square=True, cbar_kws={'label': 'Neighbor Fraction'})
-    ax.set_title('Condition Mixing Matrix', fontsize=11, fontweight='bold')
+    ax.set_title('Condition Mixing Matrix', fontsize=14, fontweight='bold')
     ax.set_xlabel('Neighbor Condition')
     ax.set_ylabel('Cell Condition')
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right', fontsize=11)
+    ax.set_yticklabels(ax.get_yticklabels(), rotation=45, ha='right', fontsize=11)
 
     # Entropy violin by condition
     ax = axes[2]
@@ -250,11 +251,9 @@ def module2_neighborhood_mixing(adata):
                    order=TREATMENT_ORDER, palette=TREATMENT_COLORS,
                    ax=ax, inner='box', cut=0, scale='width')
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
-    ax.set_title('Mixing Entropy by Condition', fontsize=11, fontweight='bold')
+    ax.set_title('Mixing Entropy by Condition', fontsize=14, fontweight='bold')
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "02_neighborhood_mixing.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "02_neighborhood_mixing.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "02_neighborhood_mixing.png")
     plt.close()
     print(f"  Saved mixing analysis figure")
 
@@ -362,9 +361,7 @@ def module3_within_condition_heterogeneity(adata):
     ax.set_title('Condition Separation (Silhouette)', fontsize=11, fontweight='bold')
     ax.axhline(0, color='black', linewidth=0.5, linestyle='--')
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "03_within_condition_dispersion.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "03_within_condition_dispersion.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "03_within_condition_dispersion.png")
     plt.close()
 
     # UMAP with convex hulls and centroids
@@ -383,13 +380,11 @@ def module3_within_condition_heterogeneity(adata):
                 ax.plot(pts[simplex, 0], pts[simplex, 1], c=color, alpha=0.5, linewidth=1)
         except Exception:
             pass
-    ax.legend(markerscale=1.5, fontsize=9, loc='best')
+    ax.legend(markerscale=1.5, fontsize=10, loc='best')
     ax.set_title('Condition Centroids & Convex Hulls', fontsize=12, fontweight='bold')
     ax.set_xlabel('UMAP1')
     ax.set_ylabel('UMAP2')
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "03b_umap_hulls_centroids.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "03b_umap_hulls_centroids.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "03b_umap_hulls_centroids.png")
     plt.close()
     print(f"  Saved heterogeneity figures")
 
@@ -451,7 +446,7 @@ def module4_cluster_composition(adata):
     ax.set_ylabel('Proportion')
     ax.set_xlabel('Leiden Cluster')
     ax.set_title('Cluster Composition by Treatment', fontsize=11, fontweight='bold')
-    ax.legend(title='Treatment', bbox_to_anchor=(1.0, 1.0), fontsize=8)
+    ax.legend(title='Treatment', bbox_to_anchor=(1.0, 1.0), fontsize=10)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
 
     # Enrichment heatmap (log2 odds ratio, significance marked)
@@ -464,7 +459,7 @@ def module4_cluster_composition(adata):
     pivot_sig = pivot_sig.reindex(index=cluster_cats, columns=TREATMENT_ORDER)
 
     sns.heatmap(log2_or, cmap='RdBu_r', center=0, ax=ax,
-                annot=True, fmt='.1f', annot_kws={'fontsize': 7},
+                annot=True, fmt='.1f', annot_kws={'fontsize': 10},
                 cbar_kws={'label': 'log2(Odds Ratio)'})
     # Mark significant cells
     for i in range(len(cluster_cats)):
@@ -496,9 +491,7 @@ def module4_cluster_composition(adata):
     ax.set_xlabel('UMAP1')
     ax.set_ylabel('UMAP2')
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "04_cluster_composition.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "04_cluster_composition.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "04_cluster_composition.png")
     plt.close()
     print(f"  Saved cluster composition figures")
 
@@ -553,7 +546,7 @@ def module5_biological_axis(adata):
     labels = [c.replace('_score', '').replace('_', ' ') for c in load_sorted.index]
     ax.barh(range(len(load_sorted)), load_sorted.values, color=colors_load, edgecolor='black', linewidth=0.5)
     ax.set_yticks(range(len(labels)))
-    ax.set_yticklabels(labels, fontsize=8)
+    ax.set_yticklabels(labels, fontsize=10)
     ax.set_xlabel('PC1 Loading')
     ax.set_title(f'PC1 Loadings ({var_explained[0]*100:.1f}% var)', fontsize=11, fontweight='bold')
     ax.axvline(0, color='black', linewidth=0.5)
@@ -603,7 +596,7 @@ def module5_biological_axis(adata):
     ax.set_xlabel(f'PC1 ({var_explained[0]*100:.1f}%)')
     ax.set_ylabel(f'PC2 ({var_explained[1]*100:.1f}%)')
     ax.set_title('Pathway PCA Space', fontsize=11, fontweight='bold')
-    ax.legend(markerscale=5, fontsize=8, loc='best')
+    ax.legend(markerscale=5, fontsize=10, loc='best')
 
     # PC2 loadings
     ax = axes[1, 2]
@@ -612,15 +605,13 @@ def module5_biological_axis(adata):
     labels2 = [c.replace('_score', '').replace('_', ' ') for c in load2_sorted.index]
     ax.barh(range(len(load2_sorted)), load2_sorted.values, color=colors2, edgecolor='black', linewidth=0.5)
     ax.set_yticks(range(len(labels2)))
-    ax.set_yticklabels(labels2, fontsize=8)
+    ax.set_yticklabels(labels2, fontsize=10)
     ax.set_xlabel('PC2 Loading')
     ax.set_title(f'PC2 Loadings ({var_explained[1]*100:.1f}% var)', fontsize=11, fontweight='bold')
     ax.axvline(0, color='black', linewidth=0.5)
 
     plt.suptitle('Core Biological Axis Analysis', fontsize=14, fontweight='bold', y=1.02)
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "05_biological_axis.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "05_biological_axis.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "05_biological_axis.png")
     plt.close()
     print(f"  Saved biological axis figures")
 
@@ -659,11 +650,9 @@ def module6_estrogen_continuum(adata):
         ax.set_xlabel('Estrogen Response Continuum')
         ax.set_ylabel('Density')
         ax.set_title(f'{title}: Estrogen Response Distribution', fontsize=11, fontweight='bold')
-        ax.legend(fontsize=9)
+        ax.legend(fontsize=10)
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "06a_estrogen_continuum_density.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "06a_estrogen_continuum_density.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "06a_estrogen_continuum_density.png")
     plt.close()
 
     # --- Figure 2: Sliding window composition ---
@@ -688,12 +677,10 @@ def module6_estrogen_continuum(adata):
     ax.set_xlabel('Estrogen Response Continuum')
     ax.set_ylabel('Proportion')
     ax.set_title('Condition Composition Along Estrogen Continuum', fontsize=12, fontweight='bold')
-    ax.legend(loc='upper left', fontsize=8)
+    ax.legend(loc='upper left', fontsize=10)
     ax.set_xlim(window_centers[0], window_centers[-1])
     ax.set_ylim(0, 1)
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "06b_estrogen_continuum_composition.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "06b_estrogen_continuum_composition.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "06b_estrogen_continuum_composition.png")
     plt.close()
 
     # --- Figure 3: Pairwise KDE overlap ---
@@ -736,9 +723,7 @@ def module6_estrogen_continuum(adata):
     ax.set_xlabel('UMAP1')
     ax.set_ylabel('UMAP2')
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "06c_estrogen_overlap_umap.png", dpi=150, bbox_inches='tight')
-    plt.savefig(FIG_DIR / "06c_estrogen_overlap_umap.pdf", bbox_inches='tight')
+    save_fig(FIG_DIR / "06c_estrogen_overlap_umap.png")
     plt.close()
     print(f"  Saved estrogen continuum figures")
 

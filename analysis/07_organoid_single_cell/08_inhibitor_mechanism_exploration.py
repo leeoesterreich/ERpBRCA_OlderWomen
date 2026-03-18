@@ -29,6 +29,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 import seaborn as sns
 import scanpy as sc
 import pandas as pd
@@ -197,7 +198,7 @@ def derive_estrogen_signatures(adata):
         row = de_merged[de_merged["gene"] == gene]
         if len(row) > 0:
             ax.annotate(gene, (row["e1_lfc"].values[0], row["e2_lfc"].values[0]),
-                       fontsize=8, fontweight="bold")
+                       fontsize=10, fontweight="bold")
 
     ax.axhline(0, color="black", linewidth=0.5, alpha=0.3)
     ax.axvline(0, color="black", linewidth=0.5, alpha=0.3)
@@ -206,10 +207,8 @@ def derive_estrogen_signatures(adata):
     ax.set_ylabel("E2 vs Vehicle (log2FC)")
     ax.set_title("E1-dominant vs E2-dominant Transcriptional Response\n"
                  "(Note: both conditions have E1<->E2 interconversion)")
-    ax.legend(markerscale=5, fontsize=8)
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "e1_vs_e2_lfc_scatter.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / "e1_vs_e2_lfc_scatter.pdf", bbox_inches="tight")
+    ax.legend(markerscale=5, fontsize=10)
+    save_fig(FIG_DIR / "e1_vs_e2_lfc_scatter.png")
     plt.close()
 
     return de_merged, {"e1_up": e1_up, "e2_up": e2_up, "shared_up": shared_up}
@@ -269,9 +268,7 @@ def project_signatures(adata, gene_lists):
         axes[i].set_xlabel("")
         axes[i].tick_params(axis="x", rotation=45)
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "signature_projection.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / "signature_projection.pdf", bbox_inches="tight")
+    save_fig(FIG_DIR / "signature_projection.png")
     plt.close()
 
     # Quantitative summary: mean scores per condition
@@ -378,9 +375,7 @@ def profile_steroidogenic_genes(adata):
         sns.heatmap(pivot, cmap="YlOrRd", annot=True, fmt=".2f", ax=ax,
                    cbar_kws={"label": "Mean Expression"})
         ax.set_title(f"{category.replace('_', ' ')} Expression Across Treatments")
-        plt.tight_layout()
-        plt.savefig(FIG_DIR / f"heatmap_{category.lower()}.png", dpi=150, bbox_inches="tight")
-        plt.savefig(FIG_DIR / f"heatmap_{category.lower()}.pdf", bbox_inches="tight")
+        save_fig(FIG_DIR / f"heatmap_{category.lower()}.png")
         plt.close()
 
     # Percent expressing heatmap for HSD17B family
@@ -395,9 +390,7 @@ def profile_steroidogenic_genes(adata):
         sns.heatmap(pivot_pct, cmap="YlOrRd", annot=True, fmt=".1f", ax=ax,
                    cbar_kws={"label": "% Cells Expressing"})
         ax.set_title("HSD17B Family - % Cells Expressing per Treatment")
-        plt.tight_layout()
-        plt.savefig(FIG_DIR / "heatmap_hsd17b_pct_expressing.png", dpi=150, bbox_inches="tight")
-        plt.savefig(FIG_DIR / "heatmap_hsd17b_pct_expressing.pdf", bbox_inches="tight")
+        save_fig(FIG_DIR / "heatmap_hsd17b_pct_expressing.png")
         plt.close()
 
     # Key comparison: expression changes in inhibitor conditions
@@ -466,11 +459,9 @@ def fulv_calibration(adata):
         ax.set_title(f"{pathway_name}\nfulv (blocked) vs HSD17B7i (shifted?)")
         ax.set_xlabel("Pathway Score")
         ax.set_ylabel("Density")
-        ax.legend(fontsize=7)
+        ax.legend(fontsize=10)
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "fulv_calibration_kde.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / "fulv_calibration_kde.pdf", bbox_inches="tight")
+    save_fig(FIG_DIR / "fulv_calibration_kde.png")
     plt.close()
 
     # Quantify: how far is each inhibitor condition from fulv (blocked) vs estrogen (active)?
@@ -525,7 +516,7 @@ def dose_response_analysis(adata):
         log_msg("  No scores or conditions to plot")
         return
 
-    fig, axes = plt.subplots(n_conds, n_scores, figsize=(5 * n_scores, 4 * n_conds))
+    fig, axes = plt.subplots(n_conds, n_scores, figsize=(8 * n_scores, 6 * n_conds))
     if n_scores == 1:
         axes = axes.reshape(-1, 1)
     if n_conds == 1:
@@ -569,13 +560,12 @@ def dose_response_analysis(adata):
                         ax.scatter(hsd_expr[b_mask].mean(), er_vals[b_mask].mean(),
                                   c="red", s=50, zorder=5, edgecolors="black")
 
-            ax.set_xlabel("HSD17B7 expression")
-            ax.set_ylabel(score_col.replace("_score", ""))
-            ax.set_title(f"{condition}\nr={r:.3f}, p={p:.1e}")
+            ax.set_xlabel("HSD17B7 expression", fontsize=16)
+            ax.set_ylabel(score_col.replace("_score", ""), fontsize=16)
+            ax.set_title(f"{condition}\nr={r:.3f}, p={p:.1e}", fontsize=16)
+            ax.tick_params(labelsize=14)
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "dose_response_hsd17b7.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / "dose_response_hsd17b7.pdf", bbox_inches="tight")
+    save_fig(FIG_DIR / "dose_response_hsd17b7.png")
     plt.close()
 
     results_df = pd.DataFrame(results)
@@ -642,9 +632,7 @@ def subprogram_decomposition(adata):
         axes[i].set_xlabel("")
         axes[i].tick_params(axis="x", rotation=45)
 
-    plt.tight_layout()
-    plt.savefig(FIG_DIR / "subprogram_violins.png", dpi=150, bbox_inches="tight")
-    plt.savefig(FIG_DIR / "subprogram_violins.pdf", bbox_inches="tight")
+    save_fig(FIG_DIR / "subprogram_violins.png")
     plt.close()
 
     # Effect size heatmap: inhibitor effect on each sub-program
@@ -690,9 +678,7 @@ def subprogram_decomposition(adata):
                    cbar_kws={"label": "Cohen's d (positive = higher in first group)"})
         ax.set_title("Estrogen Sub-program Response to Inhibitor\n"
                     "(Which programs are differentially affected?)")
-        plt.tight_layout(rect=[0, 0, 0.94, 1])
-        plt.savefig(FIG_DIR / "subprogram_effect_heatmap.png", dpi=150, bbox_inches="tight")
-        plt.savefig(FIG_DIR / "subprogram_effect_heatmap.pdf", bbox_inches="tight")
+        save_fig(FIG_DIR / "subprogram_effect_heatmap.png")
         plt.close()
 
     return adata

@@ -12,6 +12,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 
 import scanpy as sc
 import pandas as pd
@@ -372,7 +373,7 @@ def volcano_plot(results_df, title, filename_stem, padj_threshold=0.05, log2fc_t
             xy=(row["log2FoldChange"], row["neg_log10_padj"]),
             xytext=(5, 5),
             textcoords="offset points",
-            fontsize=8,
+            fontsize=10,
             alpha=0.8
         )
 
@@ -387,11 +388,10 @@ def volcano_plot(results_df, title, filename_stem, padj_threshold=0.05, log2fc_t
     xlim = min(xlim, 10)  # Cap at +/- 10
     ax.set_xlim(-xlim - 0.5, xlim + 0.5)
 
-    plt.tight_layout()
     out_path_png = DE_FIGURES_DIR / f"{filename_stem}.png"
     out_path_pdf = DE_FIGURES_DIR / f"{filename_stem}.pdf"
-    plt.savefig(out_path_png, dpi=150, bbox_inches="tight")
-    plt.savefig(out_path_pdf, bbox_inches="tight")
+    save_fig(out_path_png)
+    save_fig(out_path_pdf)
     plt.close()
 
     log_message(f"    Saved: {out_path_png}")

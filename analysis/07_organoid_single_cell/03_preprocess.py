@@ -16,6 +16,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from _figure_config import save_fig
 
 import scanpy as sc
 import pandas as pd
@@ -395,11 +396,10 @@ def plot_umap_by_category(adata, color_by, filename, title=None):
         legend_loc='right margin'
     )
 
-    plt.tight_layout()
     out_path_png = UMAP_FIGURES_DIR / f"{filename}.png"
     out_path_pdf = UMAP_FIGURES_DIR / f"{filename}.pdf"
-    plt.savefig(out_path_png, dpi=150, bbox_inches='tight')
-    plt.savefig(out_path_pdf, bbox_inches='tight')
+    save_fig(out_path_png)
+    save_fig(out_path_pdf)
     plt.close()
     log_message(f"  Saved: {out_path_png}")
 
@@ -500,11 +500,10 @@ def plot_epithelial_markers(adata, markers):
     for j in range(len(markers_present), len(axes)):
         axes[j].axis('off')
 
-    plt.tight_layout()
     out_path_png = UMAP_FIGURES_DIR / "umap_epithelial_markers.png"
     out_path_pdf = UMAP_FIGURES_DIR / "umap_epithelial_markers.pdf"
-    plt.savefig(out_path_png, dpi=150, bbox_inches='tight')
-    plt.savefig(out_path_pdf, bbox_inches='tight')
+    save_fig(out_path_png)
+    save_fig(out_path_pdf)
     plt.close()
     log_message(f"  Saved: {out_path_png}")
 
