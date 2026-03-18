@@ -1,0 +1,83 @@
+# Methods: Organoid Single-Cell RNA-seq Analysis (Section 07)
+
+## 1. Experimental Design
+
+Single-cell RNA-seq was performed on PDO-296, a patient-derived organoid line established from a study cohort ER+ breast cancer specimen. Cells were treated across seven conditions: Vehicle (DMSO control), E1 (estrone), E2 (17β-estradiol), E1+fulvestrant, E2+fulvestrant, E1+HSD17B7i, and E2+HSD17B7i, where HSD17B7i denotes a small-molecule inhibitor of 17β-hydroxysteroid dehydrogenase type 7. Cells from the seven conditions were distributed across two sequencing pools and captured using the 10x Chromium Flex platform: samples OS01–OS04 in Pool 1 and samples OS05–OS07 in Pool 2.
+
+## 2. Cell Ranger & Reference
+
+Raw sequencing data were processed using Cell Ranger multi with a custom human reference genome (`refdata-gex-GRCh38-2024-A-custom`) derived from GRCh38 release 2024-A. The probe set used was the 10x Genomics Chromium Human Transcriptome Probe Set v1.1.0 for GRCh38-2024-A. Probe filtering was disabled (`filter-probes=false`) in the Cell Ranger multi configuration. This setting was required because HSD17B7, the primary drug target under investigation, is marked as excluded in the default v1.1.0 probe set. Retaining all probes ensured that expression measurements for HSD17B7 and all other transcripts were available for downstream analysis regardless of their default inclusion status.
+
+## 3. Quality Control & Doublet Detection
+
+Cell Ranger per-sample output matrices were loaded for each of the seven samples and concatenated into a single AnnData object. Mitochondrial genes were identified by the `MT-` prefix. Per-cell quality metrics including the number of detected genes, total UMI counts, and mitochondrial transcript percentage were computed using `scanpy.pp.calculate_qc_metrics`. Cells were retained if they had at least 500 detected genes, at least 1,000 total UMI counts, and fewer than 15% mitochondrial reads. These thresholds were applied sequentially.
+
+Doublet detection was performed per sample using Scrublet. For each sample, Scrublet was initialized with an expected doublet rate of 0.06 and run with `min_counts=2`, `min_cells=3`, `min_gene_variability_pctl=85`, and `n_prin_comps=30`. Samples with fewer than 50 cells after QC filtering were skipped. Predicted doublets were removed from all downstream analyses.
+
+## 4. Preprocessing & Dimensionality Reduction
+
+Genes expressed in fewer than 3 cells were removed. Raw counts were stored in `adata.layers["counts"]` before normalization to preserve integer counts for pseudobulk aggregation. Counts were then normalized to 10,000 per cell (CPM) using `scanpy.pp.normalize_total` with `target_sum=10000`, followed by log1p transformation. Highly variable genes were selected using the seurat_v3 flavor applied to the raw counts layer, retaining the top 3,000 genes. Scaled data were clipped to a maximum value of 10 (`max_value=10`). Principal component analysis was computed on the highly variable genes using 50 components. The nearest-neighbor graph was built with `k=15` neighbors using the first 30 principal components. UMAP coordinates were computed with default parameters. Leiden clustering was applied at a resolution of 0.5.
+
+## 5. Cell Cycle Scoring
+
+Cell cycle phase scores were computed using `scanpy.tl.score_genes_cell_cycle` with the gene sets from Tirosh et al. (2016). The S-phase gene set comprised 43 genes (MCM5, PCNA, TYMS, FEN1, MCM2, MCM4, RRM1, UNG, GINS2, MCM6, CDCA7, DTL, PRIM1, UHRF1, MLF1IP, HELLS, RFC2, RPA2, NASP, RAD51AP1, GMNN, WDR76, SLBP, CCNE2, UBR7, POLD3, MSH2, ATAD2, RAD51, RRM2, CDC45, CDC6, EXO1, TIPIN, DSCC1, BLM, CASP8AP2, USP1, CLSPN, POLA1, CHAF1B, BRIP1, E2F8) and the G2M-phase gene set comprised 54 genes (HMGB2, CDK1, NUSAP1, UBE2C, BIRC5, TPX2, TOP2A, NDC80, CKS2, NUF2, CKS1B, MKI67, TMPO, CENPF, TACC3, FAM64A, SMC4, CCNB2, CKAP2L, CKAP2, AURKB, BUB1, KIF11, ANP32E, TUBB4B, GTSE1, KIF20B, HJURP, CDCA3, HN1, CDC20, TTK, CDC25C, KIF2C, RANGAP1, NCAPD2, DLGAP5, CDCA2, CDCA8, ECT2, KIF23, HMMR, AURKA, PSRC1, ANLN, LBR, CKAP5, CENPE, CTCF, NEK2, G2E3, GAS2L3, CBX5, CENPA). Each cell was assigned to the G1, S, or G2M phase based on the relative magnitude of its S-score and G2M-score.
+
+## 6. Pseudobulk Differential Expression
+
+For pseudobulk differential expression, raw integer counts from `adata.layers["counts"]` were summed per sample (OS01–OS07) to produce a sample-by-gene count matrix. Genes with fewer than 10 total counts across all samples in a given comparison were excluded. Differential expression was performed using PyDESeq2 with a Wald test design on the `treatment` factor. Three comparisons were tested: E1 vs E2, E1 vs E1+HSD17B7i, and E1+HSD17B7i vs E2+HSD17B7i. Positive log2 fold changes indicate higher expression in the first-named condition. Genes were considered differentially expressed at Benjamini-Hochberg adjusted p-value (padj) < 0.05 and |log2FC| > 0.5. Results were saved as per-comparison CSV files, and PyDESeq2 log2FoldChange and padj columns were used consistently by all downstream scripts.
+
+## 7. Pathway & Transcription Factor Analysis
+
+Gene set enrichment analysis was performed on pseudobulk DE results from script 05 using the gseapy preranked method. Genes were ranked by the metric log2FC × −log10(p-value) from the PyDESeq2 Wald test results. GSEA was run against the MSigDB Hallmarks 2020 gene set collection with 1,000 permutations, a random seed of 42, minimum gene set size 15, maximum size 500, and a significance threshold of FDR q-value < 0.25.
+
+PROGENy pathway activity was computed at the single-cell level using the decoupler multivariate linear model (MLM), fetching the human PROGENy network with the top 300 footprint genes per pathway (`dc.op.progeny(organism="human", top=300)`). Transcription factor activity was estimated using DoRothEA via `dc.op.dorothea(organism="human", levels=["A", "B", "C"])` followed by the MLM estimator. Target transcription factors visualized were ESR1, E2F1, E2F4, MYC, and TP53.
+
+Enrichr over-representation analysis was performed in script 09 separately from the pseudobulk approach above, using cell-level Wilcoxon rank-sum differential expression between E1 and E1+HSD17B7i as input. Significantly up-regulated (padj < 0.05, log2FC > 0.25) and down-regulated (padj < 0.05, log2FC < −0.25) gene lists were queried against five libraries: MSigDB_Hallmark_2020, KEGG_2021_Human, Reactome_2022, GO_Biological_Process_2023, and WikiPathway_2023_Human. Significant enrichments were defined at adjusted p-value < 0.05.
+
+## 8. Cell Cycle Distribution
+
+Phase proportions (G1, S, G2M) were computed as contingency tables of cell cycle phase assignment versus treatment condition. Chi-square tests for independence were applied to evaluate whether phase distribution differed between the following treatment pairs: E1 vs E2, E1 vs E1+HSD17B7i, and E1+HSD17B7i vs E2+HSD17B7i. Results were summarized as stacked bar plots of phase proportions by treatment, and as boxplots of continuous S-scores and G2M-scores per condition.
+
+## 9. Single-Cell Pathway Scoring
+
+Eight custom gene sets were scored at the single-cell level using `scanpy.tl.score_genes`: Estrogen Response Early (23 genes), Estrogen Response Late (20 genes), E2F Targets (24 genes), G2M Checkpoint (20 genes), MYC Targets (22 genes), Proliferation (14 genes), Steroid Biosynthesis (12 genes), and ER Targets Direct (15 genes). An additional four ER subprogram gene sets were scored in script 08: ER Proliferative (11 genes: MKI67, TOP2A, CCND1, CCNE2, CDK1, MCM2, MCM5, PCNA, E2F1, MYC, MYBL2), ER Transcriptional (12 genes: GREB1, TFF1, PGR, PDZK1, XBP1, NRIP1, RARA, FOXA1, ESR1, AGR2, CA12, STC2), ER Metabolic (10 genes: IGFBP4, PKIB, SLC7A2, ELOVL2, FKBP4, MAPT, SLC9A3R1, CELSR2, PRSS23, TSKU), and ER Signaling Crosstalk (10 genes: ERBB4, AREG, EGR3, HSPB8, NPY1R, KRT19, SIAH2, MYB, CTSD, ANXA9).
+
+Statistical comparisons of pathway score distributions were performed across the three primary treatment pairs (E1 vs E2, E1 vs E1+HSD17B7i, E1+HSD17B7i vs E2+HSD17B7i) using the Mann-Whitney U test (two-sided) to compare medians, the two-sample Kolmogorov-Smirnov test to assess distributional differences, and Cohen's d as the effect size measure. Multiple testing correction across all pathway-comparison pairs was applied using the Benjamini-Hochberg false discovery rate procedure.
+
+## 10. HSD17B7 Inhibitor Mechanism Analysis
+
+To characterize the transcriptional mechanism of HSD17B7 inhibition, E1-dominant and E2-dominant gene signatures were derived empirically from the data. Cell-level Wilcoxon rank-sum differential expression was computed separately for E1 vs Vehicle and E2 vs Vehicle. Genes were classified as E1-responsive only, E2-responsive only, or shared responsive based on significance (padj < 0.05) and effect size (|log2FC| > 0.25). Resulting gene lists were scored across all seven treatment conditions using `sc.tl.score_genes` to test the cycling hypothesis (H1): that E2+HSD17B7i gains E1-like transcriptional character by blocking conversion of E1 to E2.
+
+A steroidogenic gene panel was profiled across all conditions, comprising the full HSD17B family (HSD17B1–HSD17B3, HSD17B4, HSD17B6–HSD17B8, HSD17B10–HSD17B14), other steroidogenic enzymes (CYP19A1, STS, SULT1E1, HSD3B1, HSD3B2, CYP17A1, CYP11A1, STAR, AKR1C1–AKR1C3), and estrogen receptors (ESR1, ESR2, GPER1). Mean expression and percent of expressing cells per treatment were computed for each gene. To further characterize the mechanism, the four ER subprograms (Proliferative, Transcriptional, Metabolic, and Signaling Crosstalk) were independently scored across all conditions and compared for differential sensitivity to inhibition.
+
+## 11. Heterogeneity Analysis
+
+Per-condition cellular heterogeneity was quantified through six complementary analyses. First, kernel density estimate (KDE) contours were overlaid on UMAP coordinates using a bandwidth of 0.3, with KDE computed on up to 5,000 subsampled cells per condition when cell numbers exceeded this threshold. Second, neighborhood mixing entropy was computed per cell as the Shannon entropy of the treatment composition of its nearest-neighbor graph connections, producing both a per-cell entropy value and a condition-level mixing matrix.
+
+Third, within-condition dispersion was measured as the mean distance from each cell's UMAP position to the condition centroid, the mean pairwise distance in the first 30 PCA dimensions (subsampled to 1,000 cells per condition), and the mean silhouette score computed on a subsample of 10,000 cells in PCA space. Fourth, cluster-treatment associations were assessed by Fisher's exact test applied to each Leiden cluster-treatment pair in the contingency table, with Benjamini-Hochberg correction (FDR < 0.05).
+
+Fifth, the core biological axis was identified by performing PCA on the standardized matrix of 14 pathway score columns (the eight gene set scores from section 9 plus the four ER subprogram scores plus S-score and G2M-score), retaining up to five components.
+
+Sixth, an estrogen response continuum score was defined as the mean of the Estrogen Response Early and Estrogen Response Late scores. KDE density overlays (bandwidth 0.2) were generated for each treatment group along this continuum, pairwise KDE overlap integrals (trapezoid rule, 500 evaluation points) were computed as a measure of distributional similarity, and a 50-window sliding window (width spanning two window intervals) was used to characterize how treatment composition shifted along the continuum axis.
+
+## 12. Proliferation & Quiescence Analysis
+
+Quiescence was scored using `sc.tl.score_genes` applied to an 8-gene arrest marker set: CDKN1A, CDKN1B, BTG1, BTG2, TOB1, GAS1, CDKN2A, and CCNG2. RB1 was excluded because it is frequently mutated in breast cancer; HES1 was excluded to avoid confounding by Notch signaling.
+
+Cells were classified as cycling or non-cycling by fitting a two-component Gaussian mixture model (GMM) to the global PROLIFERATION_score distribution. The BIC was compared between one- and two-component models; if the two-component model converged and had a lower BIC, the classification threshold was set as the mean of the two component means. Otherwise the analysis fell back to the 75th percentile of the proliferation score. Cycling cells were further sub-classified into S or G2M phase based on whether S_score exceeded G2M_score.
+
+Statistical comparisons were performed across seven predefined treatment pairs: Vehicle vs E1, Vehicle vs E2, E1 vs E2, E1 vs E1+fulvestrant, E2 vs E2+fulvestrant, E1 vs E1+HSD17B7i, and E1+HSD17B7i vs E2+HSD17B7i. For continuous proliferation and quiescence scores, the Mann-Whitney U test was used with rank-biserial correlation as the effect size. For cycling fractions, Fisher's exact test was applied with the odds ratio as the effect size. Benjamini-Hochberg correction was applied separately within the proliferation score comparisons and within the cycling fraction comparisons. Per-cluster cycling fractions were tabulated across all Leiden clusters and treatment conditions. Spearman correlation between the proliferation score and the estrogen response score was computed per treatment condition.
+
+## 13. Treatment Label Convention
+
+Cell Ranger Flex produces per-sample output in which the treatment metadata are stored using the historical nomenclature E1+ICI and E2+ICI (where ICI referred to the fulvestrant compound during initial data generation). All figures and analyses display these conditions as E1+fulvestrant (E1+fulv) and E2+fulvestrant (E2+fulv) to avoid ambiguity with immune checkpoint inhibitor therapies. This renaming is applied at load time via the `standardize_treatments()` function in `_config.py`.
+
+## 14. Software & Reproducibility
+
+Single-cell analyses were performed in Python using scanpy (version compatible with decoupler 2.x API), PyDESeq2, decoupler 2.x, gseapy, scikit-learn, and scipy. Pathway and TF networks were retrieved via `dc.op.progeny()` and `dc.op.dorothea()` from the decoupler 2.x API. All analyses were run within the `erp_brca_aging` conda environment at `/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/erp_brca_aging`. Figures were saved in dual format: PNG at 150 DPI and PDF (vector) for all panels.
+
+A random seed of 42 was set explicitly in scripts 05 (GSEA preranked: `seed=42`), 09 (GSEA preranked: `seed=42`), 10 (heterogeneity: `np.random.seed(42)` at script entry), and 11 (GMM classification: `random_state=42`). Scripts 02, 03, 06, 07, and 08 use scanpy and scipy defaults without an explicit seed. This seed convention (42) is an exception to the project-wide default of 12345 and was preserved to maintain reproducibility with the original analysis results.
+
+## Main Text Summary
+
+Single-cell RNA-seq of patient-derived organoid PDO-296 was performed across seven treatment conditions (Vehicle, E1, E2, E1+fulvestrant, E2+fulvestrant, E1+HSD17B7i, E2+HSD17B7i) captured on the 10x Chromium Flex platform in two pools. A custom GRCh38-2024-A reference with probe filtering disabled (to retain HSD17B7 expression data) was used for Cell Ranger processing. Cells passing QC thresholds (≥500 genes, ≥1,000 UMI, <15% mitochondrial) and Scrublet doublet removal were normalized to CPM, log1p-transformed, and clustered by Leiden (resolution 0.5) after PCA (50 components) and neighbor graph construction (k=15, 30 PCs). Pseudobulk differential expression for three primary comparisons was performed with PyDESeq2 (padj < 0.05, |log2FC| > 0.5), and pathway activity was characterized by GSEA preranked (MSigDB Hallmarks, seed=42, FDR < 0.25), PROGENy (top 300 footprints, MLM), and DoRothEA (levels A/B/C, MLM). Eight custom gene set scores and four ER subprogram scores were computed per cell using scanpy, with distributional comparisons by Mann-Whitney U, Kolmogorov-Smirnov, and Cohen's d (BH-FDR corrected). A GMM-based cycling classifier and an 8-gene quiescence score characterized proliferative state across all seven treatment pairs, and an estrogen response continuum score was used to characterize heterogeneity in estrogen signaling across conditions.
