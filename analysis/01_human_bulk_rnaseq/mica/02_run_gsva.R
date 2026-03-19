@@ -1,19 +1,14 @@
 #!/usr/bin/env Rscript
-# 02_run_gsva.R - Run GSVA on EstroGene and MSigDB pathways
+# 02_run_gsva.R — GSVA scoring is now integrated into 01_prep_data.R
 #
-# Inputs:
-#   - outputs/01_*_filtered.RData
-#   - data/input/EstroGene_Signatures.xlsx
+# This script exists for backward compatibility with run_all.sbatch.
+# GSVA computation on EstroGene + LI_ESTROGENE signatures is performed
+# in 01_prep_data.R which outputs:
+#   - outputs/04_selected_path_aging_standard.RData  (Scheme 1)
+#   - outputs/04_selected_path_aging_postM.RData     (Scheme 2)
 #
-# Outputs:
-#   - outputs/02_gsva_estrogene.RData
-#   - outputs/02_gsva_pathways.RData
+# Nothing to do here.
 
 set.seed(12345)
 
-library(GSVA)
-library(tidyverse)
-
-# TODO: Implement once data files are obtained
-
-message("02_run_gsva.R: Waiting for data files from Jian")
+cat("02_run_gsva.R: GSVA scoring is integrated into 01_prep_data.R — skipping.\n")

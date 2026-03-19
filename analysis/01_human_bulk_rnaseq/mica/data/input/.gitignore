@@ -1,0 +1,4 @@
+# Exclude all data files from git (1.3GB+)
+# Data is copied from Jian_MICA/data/ by the pipeline
+*
+!.gitignore
