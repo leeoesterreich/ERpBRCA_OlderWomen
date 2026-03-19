@@ -180,9 +180,23 @@ if (use_tpm_only) {
   new_colnames <- c("GeneSymb", matched_samples$SampleNameGroup)
   colnames(tpm_matrix) <- new_colnames
 
-  # Remove duplicate genes
-  tpm_matrix_nodup <- tpm_matrix %>%
-    dplyr::filter(!duplicated(GeneSymb))
+  # Resolve duplicate gene symbols by keeping highest mean expression
+  dup_genes <- unique(tpm_matrix$GeneSymb[duplicated(tpm_matrix$GeneSymb)])
+  n_dups <- length(dup_genes)
+  if (n_dups > 0) {
+    cat("  Resolving", n_dups, "duplicated gene symbols (keeping highest mean expression)\n")
+    keep <- rep(TRUE, nrow(tpm_matrix))
+    expr_cols <- setdiff(colnames(tpm_matrix), "GeneSymb")
+    for (g in dup_genes) {
+      idx <- which(tpm_matrix$GeneSymb == g)
+      means <- rowMeans(tpm_matrix[idx, expr_cols, drop = FALSE], na.rm = TRUE)
+      keep[idx] <- FALSE
+      keep[idx[which.max(means)]] <- TRUE
+    }
+    tpm_matrix_nodup <- tpm_matrix[keep, ]
+  } else {
+    tpm_matrix_nodup <- tpm_matrix
+  }
 
   cat("  Final matrix:", nrow(tpm_matrix_nodup), "genes x", ncol(tpm_matrix_nodup) - 1, "samples\n")
 
@@ -389,9 +403,23 @@ if (use_tpm_only) {
     as.data.frame() %>%
     tibble::rownames_to_column("GeneSymb")
 
-  # Remove duplicate genes
-  vst_matrix_nodup <- vst_matrix %>%
-    dplyr::filter(!duplicated(GeneSymb))
+  # Resolve duplicate gene symbols by keeping highest mean expression
+  dup_genes <- unique(vst_matrix$GeneSymb[duplicated(vst_matrix$GeneSymb)])
+  n_dups <- length(dup_genes)
+  if (n_dups > 0) {
+    cat("  Resolving", n_dups, "duplicated gene symbols (keeping highest mean expression)\n")
+    keep <- rep(TRUE, nrow(vst_matrix))
+    expr_cols <- setdiff(colnames(vst_matrix), "GeneSymb")
+    for (g in dup_genes) {
+      idx <- which(vst_matrix$GeneSymb == g)
+      means <- rowMeans(vst_matrix[idx, expr_cols, drop = FALSE], na.rm = TRUE)
+      keep[idx] <- FALSE
+      keep[idx[which.max(means)]] <- TRUE
+    }
+    vst_matrix_nodup <- vst_matrix[keep, ]
+  } else {
+    vst_matrix_nodup <- vst_matrix
+  }
   cat("  VST matrix:", nrow(vst_matrix_nodup), "genes\n")
 
   # -------------------------------------------------------------------------
@@ -416,7 +444,8 @@ if (use_tpm_only) {
     sample_dist_matrix,
     main = "Sample Distance Matrix",
     clustering_distance_rows = sample_dists,
-    clustering_distance_cols = sample_dists
+    clustering_distance_cols = sample_dists,
+    annotation_col = metadata[, c("AgeRange", "Group"), drop = FALSE]
   )
 
   # Library size distribution
