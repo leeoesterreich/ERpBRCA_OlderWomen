@@ -10,8 +10,8 @@ For the MICA concordance analysis (subdirectory `mica/`), external validation co
 
 Samples were classified into age groups as follows:
 
-- **Primary analysis (main pipeline):** Age groups extracted from sample annotation column `AgeRange` (values: Young, Middle, Elderly). The correlation analysis (script `04_correlations.R`) restricted to Young and Elderly tumor samples only, excluding Middle-aged samples.
-- **MICA sub-analysis (planned):** Young: 35-45 years; Middle-Aged: 55-69 years; Elderly: >= 70 years. A postmenopausal subdivision was also defined: Early: 55-59, Middle: 60-69, Elderly: >= 70.
+- **Primary analysis (main pipeline):** Age groups were derived from the sample annotation column `AgeRange` (categorical values: Young, Middle, Elderly). Numeric age boundaries are defined by the annotation file; the correlation analysis (script `04_correlations.R`) restricted to Young and Elderly tumor samples only, excluding Middle-aged samples.
+- **MICA sub-analysis:** Young: 35-45 years; Middle-Aged: 55-69 years; Elderly: >= 70 years. A postmenopausal subdivision was also defined: Early: 55-59, Middle: 60-69, Elderly: >= 70.
 
 ## 2. Preprocessing
 
@@ -27,7 +27,7 @@ When raw feature counts were available, the pipeline performed:
 
 3. **DESeq2 normalization:** A `DESeqDataSet` object was constructed using `DESeqDataSetFromMatrix()` with design formula `~ AgeRange + Group`, accounting for age range and tissue type effects during size factor estimation.
 
-4. **Variance stabilizing transformation:** The `varianceStabilizingTransformation()` function from DESeq2 was applied with `blind = FALSE`, using the design formula to inform the dispersion estimation. The resulting VST-transformed matrix was deduplicated by gene symbol (first occurrence retained via `!duplicated(GeneSymb)`).
+4. **Variance stabilizing transformation:** The `varianceStabilizingTransformation()` function from DESeq2 was applied with `blind = FALSE`, using the design formula to inform the dispersion estimation. The resulting VST-transformed matrix was deduplicated by gene symbol (the row with the highest mean expression across samples was retained).
 
 ### TPM-Only Mode (Fallback)
 
@@ -42,7 +42,7 @@ QC visualizations were generated as a multi-page PDF (`qc_plots.pdf`):
 
 ### Duplicate Gene Handling
 
-Duplicate gene symbols were removed by retaining the first occurrence using `dplyr::filter(!duplicated(GeneSymb))`.
+When multiple rows shared the same gene symbol, the row with the highest mean expression across samples was retained.
 
 ### Random Seed
 
@@ -80,7 +80,7 @@ For the E1-upregulated gene set, gene symbols containing hyphens were truncated 
 
 PROGENy pathway activity inference was performed in `03_run_progeny.R`.
 
-**Input data:** Log2(TPM) expression matrix, filtered to protein-coding genes (same filter as preprocessing), with sample names matched to annotation via inner join.
+**Input data:** VST-normalized expression matrix (`vst_normalized_matrix.rds`) produced by `01_preprocess.R`, consistent with the GSVA input. The matrix was filtered to protein-coding genes (same filter as preprocessing), with sample names matched to annotation via inner join.
 
 **PROGENy parameters:**
 - Function: `progeny::progeny()`
@@ -88,8 +88,6 @@ PROGENy pathway activity inference was performed in `03_run_progeny.R`.
 - `organism = "Human"`
 - `top = 100` (number of footprint genes per pathway)
 - `perm = 1000` (permutations for significance assessment)
-
-PROGENy uses the same VST-normalized matrix (`vst_normalized_matrix.rds`) produced by `01_preprocess.R`, consistent with the GSVA input.
 
 ### 3.3 Correlation Analysis
 
@@ -116,13 +114,9 @@ The correlation analysis (`04_correlations.R`) filters the TPM matrix to protein
 
 ## 4. Downstream Analyses
 
-### 4.1 MICA Concordance Analysis (Planned)
+### 4.1 MICA Concordance Analysis
 
-The MICA (Mutual Information-based Concordance Analysis) sub-pipeline was designed to validate estrogen pathway findings across independent cohorts (TCGA, METABRIC, SCAN-B). Planned parameters included:
-- `N_PERM = 500` (permutations)
-- `P_THRESHOLD = 0.05`
-- `N_PARALLEL = 10` (parallel threads)
-- CPM normalization via `edgeR::cpm()` for count data
+The MICA (Mutual Information-based Concordance Analysis) sub-pipeline validated estrogen pathway findings across independent cohorts (TCGA, METABRIC, SCAN-B). GSVA was used to compute pathway activity scores across cohorts with two age stratification schemes, and concordance was assessed using 500 permutations (`N_PERM = 500`) at a significance threshold of `P_THRESHOLD = 0.05` with `N_PARALLEL = 10` parallel threads. CPM normalization was applied via `edgeR::cpm()` for count data.
 
 ### 4.2 HSD17B Gene Family Analysis (Planned)
 
@@ -199,4 +193,4 @@ From `environment.yml` (conda environment `erp_brca_aging`):
 
 ## Main Text Summary
 
-Human ER+ breast cancer bulk RNA-seq data (39,404 genes, 168 samples) were preprocessed by filtering to protein-coding genes using NCBI gene annotations and normalizing with DESeq2 variance stabilizing transformation (design: ~ AgeRange + Group, `blind = FALSE`). Estrogen pathway activity was quantified using GSVA (v2.x, `kcdf = "Gaussian"`, `maxDiff = TRUE`) across seven curated gene sets from MSigDB Hallmark, Reactome, WikiPathways, GO Biological Process, and a custom E1-responsive gene set (407 genes). PROGENy pathway activity was inferred using the top 100 footprint genes per pathway with 1,000 permutations. Spearman rank correlations between nine estrogen-related genes (PAK4, HSD17B7, GREB1, PGR, ESR1, TFF1, CYP19A1, HSD17B2, SAA1) plus chronological age and all pathway activity scores were computed for Young and Elderly tumor samples, with Benjamini-Hochberg false discovery rate correction applied across all tests. All analyses used R 4.4.1 with seed 12345 for reproducibility.
+Human ER+ breast cancer bulk RNA-seq data (39,404 genes, 168 samples) were preprocessed by filtering to protein-coding genes using NCBI gene annotations and normalizing with DESeq2 variance stabilizing transformation (design: ~ AgeRange + Group, `blind = FALSE`). Estrogen pathway activity was quantified using GSVA (v2.x, `kcdf = "Gaussian"`, `maxDiff = TRUE`) across seven curated gene sets from MSigDB Hallmark, Reactome, WikiPathways, GO Biological Process, and a custom E1-responsive gene set (407 genes). PROGENy pathway activity was inferred using the top 100 footprint genes per pathway with 1,000 permutations. Spearman rank correlations between nine estrogen-related genes (PAK4, HSD17B7, GREB1, PGR, ESR1, TFF1, CYP19A1, HSD17B2, SAA1) plus chronological age and all pathway activity scores were computed for Young and Elderly tumor samples, with Benjamini-Hochberg false discovery rate correction applied across all tests. MICA concordance analysis was performed across TCGA, METABRIC, and SCAN-B cohorts using GSVA with two age stratification schemes and 500 permutations. All analyses used R 4.4.1 with seed 12345 for reproducibility.

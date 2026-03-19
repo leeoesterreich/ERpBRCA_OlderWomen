@@ -148,7 +148,7 @@ Heatmaps of signed -log10(FDR) scores were generated across cell types, with sig
 
 ## 16. Macrophage Cell-Cell Communication Visualization
 
-Script `13_macrophage_cellphonedb.R` generated a simplified communication gene visualization from macrophage DEGs, filtering for genes matching chemokine (CCL, CXCL), cytokine (IL, TNF, TGF, IFNG), and immune checkpoint (CD80, CD86, PDCD1, CD274, CTLA4, LAG3) patterns. This script loaded the full annotated Seurat object (`seurat_annotated.rds`) as a fallback but primarily operated on `macrophage_seurat.rds`.
+Script `13_macrophage_cellphonedb.R` generated a bar chart visualization of communication-related DEGs from the macrophage pseudobulk DE results, filtering for genes matching chemokine (CCL, CXCL), cytokine (IL, TNF, TGF, IFNG), and immune checkpoint (CD80, CD86, PDCD1, CD274, CTLA4, LAG3) patterns. This is a DEG-based visualization, not a CellPhoneDB or CellChat interaction analysis. The script loaded the full annotated Seurat object (`seurat_annotated.rds`) as a fallback but primarily operated on `macrophage_seurat.rds`.
 
 This script uses DESeq2-style column names (`log2FoldChange`, `padj`) from the DEG input file.
 
@@ -162,13 +162,13 @@ Per-patient pseudo-bulk GSVA was performed within each cell type, followed by st
 
 **Input data:** Full annotated Seurat object (`seurat_annotated.rds`) containing all cell types, enabling proper cross-cell-type pathway analysis.
 
-**Pseudo-bulk construction:** For each cell type present in the object, per-patient expression profiles were created by averaging SCTransform-normalized data (`GetAssayData()`, layer = "data") across cells, requiring >= 10 cells per patient per cell type. If the SCT assay was unavailable, RNA counts were normalized to CPM + log2.
+**Pseudo-bulk construction:** For each cell type present in the object, per-patient expression profiles were created by averaging SCTransform-normalized data (`GetAssayData()`, layer = "data") across cells, requiring >= 10 cells per patient per cell type (`min_patients_per_group = 2` in script 15, compared to `MIN_PATIENTS_PER_GROUP = 3` in the DESeq2-based script 14). If the SCT assay was unavailable, RNA counts were normalized to CPM + log2.
 
 **GSVA parameters:** `gsvaParam()` with `kcdf = "Gaussian"` and `maxDiff = TRUE`. Gene sets included all MSigDB Hallmark pathways, BioCarta (subcategory "CP:BIOCARTA"), and LI_ESTROGENE early/late E2 response gene sets from local GMT files.
 
 **Statistical testing:** For each pathway within each cell type, Elderly vs Young patient GSVA scores were compared using a Welch t-test (`t.test(..., var.equal = FALSE)`). FDR correction was applied using two strategies: (1) across all pathway-cell type combinations (`padj_all`), and (2) restricted to 25 curated pathways only (`padj`, reducing multiple testing burden from ~4000+ to ~312 tests). Significance was determined at FDR < 0.05.
 
-**Curated pathway set (Hallmark):** ESTROGEN_RESPONSE_EARLY, ESTROGEN_RESPONSE_LATE, INFLAMMATORY_RESPONSE, TNFA_SIGNALING_VIA_NFKB, TGF_BETA_SIGNALING, IL6_JAK_STAT3_SIGNALING, IL2_STAT5_SIGNALING, INTERFERON_GAMMA_RESPONSE, INTERFERON_ALPHA_RESPONSE, EPITHELIAL_MESENCHYMAL_TRANSITION, ANGIOGENESIS, HYPOXIA, APOPTOSIS, plus LI_ESTROGENE_EARLY_E2_RESPONSE_UP and LI_ESTROGENE_LATE_E2_RESPONSE_UP.
+**Curated pathway set (Hallmark):** ESTROGEN_RESPONSE_EARLY, ESTROGEN_RESPONSE_LATE, INFLAMMATORY_RESPONSE, TNFA_SIGNALING_VIA_NFKB, TGF_BETA_SIGNALING, IL6_JAK_STAT3_SIGNALING, IL2_STAT5_SIGNALING, INTERFERON_GAMMA_RESPONSE, INTERFERON_ALPHA_RESPONSE, EPITHELIAL_MESENCHYMAL_TRANSITION, ANGIOGENESIS, HYPOXIA, APOPTOSIS, plus LI_ESTROGENE_EARLY_E2_RESPONSE_UP and LI_ESTROGENE_LATE_E2_RESPONSE_UP. The unified set includes IL2_STAT5, IFN_ALPHA, and EMT; COMPLEMENT is excluded.
 
 **Curated pathway set (BioCarta):** INFLAM_PATHWAY, IL6_PATHWAY, IL2_PATHWAY, NFKB_PATHWAY, TNFR1_PATHWAY, DEATH_PATHWAY, FAS_PATHWAY, CASPASE_PATHWAY, P53_PATHWAY, CELLCYCLE_PATHWAY, G1_PATHWAY, G2_PATHWAY.
 
@@ -202,10 +202,14 @@ CellPhoneDB was run via the Python API in two versions:
 
 Both versions were run separately for Elderly and Young age groups using pre-prepared count matrices and metadata files from script 09.
 
+### 21.1 Independent GSEA (Script 09)
+
+Script 09 (`09_pathway_enrichment_analysis.py`) performed an independent GSEA using cell-level Wilcoxon rank-sum z-scores for gene ranking (distinct from the pseudobulk-based log2FC x -log10(p) ranking in script 05), querying three libraries: MSigDB_Hallmark_2020, KEGG_2021_Human, and Reactome_2022.
+
 ## 22. CellPhoneDB Dot Plot Visualization
 
 A comparative dot plot of CellPhoneDB results was generated in R (`17_cellphonedb_dotplot.R`). Two modes were available:
-- **top50** (default): Top 40 ligand-receptor pairs by minimum p-value across all macrophage-immune cell interactions
+- **top50** (default): Despite the mode name, selects the top 40 ligand-receptor pairs (via `head(40)`) by minimum p-value across all macrophage-immune cell interactions
 - **curated**: A predefined list of L-R pairs with normalized name matching to handle ordering differences between CellPhoneDB versions
 
 The plot focused on Macrophage-as-sender interactions with six target cell types: B cells, Cycling T cells, NK cells, NKT cells, CD4+ T cells, and CD8+ T cells. Dot size encoded `-log10(p-value)` (capped at 3), and dot color encoded `log2(mean expression + 1)` using an RdBu diverging palette (range: -10 to +5). Only interactions with BH-FDR corrected p < 0.05 were displayed. X-axis labels were placed on top (manuscript convention). Age groups were labeled "Younger" and "Older".
@@ -216,7 +220,7 @@ From `environment.yml` (conda environment `erp_brca_aging`):
 
 | Software | Version |
 |---|---|
-| R | 4.4.1 |
+| R | 4.3.3 |
 | Seurat | >= 5.0 |
 | Harmony | (via conda) |
 | glmGamPoi | (Bioconductor) |

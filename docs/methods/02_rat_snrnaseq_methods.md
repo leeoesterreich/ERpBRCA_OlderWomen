@@ -17,7 +17,7 @@ Quality control was performed per sample prior to merging. Mitochondrial gene co
 
 ### 2.2 Doublet Detection and Removal
 
-Doublet detection was performed per sample using DoubletFinder (v1.0). Each sample was independently normalized with `SCTransform()` (method = `"glmGamPoi"`, regressing `percent.mt`) and subjected to PCA (30 components) prior to doublet detection. The optimal `pK` parameter was determined via `paramSweep()` over PCs 1:30 with `sct = TRUE`, followed by `summarizeSweep()` (without ground truth, `GT = FALSE`) and `find.pK()`, selecting the `pK` value that maximized the BCmvn metric. The expected doublet rate was set to 5% (`doublet_rate = 0.05`), and `pN` was set to the default value of 0.25. Predicted doublets were removed, retaining only singlet-classified nuclei. After QC filtering and doublet removal, samples were merged using `Seurat::merge()` with sample-specific cell ID prefixes.
+Doublet detection was performed per sample using DoubletFinder (v1.0). Each sample was independently normalized with `SCTransform()` (method = `"glmGamPoi"`, regressing `percent.mt`) and subjected to PCA prior to doublet detection. PCA was computed with the default 50 components; dimensions 1:30 were used for paramSweep and doubletFinder. The optimal `pK` parameter was determined via `paramSweep()` over PCs 1:30 with `sct = TRUE`, followed by `summarizeSweep()` (without ground truth, `GT = FALSE`) and `find.pK()`, selecting the `pK` value that maximized the BCmvn metric. The expected doublet rate was set to 5% (`doublet_rate = 0.05`), and `pN` was set to the default value of 0.25. Predicted doublets were removed, retaining only singlet-classified nuclei. After QC filtering and doublet removal, samples were merged using `Seurat::merge()` with sample-specific cell ID prefixes.
 
 ## 3. Normalization and Integration
 
@@ -101,7 +101,9 @@ A systematic comparison of annotation methods (`method_comparison.R`, `spot_chec
 
 ## 6. Differential Expression
 
-Differential expression testing between Aged and Young groups was performed per cell type using a pseudobulk DESeq2 approach. Raw counts are aggregated per sample using `AggregateExpression()`, with DESeq2 `~ group` design and Aged vs Young contrast. This properly treats biological replicates (n=3 per group) as the unit of analysis. Cell types with fewer than 10 cells in either group were excluded. P-values were corrected for multiple testing using the Benjamini-Hochberg method (`p.adjust(method = "BH")`) applied within each cell type. Genes were classified as significant at FDR < 0.05 and further annotated by direction (upregulated or downregulated in Aged).
+Differential expression and differential abundance analyses used the marker-scoring annotation from the primary pipeline (Louvain resolution 0.4), not scType annotations.
+
+Differential expression testing between Aged and Young groups was performed per cell type using a pseudobulk DESeq2 approach. Low-count genes were filtered, requiring >= 10 counts in >= 2 samples before DESeq2. Raw counts were aggregated per sample using `AggregateExpression()`, with DESeq2 `~ group` design and Aged vs Young contrast. This properly treats biological replicates (n=3 per group) as the unit of analysis. Cell types with fewer than 10 cells per sample were excluded, and groups required at least 2 samples (`MIN_CELLS_PER_SAMPLE = 10`, `MIN_SAMPLES_PER_GROUP = 2`). P-values were corrected for multiple testing using the Benjamini-Hochberg method (`p.adjust(method = "BH")`) applied within each cell type. Genes were classified as significant at FDR < 0.05 and further annotated by direction (upregulated or downregulated in Aged).
 
 ## 7. Differential Abundance
 
@@ -112,7 +114,7 @@ Two levels of cell type granularity were tested:
 1. **Main cell types** (`CellTypeByMarker_RatsnRNAseq`): broad categories (e.g., CancerEpithelial, Myeloid, NKTcell, Fibroblast, Endothelial)
 2. **Subtypes** (`CellTypeMacroTcell_RatsnRNAseq`): finer-grained types from scType annotation
 
-P-values from propeller were additionally corrected using the Benjamini-Hochberg method. Results at both levels were combined for reporting.
+Propeller's internally adjusted p-values were overridden with an independent Benjamini-Hochberg correction applied to the raw P.Value column. Results at both levels were combined for reporting.
 
 ## 8. Visualization
 
@@ -138,7 +140,7 @@ All figure panels were saved in both PDF (vector) and PNG (300 DPI) formats, wit
 
 ## 9. Software Versions
 
-The analysis was performed using the `erp_brca_aging` conda environment with the following key software:
+The analysis was performed using the `erp_snrnaseq` conda environment with the following key software:
 
 | Package | Version | Purpose |
 |---------|---------|---------|
@@ -168,4 +170,4 @@ The analysis was performed using the `erp_brca_aging` conda environment with the
 
 ## Main Text Summary
 
-Single-nucleus RNA sequencing data from six NMU-induced rat mammary tumors (three Aged, three Young; GEO: GSE276758) were processed using Seurat v5. Nuclei were filtered by gene count (200--6,000), UMI count (>400), and mitochondrial content (<15%), and doublets were removed using DoubletFinder (5% expected rate, per-sample pK optimization). Data were normalized with SCTransform (glmGamPoi, regressing mitochondrial percentage) and integrated across samples using Harmony. UMAP embedding and shared nearest neighbor clustering (Louvain algorithm, resolution 0.4) were computed on the first 30 Harmony-corrected components. Cell types were annotated by scoring clusters against canonical mammary tissue marker gene sets; a parallel scType-based annotation confirmed immune cell identification. Differential expression between age groups was tested per cell type using pseudobulk DESeq2 (BH-corrected FDR < 0.05), and differential abundance was assessed using propeller (speckle package) with Benjamini-Hochberg correction. All analyses used random seed 12345.
+Single-nucleus RNA sequencing data from six NMU-induced rat mammary tumors (three Aged, three Young; GEO: GSE276758) were processed using Seurat v5. Nuclei were filtered by gene count (200--6,000), UMI count (>400), and mitochondrial content (<15%), and doublets were removed using DoubletFinder (5% expected rate, per-sample pK optimization via dimensions 1:30). Data were normalized with SCTransform (glmGamPoi, regressing mitochondrial percentage) and integrated across samples using Harmony. UMAP embedding and shared nearest neighbor clustering (Louvain algorithm, resolution 0.4) were computed on the first 30 Harmony-corrected components. Cell types were annotated by scoring clusters against canonical mammary tissue marker gene sets; a parallel scType-based annotation confirmed immune cell identification. Differential expression and differential abundance analyses used the marker-scoring annotation (resolution 0.4). Pseudobulk DESeq2 DE testing required >= 10 cells per sample per cell type and >= 2 samples per group, with low-count gene filtering (>= 10 counts in >= 2 samples) and BH-corrected FDR < 0.05. Differential abundance was assessed using propeller (speckle package) with an independent Benjamini-Hochberg correction applied to raw p-values. All analyses used random seed 12345.

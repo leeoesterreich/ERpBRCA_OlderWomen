@@ -58,7 +58,7 @@ Reproducibility of the pipeline was validated against an independent analysis by
 
 ### 7.1 HTSeq Count Correlation
 
-Per-sample HTSeq count vectors were compared between the current pipeline and Rahul's results (located at `/ix1/alee/LO_LAB/Personal/Rahul/Neil_RNAseq/5_Count_file/`). A sample name mapping was applied (e.g., `"102-FF-Tumor"` to `"102-FF"`). Pearson correlation was computed on merged gene-level counts (excluding `__`-prefixed summary rows). The pass threshold was r >= 0.99 for all samples.
+Per-sample HTSeq count vectors were compared between the current pipeline and Rahul's results (located at `/ix1/alee/LO_LAB/Personal/Rahul/Neil_RNAseq/5_Count_file/`). A hardcoded sample name lookup table was used for matching (e.g., `"102-FF-Tumor"` to `"102-FF"`). Pearson correlation was computed on merged gene-level counts (excluding `__`-prefixed summary rows). The pass threshold was r >= 0.99 for all samples.
 
 ### 7.2 DESeq2 Significant Gene Overlap
 
@@ -66,7 +66,7 @@ Significant gene sets (FDR < 0.05) from both analyses were compared. Rahul's res
 
 ### 7.3 PAM50 Subtype Concordance
 
-Per-sample PAM50 subtype assignments were compared between the two analyses. Rahul's subtypes were loaded from `PAM50/PAM50.csv`. Matching was performed by fuzzy name matching (removing the `-Tumor` suffix). The pass criterion was 100% concordance across all matched samples.
+Per-sample PAM50 subtype assignments were compared between the two analyses. Rahul's subtypes were loaded from `PAM50/PAM50.csv`. Matching was performed by removing the `-Tumor` suffix via `gsub("-Tumor", "", ...)`. The pass criterion was 100% concordance across all matched samples.
 
 Validation results were saved as an RDS object (`validation_results.rds`).
 

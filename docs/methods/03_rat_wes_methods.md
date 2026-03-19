@@ -12,7 +12,7 @@ Somatic variants were annotated using Ensembl Variant Effect Predictor (VEP) v11
 |-----------|-------|
 | `--species` | `rattus_norvegicus` |
 | `--assembly` | `Rnor_6.0` |
-| `--cache_version` | `95` |
+| `--cache_version` | `104` |
 | `--offline` | enabled |
 | `--force_overwrite` | enabled |
 | `--tab` | tab-delimited output |
@@ -82,7 +82,7 @@ The analysis pipeline was orchestrated via `run_analysis.sbatch`, which executed
 
 ## 7. Software Versions
 
-From `environment.yml` (environment name: `erp_brca_aging`):
+From `environment.yml` (environment name: `aging_wes`):
 
 | Software | Version | Source |
 |----------|---------|--------|
@@ -97,7 +97,7 @@ Additional dependencies not in `environment.yml` but required by the scripts:
 | Software | Version | Notes |
 |----------|---------|-------|
 | Ensembl VEP | 114.2 | Loaded via `module load ensembl-vep/114.2` |
-| VEP cache | 95 | Rnor_6.0, offline cache |
+| VEP cache | 104 | Rnor_6.0, offline cache |
 | SigProfilerAssignment | (not pinned) | `cosmic_fit()` with COSMIC v3.4 |
 | pybiomart | (not pinned) | BioMart API queries |
 
@@ -105,6 +105,7 @@ Additional dependencies not in `environment.yml` but required by the scripts:
 
 - **Random seeds**: No random seeds were set in any Python script, contrary to the project requirement of `np.random.seed(12345)`.
 - **Caching**: BioMart homolog queries were cached to `outputs/homolog_cache.csv`, making subsequent runs independent of external API state. SigProfiler was skipped on re-runs if its output file already existed.
+- **VEP version history**: Results were regenerated with VEP v114.2 using the Ensembl release 104 cache (latest available for Rnor_6.0 assembly). The original analysis used VEP v95 with cache v95.
 - **Determinism**: VEP annotation and VEP parsing are deterministic. SigProfilerAssignment's internal optimization may not be deterministic without explicit seed control. BioMart query results may vary across Ensembl releases.
 - **Completion markers**: The pipeline wrote a `.pipeline_markers/03_rat_wes.complete` file upon successful completion, enabling downstream dependency checks.
 - **Output formats**: Figures were saved in both SVG (vector) and PNG (300 DPI raster). Intermediate data were saved as CSV.
@@ -113,4 +114,4 @@ Additional dependencies not in `environment.yml` but required by the scripts:
 
 ## Main Text Summary
 
-Somatic variants from whole exome sequencing of six rat mammary tumors (three young, three old; matched spleen germline controls) were annotated using Ensembl VEP v114.2 (Rnor_6.0 assembly, cache v95) and filtered for HIGH or MODERATE impact consequences on Ensembl-annotated genes. Mutational signatures were decomposed against COSMIC v3.4 SBS references using SigProfilerAssignment with 96-trinucleotide context on the rn6 genome. For oncoplot visualization, rat genes were mapped to human orthologs via BioMart and filtered against a curated panel of 229 cancer-associated genes. When multiple variants affected the same gene in a sample, the highest-impact consequence was retained. Samples were grouped by age and ordered by descending numeric ID within each group.
+Somatic variants from whole exome sequencing of six rat mammary tumors (three young, three old; matched spleen germline controls) were annotated using Ensembl VEP v114.2 (Rnor_6.0 assembly, cache v104) and filtered for HIGH or MODERATE impact consequences on Ensembl-annotated genes. Mutational signatures were decomposed against COSMIC v3.4 SBS references using SigProfilerAssignment with 96-trinucleotide context on the rn6 genome. For oncoplot visualization, rat genes were mapped to human orthologs via BioMart and filtered against a curated panel of 229 cancer-associated genes. When multiple variants affected the same gene in a sample, the highest-impact consequence was retained. Samples were grouped by age and ordered by descending numeric ID within each group.
