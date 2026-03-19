@@ -184,7 +184,7 @@ def generate_oncoplot_figure(df):
 
     # Convert to numeric matrix (0 for missing)
     # Use map for pandas 2.x compatibility
-    plot_numeric = plot_data.map(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
+    plot_numeric = plot_data.applymap(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
 
     # Create colormap with white for missing
     n_colors = len(unique_consequences) + 1

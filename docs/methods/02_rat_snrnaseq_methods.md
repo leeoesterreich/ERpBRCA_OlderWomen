@@ -109,12 +109,9 @@ Differential expression testing between Aged and Young groups was performed per 
 
 Differential abundance of cell types between Young and Aged groups was tested using the propeller method from the speckle package (`speckle::propeller()`). Propeller performs an empirical Bayes moderated test on arcsin-square-root-transformed cell type proportions, properly accounting for the compositional nature of single-cell data and using biological replicates (samples) as the unit of analysis.
 
-Two levels of cell type granularity were tested:
+Cell type labels from the marker-scoring annotation (`CellTypeByMarker_RatsnRNAseq`) were used (e.g., CancerEpithelial, Myeloid, NKTcell, Fibroblast, Endothelial). A second metadata column (`CellTypeMacroTcell_RatsnRNAseq`) is present in the object but is an identical copy of `CellTypeByMarker_RatsnRNAseq`, retained for downstream compatibility rather than representing a separate annotation level.
 
-1. **Main cell types** (`CellTypeByMarker_RatsnRNAseq`): broad categories (e.g., CancerEpithelial, Myeloid, NKTcell, Fibroblast, Endothelial)
-2. **Subtypes** (`CellTypeMacroTcell_RatsnRNAseq`): finer-grained types from scType annotation
-
-Propeller's internally adjusted p-values were overridden with an independent Benjamini-Hochberg correction applied to the raw P.Value column. Results at both levels were combined for reporting.
+Propeller's internally adjusted p-values were overridden with an independent Benjamini-Hochberg correction applied to the raw P.Value column.
 
 ## 8. Visualization
 
@@ -144,7 +141,7 @@ The analysis was performed using the `erp_snrnaseq` conda environment with the f
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| R | 4.4.1 | Base language |
+| R | 4.3.3 | Base language |
 | Seurat | >= 5.0 | snRNA-seq analysis framework |
 | SeuratObject | (bundled) | Seurat data structures |
 | harmony | (latest conda) | Batch correction / integration |

@@ -10,7 +10,7 @@ For the MICA concordance analysis (subdirectory `mica/`), external validation co
 
 Samples were classified into age groups as follows:
 
-- **Primary analysis (main pipeline):** Age groups were derived from the sample annotation column `AgeRange` (categorical values: Young, Middle, Elderly). Numeric age boundaries are defined by the annotation file; the correlation analysis (script `04_correlations.R`) restricted to Young and Elderly tumor samples only, excluding Middle-aged samples.
+- **Primary analysis (main pipeline):** Age groups were derived from the sample annotation column `AgeRange` (categorical values: Young, Middle, Elderly). Numeric age boundaries are Young: 35–44 years, Middle: 54–69 years, Elderly: 70–85 years; the correlation analysis (script `04_correlations.R`) restricted to Young and Elderly tumor samples only, excluding Middle-aged samples.
 - **MICA sub-analysis:** Young: 35-45 years; Middle-Aged: 55-69 years; Elderly: >= 70 years. A postmenopausal subdivision was also defined: Early: 55-59, Middle: 60-69, Elderly: >= 70.
 
 ## 2. Preprocessing
