@@ -50,7 +50,7 @@ for vcf in "$VCF_DIR"/*.vcf; do
         --dir_cache "$VEP_CACHE" \
         --species rattus_norvegicus \
         --assembly Rnor_6.0 \
-        --cache_version 95 \
+        --cache_version 104 \
         --offline \
         --force_overwrite \
         --tab \
