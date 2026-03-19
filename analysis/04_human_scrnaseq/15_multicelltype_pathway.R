@@ -5,7 +5,7 @@
 #
 # Approach: For each cell type, create pseudo-bulk per PATIENT (not per age group),
 # run GSVA across all patients within that cell type, then compare Young vs Elderly
-# with Wilcoxon tests. This preserves patient-level replication.
+# with Welch t-test tests. This preserves patient-level replication.
 #
 # Usage:
 #   Rscript 15_multicelltype_pathway.R [--mode=curated|divergent] [--n-pathways=12]

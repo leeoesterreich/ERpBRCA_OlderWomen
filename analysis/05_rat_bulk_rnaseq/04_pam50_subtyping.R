@@ -49,7 +49,7 @@ pam50_genes_human <- rownames(pam50$centroids)
 human_to_rat <- c(
   "ACTR3B" = "Actr3b", "ANLN" = "Anln", "BAG1" = "Bag1", "BCL2" = "Bcl2",
   "BIRC5" = "Birc5", "BLVRA" = "Blvra", "CCNB1" = "Ccnb1", "CCNE1" = "Ccne1",
-  "CDC20" = "Cdc20", "CDCA1" = "Nuf2", "NUF2" = "Nuf2", "CDC6" = "Cdc6",
+  "CDC20" = "Cdc20", "CDCA1" = "Nuf2", "CDC6" = "Cdc6",
   "CDH3" = "Cdh3", "CENPF" = "Cenpf", "CEP55" = "Cep55", "CXXC5" = "Cxxc5",
   "EGFR" = "Egfr", "ERBB2" = "Erbb2", "ESR1" = "Esr1", "EXO1" = "Exo1",
   "FGFR4" = "Fgfr4", "FOXA1" = "Foxa1", "FOXC1" = "Foxc1", "GPR160" = "Gpr160",
@@ -223,6 +223,22 @@ pheatmap(
 dev.off()
 cat("  Saved: pam50_heatmap.pdf\n")
 
+figures_dir <- file.path(script_dir, "figures")
+dir.create(figures_dir, showWarnings = FALSE, recursive = TRUE)
+png(file.path(figures_dir, "pam50_heatmap.png"), width = 12*300, height = 15*300, res = 300)
+pheatmap(
+  centered_data,
+  annotation_col = annotation_col,
+  show_rownames = TRUE,
+  show_colnames = TRUE,
+  main = "PAM50 Gene Expression with Predicted Subtypes",
+  fontsize_row = 10,
+  fontsize_col = 10,
+  cluster_cols = FALSE
+)
+dev.off()
+cat("  Saved: pam50_heatmap.png\n")
+
 # Save probability heatmap
 pdf(file.path(output_dir, "pam50_probabilities_heatmap.pdf"), width = 12, height = 8)
 pheatmap(
@@ -236,5 +252,18 @@ pheatmap(
 )
 dev.off()
 cat("  Saved: pam50_probabilities_heatmap.pdf\n")
+
+png(file.path(figures_dir, "pam50_probabilities_heatmap.png"), width = 12*300, height = 8*300, res = 300)
+pheatmap(
+  t(PAM50_subtype$subtype.proba),
+  show_rownames = TRUE,
+  show_colnames = TRUE,
+  main = "PAM50 Subtype Probabilities",
+  fontsize_row = 10,
+  cluster_cols = FALSE,
+  cluster_rows = FALSE
+)
+dev.off()
+cat("  Saved: pam50_probabilities_heatmap.png\n")
 
 cat("\n=== PAM50 complete ===\n")

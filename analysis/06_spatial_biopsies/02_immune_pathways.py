@@ -94,9 +94,8 @@ def run_enrichment_analysis(gene_list, gene_set, sample_name, celltype, directio
     
     try:
         # Run enrichment analysis
-        enr = gp.enrichr(gene_list=gene_list, 
+        enr = gp.enrichr(gene_list=gene_list,
                         gene_sets=gene_set,
-                        organism='Human',
                         outdir=None,  # Don't save intermediate files
                         cutoff=0.05)
         

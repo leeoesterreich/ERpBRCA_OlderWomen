@@ -170,10 +170,11 @@ def generate_oncoplot_figure(df):
     gene_freq = plot_data.notna().sum(axis=1).sort_values(ascending=False)
     plot_data = plot_data.reindex(gene_freq.index)
 
-    # Sort samples: Old first (157, 158, 167), then Young (102, 107, 116)
+    # Sort samples: Young first (167, 158, 157), then Old (116, 107, 102)
+    # Within each group, use DESCENDING numeric order to match manuscript
     sample_order = sorted(plot_data.columns, key=lambda x: (
-        extract_sample_id(x) in YOUNG_SAMPLES,  # False (Old) sorts before True (Young)
-        int(extract_sample_id(x))  # Then by numeric ID
+        extract_sample_id(x) not in YOUNG_SAMPLES,  # True (Old) sorts after False (Young)
+        -int(extract_sample_id(x))  # DESCENDING numeric ID within group
     ))
     plot_data = plot_data[sample_order]
 
@@ -182,8 +183,8 @@ def generate_oncoplot_figure(df):
     consequence_map = {cons: i+1 for i, cons in enumerate(unique_consequences)}
 
     # Convert to numeric matrix (0 for missing)
-    # Use applymap for pandas 1.x compatibility (map is pandas 2.x+)
-    plot_numeric = plot_data.applymap(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
+    # Use map for pandas 2.x compatibility
+    plot_numeric = plot_data.map(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
 
     # Create colormap with white for missing
     n_colors = len(unique_consequences) + 1
@@ -212,7 +213,7 @@ def generate_oncoplot_figure(df):
     ax.set_ylabel('Genes', fontsize=14)
 
     # Relabel x-axis with age suffix using ID-based lookup (not positional)
-    # Per legend: Young (102, 107, 116) = "_Y", Old (157, 158, 167) = "_O"
+    # Per legend: Young (157, 158, 167) = '_Y', Old (102, 107, 116) = '_O'
     new_labels = []
     for label in ax.get_xticklabels():
         sample_id = extract_sample_id(label.get_text())
