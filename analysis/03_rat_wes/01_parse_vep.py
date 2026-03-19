@@ -4,6 +4,9 @@
 import os
 import pandas as pd
 from pathlib import Path
+import numpy as np
+
+np.random.seed(12345)
 
 # Input directory - VEP output from 00_run_vep.sbatch
 VEP_DIR = Path(__file__).parent / "outputs" / "vep"

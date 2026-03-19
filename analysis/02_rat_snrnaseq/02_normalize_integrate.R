@@ -134,6 +134,7 @@ cat("  PCA complete, 50 PCs computed\n")
 # -----------------------------------------------------------------------------
 cat("\nStep 5: Running Harmony integration...\n")
 
+# Harmony relies on global set.seed(12345) at script top for reproducibility
 seurat_obj <- RunHarmony(
   seurat_obj,
   group.by.vars = "orig.ident",

@@ -25,6 +25,8 @@ import numpy as np
 import os
 from datetime import datetime
 
+np.random.seed(42)
+
 from _config import (
     OUTPUT_DIR, FIGURES_DIR, CONFIGS_DIR, DATA_PATHS,
     SAMPLE_IDS, SAMPLE_POOL_MAP, MIN_GENES, MIN_COUNTS, MAX_PCT_MITO,

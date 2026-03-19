@@ -24,6 +24,8 @@ import os
 from datetime import datetime
 from scipy.stats import chi2_contingency
 
+np.random.seed(42)
+
 from _config import (
     OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments
 )

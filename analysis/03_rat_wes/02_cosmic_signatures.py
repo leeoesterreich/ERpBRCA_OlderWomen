@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
+np.random.seed(12345)
+
 # Sample age groups (confirmed: lower IDs are older rats)
 YOUNG_SAMPLES = ['157', '158', '167']
 OLD_SAMPLES = ['102', '107', '116']
@@ -94,10 +96,10 @@ def generate_signature_figure():
     # Extract sample IDs for sorting and labeling
     df['_sample_id'] = df.index.map(extract_sample_id)
 
-    # Sort samples: Old first (157, 158, 167), then Young (102, 107, 116)
-    # This matches the manuscript figure order
+    # Sort samples: Young first (167, 158, 157), then Old (116, 107, 102)
+    # Within each group, use DESCENDING numeric order to match manuscript
     df = df.sort_values('_sample_id', key=lambda x: x.map(
-        lambda sid: (sid in YOUNG_SAMPLES, int(sid) if sid.isdigit() else 0)
+        lambda sid: (sid not in YOUNG_SAMPLES, -int(sid) if sid.isdigit() else 0)
     ))
 
     # Create display labels: ID + age suffix (e.g., "157_O", "102_Y")
@@ -117,7 +119,6 @@ def generate_signature_figure():
 
     ax.set_ylabel('Total Counts', fontsize=18)
     ax.set_xlabel('Samples', fontsize=18)
-    ax.set_title('SBS Signature Counts per Sample')
     ax.legend(title='SBS Signatures', bbox_to_anchor=(1.05, 1), loc='upper left')
 
     # Set x-axis labels with proper ID-based age suffixes

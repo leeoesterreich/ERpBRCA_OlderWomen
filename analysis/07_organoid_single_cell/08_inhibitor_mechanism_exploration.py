@@ -41,6 +41,8 @@ from pathlib import Path
 
 warnings.filterwarnings('ignore')
 
+np.random.seed(42)
+
 from _config import (
     OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments
 )

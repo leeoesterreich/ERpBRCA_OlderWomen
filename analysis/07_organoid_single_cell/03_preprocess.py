@@ -24,6 +24,8 @@ import numpy as np
 import os
 from datetime import datetime
 
+np.random.seed(42)
+
 from _config import (
     FIGURES_DIR, h5ad_path, check_file_exists
 )
@@ -233,7 +235,7 @@ def run_pca(adata, n_comps=50):
     log_message(f"Running PCA ({n_comps} components) on HVGs...")
 
     # Run PCA using only HVGs
-    sc.tl.pca(adata, n_comps=n_comps, use_highly_variable=True)
+    sc.tl.pca(adata, n_comps=n_comps, use_highly_variable=True, random_state=42)
 
     # Log variance explained
     var_explained = adata.uns['pca']['variance_ratio']
@@ -335,7 +337,7 @@ def run_umap(adata):
         AnnData with UMAP in obsm['X_umap']
     """
     log_message("Running UMAP...")
-    sc.tl.umap(adata)
+    sc.tl.umap(adata, random_state=42)
     log_message("  UMAP complete")
     return adata
 
@@ -356,7 +358,7 @@ def run_leiden_clustering(adata, resolution=0.5):
         AnnData with 'leiden' cluster assignments in obs
     """
     log_message(f"Running Leiden clustering (resolution={resolution})...")
-    sc.tl.leiden(adata, resolution=resolution)
+    sc.tl.leiden(adata, resolution=resolution, random_state=42)
 
     n_clusters = adata.obs['leiden'].nunique()
     log_message(f"  Found {n_clusters} clusters")

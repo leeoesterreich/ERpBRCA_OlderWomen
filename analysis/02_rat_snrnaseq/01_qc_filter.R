@@ -122,7 +122,8 @@ for (sample_dir in sample_dirs) {
     seurat_obj,
     method = "glmGamPoi",
     vars.to.regress = "percent.mt",
-    verbose = FALSE
+    verbose = FALSE,
+    seed.use = 12345
   )
 
   # BIOSTATISTICAL FIX: Run DoubletFinder

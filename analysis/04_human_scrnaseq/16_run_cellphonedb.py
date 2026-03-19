@@ -97,6 +97,7 @@ def run_cellphonedb(group_name: str):
             threshold=0.1,
             iterations=1000,
             threads=4,
+            debug_seed=42,
         )
 
         print(f"\nCellPhoneDB completed successfully!")
