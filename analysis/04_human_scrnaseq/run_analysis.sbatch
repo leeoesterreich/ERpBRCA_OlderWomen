@@ -2,7 +2,7 @@
 #SBATCH --job-name=human_scrnaseq
 #SBATCH -N 1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64G
+#SBATCH --mem=256G
 #SBATCH -t 12:00:00
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=alc376@pitt.edu
@@ -26,7 +26,7 @@ echo "Working directory: $SCRIPT_DIR"
 mkdir -p logs outputs outputs/preprocessing figures
 
 # Check if preprocessed data already exists
-PREPROCESS_FILE="../../data/human_scrnaseq/SeuratObj_GSE176078_ERpos_AfterQCSCT.rds"
+PREPROCESS_FILE="../../data/human_scrnaseq/SeuratObj_Xu2024_HRpos_AfterQCSCT.rds"
 if [ -f "$PREPROCESS_FILE" ]; then
     echo "=== Step 0b: Preprocessed data exists, skipping ==="
 else

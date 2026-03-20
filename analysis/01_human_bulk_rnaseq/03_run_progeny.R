@@ -65,16 +65,28 @@ cat("  VST matrix:", nrow(vst_matrix), "genes x", ncol(vst_matrix), "samples\n")
 # -----------------------------------------------------------------------------
 cat("Step 2: Preparing expression matrix...\n")
 
+# Convert to base data.frame if data.table (preserves row names for PROGENy)
+if (inherits(vst_matrix, "data.table")) {
+  gene_names <- vst_matrix[[1]]  # first column is typically gene names
+  # Check if first column is character (gene IDs)
+  if (is.character(gene_names)) {
+    vst_matrix <- as.data.frame(vst_matrix[, -1])
+    rownames(vst_matrix) <- gene_names
+  } else {
+    vst_matrix <- as.data.frame(vst_matrix)
+  }
+}
+
 # Align sample names with annotation
 common_samples <- intersect(colnames(vst_matrix), sample_annot$SampleName)
 if (length(common_samples) == 0) {
   # Try SampleNameGroup matching
   common_samples <- intersect(colnames(vst_matrix), sample_annot$SampleNameGroup)
-  tpm_annot <- as.data.frame(vst_matrix[, common_samples])
+  tpm_annot <- vst_matrix[, common_samples, drop = FALSE]
 } else {
   # Rename to SampleNameGroup for downstream compatibility
   name_map <- setNames(sample_annot$SampleNameGroup, sample_annot$SampleName)
-  tpm_annot <- as.data.frame(vst_matrix[, common_samples])
+  tpm_annot <- vst_matrix[, common_samples, drop = FALSE]
   colnames(tpm_annot) <- name_map[common_samples]
 }
 

@@ -44,5 +44,5 @@ def save_fig(path, **kwargs):
     kwargs.setdefault('dpi', 150)
     kwargs.setdefault('bbox_inches', 'tight')
     plt.savefig(path, **kwargs)
-    svg_path = path.rsplit('.', 1)[0] + '.svg'
+    svg_path = str(path).rsplit('.', 1)[0] + '.svg'
     plt.savefig(svg_path, format='svg', bbox_inches='tight')
