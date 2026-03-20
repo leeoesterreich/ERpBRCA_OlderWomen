@@ -48,8 +48,8 @@ Rscript 04_cell_fractions.R
 echo "=== Step 5: Gene expression ==="
 Rscript 05_gene_expression_violin.R
 
-echo "=== Step 6: GSVA ==="
-Rscript 06_run_gsva.R
+echo "=== Step 6: GSVA (pseudobulk only — single-cell mode exceeds 256GB) ==="
+Rscript 06_run_gsva.R --mode=pseudobulk
 
 echo "=== Step 7: PROGENy ==="
 Rscript 07_run_progeny.R
