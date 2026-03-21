@@ -75,11 +75,11 @@ cat("  PAM50 genes mapped:", sum(!is.na(pam50_genes_rat)), "/", length(pam50_gen
 cat("Step 2: Loading expression data...\n")
 
 # Load size-factor-normalized CPM data from DESeq2
-tpm_file <- file.path(output_dir, "normalized_cpm.csv")
-if (file.exists(tpm_file)) {
-  pam50_data <- read.csv(tpm_file, row.names = 1)
+cpm_file <- file.path(output_dir, "normalized_cpm.csv")
+if (file.exists(cpm_file)) {
+  pam50_data <- read.csv(cpm_file, row.names = 1)
 } else {
-  stop("Normalized TPM file not found. Run normalization first: ", tpm_file)
+  stop("Normalized CPM file not found. Run normalization first: ", cpm_file)
 }
 
 cat("  Expression matrix:", nrow(pam50_data), "genes x", ncol(pam50_data), "samples\n")
@@ -162,22 +162,30 @@ if (length(available_genes) < 40) {
 cat("Step 4: Running PAM50 classification...\n")
 
 # Prepare expression matrix
-pam50_tpm <- t(pam50_data[available_genes, ])
-colnames(pam50_tpm) <- names(available_genes)
+# Log2-transform CPM (genefu expects log2-scale data)
+pam50_log2 <- log2(pam50_data[available_genes, ] + 1)
+
+# Median-center per gene across samples (genefu PAM50 requirement:
+# correlations to centroids assume centered data)
+pam50_centered <- sweep(pam50_log2, 1, apply(pam50_log2, 1, median), "-")
+
+# Transpose: genefu expects samples as rows, genes as columns
+pam50_input <- t(pam50_centered)
+colnames(pam50_input) <- names(available_genes)
 
 # FIX: Create minimal annotation data frame instead of using annot.nkis
 # which is designed for human breast cancer samples
 # The annotation only needs probe/gene identifiers for mapping
 annot_df <- data.frame(
-  probe = colnames(pam50_tpm),
-  Gene.Symbol = colnames(pam50_tpm),
+  probe = colnames(pam50_input),
+  Gene.Symbol = colnames(pam50_input),
   EntrezGene.ID = NA,
-  row.names = colnames(pam50_tpm)
+  row.names = colnames(pam50_input)
 )
 
 PAM50_subtype <- molecular.subtyping(
   sbt.model = "pam50",
-  data = pam50_tpm,
+  data = pam50_input,
   annot = annot_df,
   do.mapping = FALSE  # Genes already mapped to human symbols
 )
@@ -204,6 +212,8 @@ cat("  Saved: pam50_subtypes.csv\n")
 
 # Generate heatmap
 centered_data <- t(scale(t(pam50_data[available_genes, ])))
+# Fix R-mangled sample names (X102.FF.Tumor → 102-FF-Tumor)
+colnames(centered_data) <- gsub("^X", "", gsub("\\.", "-", colnames(centered_data)))
 annotation_col <- data.frame(
   Subtype = PAM50_subtype$subtype,
   row.names = colnames(centered_data)

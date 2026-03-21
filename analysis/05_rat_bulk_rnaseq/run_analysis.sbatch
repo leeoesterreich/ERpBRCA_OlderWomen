@@ -31,4 +31,6 @@ Rscript 04_pam50_subtyping.R
 echo "=== Validation ==="
 Rscript 05_validate_vs_rahul.R
 
+touch ../../analysis/.pipeline_markers/05_rat_bulk_rnaseq.complete
+
 echo "=== Analysis complete ==="
