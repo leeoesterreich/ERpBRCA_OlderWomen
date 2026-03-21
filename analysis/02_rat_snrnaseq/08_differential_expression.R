@@ -222,7 +222,14 @@ all_de_results <- all_de_results %>%
   mutate(
     Sig_nominal = pvalue < 0.05,
     Sig_FDR = FDR < 0.05,
-    Direction = ifelse(avg_log2FC > 0, "Up_in_Aged", "Down_in_Aged")
+    Direction = ifelse(avg_log2FC > 0, "Up_in_Aged", "Down_in_Aged"),
+    # FC-filtered significance: require |log2FC|>0.5 in addition to FDR<0.05
+    # Prevents cell-count artifacts (e.g. Luminal n=3 pseudobulk) from flooding plots
+    Sig_FC = case_when(
+      FDR < 0.05 & avg_log2FC > 0.5  ~ "Up",
+      FDR < 0.05 & avg_log2FC < -0.5 ~ "Down",
+      TRUE ~ "NS"
+    )
   )
 
 # Summary by cell type
@@ -253,25 +260,31 @@ pdf(file.path(fig_dir, "DE_volcano_plots.pdf"), width = 12, height = 10)
 for (ct in unique(all_de_results$celltype)) {
   ct_results <- all_de_results %>% filter(celltype == ct)
 
-  # Label top genes
+  # Label top genes (require FC filter so labels come from biologically meaningful hits)
   top_genes <- ct_results %>%
-    filter(Sig_FDR) %>%
+    filter(Sig_FC != "NS") %>%
     slice_min(FDR, n = 10)
 
   p <- ggplot(ct_results, aes(x = avg_log2FC, y = -log10(FDR))) +
-    geom_point(aes(color = Sig_FDR), alpha = 0.6) +
+    geom_point(aes(color = Sig_FC), alpha = 0.6) +
     geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
     geom_vline(xintercept = c(-0.5, 0.5), linetype = "dashed", color = "gray") +
     geom_text_repel(data = top_genes, aes(label = gene), max.overlaps = 20, size = 3) +
-    scale_color_manual(values = c("FALSE" = "gray", "TRUE" = "red")) +
+    scale_color_manual(values = c("NS" = "gray", "Up" = "red", "Down" = "steelblue")) +
     theme_bw() +
     labs(
       title = paste("Differential Expression:", ct),
-      subtitle = paste("Aged vs Young | FDR<0.05:", sum(ct_results$Sig_FDR)),
+      subtitle = sprintf("%d up (|FC|>1.5), %d down at FDR<0.05",
+        sum(ct_results$Sig_FC == "Up",   na.rm = TRUE),
+        sum(ct_results$Sig_FC == "Down", na.rm = TRUE)),
       x = "log2 Fold Change (Aged/Young)",
       y = "-log10(FDR)"
     ) +
     theme(legend.position = "none")
+
+  # Cap y-axis (extreme -log10(FDR) from high cell counts makes plot unreadable)
+  y_cap <- min(50, max(-log10(ct_results$FDR + 1e-300), na.rm = TRUE))
+  p <- p + ylim(0, y_cap)
 
   print(p)
   volcano_plots[[ct]] <- p
