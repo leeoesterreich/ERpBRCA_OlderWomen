@@ -34,6 +34,7 @@ def run_sigprofiler():
         input_type="vcf",
         context_type="96",
         genome_build="rn6",
+        exome=True,  # WES data: use exonic trinucleotide context
         cosmic_version=3.4
     )
 
