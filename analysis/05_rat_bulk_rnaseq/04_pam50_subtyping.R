@@ -93,13 +93,36 @@ cat("Step 2b: Converting Ensembl IDs to gene symbols...\n")
 if (grepl("^ENSRNOG", rownames(pam50_data)[1])) {
   cat("  Detected Ensembl IDs, fetching gene symbols from biomaRt...\n")
 
-  mart <- useMart("ensembl", dataset = "rnorvegicus_gene_ensembl")
-  gene_map <- getBM(
-    filters = "ensembl_gene_id",
-    attributes = c("ensembl_gene_id", "external_gene_name"),
-    values = rownames(pam50_data),
-    mart = mart
-  )
+  cache_file <- file.path(output_dir, "ensembl_to_symbol_cache.csv")
+  if (file.exists(cache_file)) {
+    cat("  Loading cached Ensembl→symbol mapping\n")
+    gene_map <- read.csv(cache_file, stringsAsFactors = FALSE)
+  } else {
+    # Try main Ensembl, then mirrors
+    gene_map <- NULL
+    for (host in c("https://www.ensembl.org", "https://useast.ensembl.org", "https://asia.ensembl.org")) {
+      gene_map <- tryCatch({
+        mart <- useMart("ensembl", dataset = "rnorvegicus_gene_ensembl", host = host)
+        getBM(
+          filters = "ensembl_gene_id",
+          attributes = c("ensembl_gene_id", "external_gene_name"),
+          values = rownames(pam50_data),
+          mart = mart
+        )
+      }, error = function(e) {
+        cat(sprintf("  BioMart mirror %s failed: %s\n", host, conditionMessage(e)))
+        NULL
+      })
+      if (!is.null(gene_map) && nrow(gene_map) > 0) {
+        cat(sprintf("  BioMart success via %s (%d mappings)\n", host, nrow(gene_map)))
+        write.csv(gene_map, cache_file, row.names = FALSE)
+        break
+      }
+    }
+    if (is.null(gene_map) || nrow(gene_map) == 0) {
+      stop("All BioMart mirrors failed. Retry later or provide a cached mapping at:\n  ", cache_file)
+    }
+  }
 
   # Create mapping, keep only unique mappings
   gene_map <- gene_map[gene_map$external_gene_name != "", ]

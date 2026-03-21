@@ -72,6 +72,20 @@ cat("\nStep 1: Loading data...\n")
 seurat_file <- file.path(output_dir, "seurat_annotated.rds")
 seurat_obj <- readRDS(seurat_file)
 
+# Fix tab-embedded gene names from Xu atlas (e.g., "ESR1\tESR1" → "ESR1")
+gene_names <- rownames(seurat_obj)
+if (any(grepl("\t", gene_names))) {
+  cat("  Cleaning tab-embedded gene names...\n")
+  clean_names <- sapply(strsplit(gene_names, "\t"), function(x) x[length(x)])
+  clean_names <- make.unique(clean_names)
+  for (assay_name in Assays(seurat_obj)) {
+    assay_obj <- seurat_obj[[assay_name]]
+    rownames(assay_obj) <- clean_names[match(rownames(assay_obj), gene_names)]
+    seurat_obj[[assay_name]] <- assay_obj
+  }
+  cat("  Cleaned", sum(grepl("\t", gene_names)), "gene names\n")
+}
+
 # Keep all age groups for GSVA (more samples = better z-score estimation)
 # Statistical tests will compare Young vs Elderly
 cat("  Total cells:", ncol(seurat_obj), "\n")
