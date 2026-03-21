@@ -147,6 +147,14 @@ if ("SCT" %in% Assays(seurat_obj)) {
   expr_data <- GetAssayData(seurat_obj, layer = "counts")
 }
 
+# Clean tab-embedded gene names from expression matrix (Xu atlas artifact)
+if (any(grepl("\t", rownames(expr_data)))) {
+  cat("  Cleaning tab-embedded gene names from expression matrix...\n")
+  clean_rn <- sapply(strsplit(rownames(expr_data), "\t"), function(x) x[length(x)])
+  rownames(expr_data) <- make.unique(clean_rn)
+  cat("  Expression matrix:", nrow(expr_data), "genes x", ncol(expr_data), "cells\n")
+}
+
 cell_types <- sort(unique(as.character(seurat_obj$CellTypeAnnotSH)))
 patients <- sort(unique(as.character(seurat_obj$orig.ident)))
 
