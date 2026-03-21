@@ -233,8 +233,16 @@ def run_deseq2_comparison(pseudobulk_df, sample_meta, condition1, condition2, co
         if cond not in condition_counts:
             log_message(f"  ERROR: No samples found for condition '{cond}'")
             return None
-        if condition_counts[cond] < 1:
-            log_message(f"  WARNING: Only {condition_counts[cond]} sample(s) for {cond}")
+
+    n_treat = condition_counts.get(condition1, 0)
+    n_ctrl = condition_counts.get(condition2, 0)
+    if n_treat < 2 or n_ctrl < 2:
+        print(
+            f"  SKIPPING {condition1} vs {condition2}: n={n_treat} vs n={n_ctrl}. "
+            f"DESeq2 cannot estimate dispersion with n<2. "
+            f"Use cell-level tests (script 07) for exploratory analysis."
+        )
+        return "SKIPPED"
 
     # Ensure counts are integers
     pseudobulk_subset = pseudobulk_subset.astype(int)
@@ -446,6 +454,7 @@ def main():
     log_message("=" * 40)
 
     all_results = {}
+    comparison_status = {}
     for comparison_name, condition1, condition2 in COMPARISONS:
         results = run_deseq2_comparison(
             pseudobulk_filtered,
@@ -455,7 +464,15 @@ def main():
             comparison_name
         )
 
-        if results is not None:
+        if results == "SKIPPED":
+            # Count samples per group for the status message
+            samples_treat = (sample_meta["treatment"] == condition1).sum()
+            samples_ctrl = (sample_meta["treatment"] == condition2).sum()
+            comparison_status[f"{condition1}_vs_{condition2}"] = (
+                f"SKIPPED (n={samples_treat} vs {samples_ctrl})"
+            )
+        elif results is not None:
+            comparison_status[f"{condition1}_vs_{condition2}"] = "RAN"
             all_results[comparison_name] = results
 
             # Save results to CSV
@@ -469,6 +486,10 @@ def main():
                 padj_threshold=PADJ_THRESHOLD,
                 log2fc_threshold=LOG2FC_THRESHOLD
             )
+
+    print("\n=== Comparison Summary ===")
+    for comp, status in comparison_status.items():
+        print(f"  {comp}: {status}")
 
     # Final summary
     log_message("\n" + "=" * 60)
