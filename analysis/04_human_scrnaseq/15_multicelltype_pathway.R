@@ -62,7 +62,7 @@ dir.create(figures_dir, showWarnings = FALSE, recursive = TRUE)
 
 cat("=== Multi-Cell-Type Pathway Enrichment (Figure 7B/C) ===\n")
 cat(sprintf("Mode: %s\n", pathway_mode))
-cat("Approach: per-patient pseudo-bulk GSVA with Wilcoxon tests\n")
+cat("Approach: per-patient pseudo-bulk GSVA with Welch's t-test (var.equal=FALSE)\n")
 
 # -----------------------------------------------------------------------------
 # Step 1: Load data — use ALL age groups (Young + MidAge + Elderly)
@@ -253,8 +253,14 @@ curated_set <- c(hallmark_curated, biocarta_curated)
 stats_df$is_curated <- stats_df$pathway %in% curated_set
 curated_idx <- which(stats_df$is_curated)
 
+# Per-cell-type BH correction (each cell type is a separate hypothesis space)
 stats_df$padj <- NA_real_
-stats_df$padj[curated_idx] <- p.adjust(stats_df$pvalue[curated_idx], method = "BH")
+for (ct in unique(stats_df$celltype)) {
+  ct_curated <- which(stats_df$celltype == ct & stats_df$is_curated)
+  if (length(ct_curated) > 0) {
+    stats_df$padj[ct_curated] <- p.adjust(stats_df$pvalue[ct_curated], method = "BH")
+  }
+}
 stats_df$significant <- !is.na(stats_df$padj) & stats_df$padj < 0.05
 
 cat(sprintf("\n--- Statistical summary (t-test, curated FDR) ---\n"))
