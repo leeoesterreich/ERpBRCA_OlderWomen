@@ -4,7 +4,7 @@
 # BIOSTATISTICAL FIX: This statistical test was missing from original
 #
 # Inputs:
-#   - analysis/02_rat_snrnaseq/outputs/seurat_annotated.rds
+#   - analysis/02_rat_snrnaseq/outputs/seurat_annotated_sctype.rds
 #
 # Outputs:
 #   - results/corrected/rat_snrnaseq/DA_results_celltypes.csv
@@ -53,7 +53,9 @@ cat("Project root:", project_root, "\n")
 cat("Results directory:", results_dir, "\n\n")
 
 # Input file
-input_rds <- file.path(output_dir, "seurat_annotated.rds")
+# Use scType-annotated object: includes immune cells (Myeloid, NKTcell, DendriticCell)
+# that are absent from the res 0.4 marker-scoring annotation in seurat_annotated.rds
+input_rds <- file.path(output_dir, "seurat_annotated_sctype.rds")
 
 # Verify input file exists
 cat("Checking input files...\n")
@@ -75,8 +77,10 @@ if (ncol(seurat_obj) == 0) {
 }
 
 # Get metadata
+# sctype_celltype: scType main-type annotation including immune cells
+# (Myeloid, NKTcell, DendriticCell, plus Luminal/Basal/Fibroblast/Endothelial)
 meta <- seurat_obj@meta.data %>%
-  select(orig.ident, AgeGroup, CellTypeByMarker_RatsnRNAseq, CellTypeMacroTcell_RatsnRNAseq)
+  select(orig.ident, AgeGroup, sctype_celltype)
 
 cat("  Total cells:", nrow(meta), "\n")
 cat("  Samples:", length(unique(meta$orig.ident)), "\n")
@@ -96,9 +100,9 @@ print(table(n_samples$AgeGroup))
 # -----------------------------------------------------------------------------
 cat("\nStep 2: Calculating cell type proportions...\n")
 
-# Main cell types
+# scType cell types (includes immune: Myeloid, NKTcell, DendriticCell)
 prop_main <- meta %>%
-  group_by(orig.ident, AgeGroup, CellTypeByMarker_RatsnRNAseq) %>%
+  group_by(orig.ident, AgeGroup, sctype_celltype) %>%
   summarise(n = n(), .groups = "drop") %>%
   group_by(orig.ident) %>%
   mutate(
@@ -107,17 +111,7 @@ prop_main <- meta %>%
   )
 
 cat("  Cell type proportions calculated\n")
-cat("  Cell types:", length(unique(prop_main$CellTypeByMarker_RatsnRNAseq)), "\n")
-
-# Detailed subtypes (if different from main)
-prop_sub <- meta %>%
-  group_by(orig.ident, AgeGroup, CellTypeMacroTcell_RatsnRNAseq) %>%
-  summarise(n = n(), .groups = "drop") %>%
-  group_by(orig.ident) %>%
-  mutate(
-    total = sum(n),
-    proportion = n / total
-  )
+cat("  Cell types:", length(unique(prop_main$sctype_celltype)), "\n")
 
 # -----------------------------------------------------------------------------
 # Step 3: Run Propeller DA Test
@@ -128,7 +122,9 @@ cat("\nStep 3: Running propeller differential abundance test...\n")
 # Note: propeller requires counts, sample IDs, and cluster IDs
 
 # Check for valid cell types before running propeller
-cell_types <- unique(seurat_obj$CellTypeByMarker_RatsnRNAseq)
+# Using sctype_celltype which includes immune cells (Myeloid, NKTcell, DendriticCell)
+# absent from the res 0.4 marker-scoring annotation
+cell_types <- unique(seurat_obj$sctype_celltype)
 cell_types <- cell_types[!is.na(cell_types)]
 cat("  Cell types for DA:", length(cell_types), "-", paste(cell_types, collapse = ", "), "\n")
 
@@ -140,11 +136,11 @@ if (length(cell_types) < 2) {
   # Still generate proportion plots with available data
   da_main <- NULL
 } else {
-  # Main cell types
+  # Primary DA: scType main types (includes immune cells)
   da_main <- NULL
   tryCatch({
     da_main <- propeller(
-      clusters = seurat_obj$CellTypeByMarker_RatsnRNAseq,
+      clusters = seurat_obj$sctype_celltype,
       sample = seurat_obj$orig.ident,
       group = seurat_obj$AgeGroup
     )
@@ -154,43 +150,20 @@ if (length(cell_types) < 2) {
     da_main$FDR <- p.adjust(da_main$P.Value, method = "BH")
     da_main$Level <- "Main"
 
-    cat("\nMain cell type results:\n")
+    cat("\nscType cell type DA results:\n")
     print(da_main %>% select(CellType, PropMean.Aged, PropMean.Young, P.Value, FDR) %>% arrange(P.Value))
 
   }, error = function(e) {
-    cat("  Error in main cell type propeller:", e$message, "\n")
+    cat("  Error in scType propeller:", e$message, "\n")
   })
 }
 
-# Detailed subtypes (if enough cells per category)
-da_sub <- NULL
-tryCatch({
-  da_sub <- propeller(
-    clusters = seurat_obj$CellTypeMacroTcell_RatsnRNAseq,
-    sample = seurat_obj$orig.ident,
-    group = seurat_obj$AgeGroup
-  )
+# NOTE: CellTypeMacroTcell_RatsnRNAseq was identical to CellTypeByMarker_RatsnRNAseq
+# in seurat_annotated.rds (H3 audit issue — both set by 03_cluster_annotate.R from
+# res 0.4 marker scoring). Removed duplicate Subtype analysis.
 
-  da_sub$CellType <- rownames(da_sub)
-  da_sub$FDR <- p.adjust(da_sub$P.Value, method = "BH")
-  da_sub$Level <- "Subtype"
-
-  cat("\nSubtype results:\n")
-  print(da_sub %>% select(CellType, PropMean.Aged, PropMean.Young, P.Value, FDR) %>% arrange(P.Value))
-
-}, error = function(e) {
-  cat("  Warning: Subtype analysis failed -", e$message, "\n")
-})
-
-# Combine results
-da_all <- NULL
-if (!is.null(da_main) && !is.null(da_sub)) {
-  da_all <- rbind(da_main, da_sub)
-} else if (!is.null(da_main)) {
-  da_all <- da_main
-} else if (!is.null(da_sub)) {
-  da_all <- da_sub
-}
+# Single result set (no subtype panel)
+da_all <- da_main
 
 # -----------------------------------------------------------------------------
 # Step 4: Generate Proportion Plots
@@ -200,19 +173,19 @@ cat("\nStep 4: Generating proportion plots...\n")
 pdf(file.path(fig_dir, "DA_proportion_plots.pdf"), width = 14, height = 10)
 
 # Stacked bar plot by sample
-p1 <- ggplot(prop_main, aes(x = orig.ident, y = proportion, fill = CellTypeByMarker_RatsnRNAseq)) +
+p1 <- ggplot(prop_main, aes(x = orig.ident, y = proportion, fill = sctype_celltype)) +
   geom_bar(stat = "identity") +
   facet_wrap(~AgeGroup, scales = "free_x") +
   theme_bw() +
   labs(
-    title = "Cell Type Proportions by Sample",
+    title = "Cell Type Proportions by Sample (scType annotation)",
     x = "Sample", y = "Proportion", fill = "Cell Type"
   ) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(p1)
 
 # Box plot comparing proportions
-p2 <- ggplot(prop_main, aes(x = CellTypeByMarker_RatsnRNAseq, y = proportion * 100, fill = AgeGroup)) +
+p2 <- ggplot(prop_main, aes(x = sctype_celltype, y = proportion * 100, fill = AgeGroup)) +
   geom_boxplot(outlier.shape = NA) +
   geom_point(position = position_jitterdodge(jitter.width = 0.1), alpha = 0.7, size = 2) +
   theme_bw() +
@@ -244,11 +217,10 @@ if (!is.null(da_all)) {
     geom_bar(stat = "identity") +
     geom_hline(yintercept = 0, linetype = "dashed") +
     coord_flip() +
-    facet_wrap(~Level, scales = "free_y") +
     scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red")) +
     theme_bw() +
     labs(
-      title = "Differential Abundance: Aged vs Young",
+      title = "Differential Abundance: Aged vs Young (scType annotation)",
       subtitle = "Red = FDR < 0.05",
       x = "Cell Type", y = "log2 Fold Change (Aged/Young)"
     )
@@ -259,11 +231,10 @@ if (!is.null(da_all)) {
     geom_bar(stat = "identity") +
     geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
     coord_flip() +
-    facet_wrap(~Level, scales = "free_y") +
     scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red")) +
     theme_bw() +
     labs(
-      title = "Differential Abundance Significance",
+      title = "Differential Abundance Significance (scType annotation)",
       subtitle = "Dashed line = FDR 0.05",
       x = "Cell Type", y = "-log10(FDR)"
     )
