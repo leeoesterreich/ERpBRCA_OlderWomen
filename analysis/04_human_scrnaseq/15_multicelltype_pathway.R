@@ -137,15 +137,13 @@ cat("\nStep 3: Creating per-patient pseudo-bulk and running GSVA per cell type..
 min_cells_per_patient <- 10  # minimum cells for a patient to be included in a cell type
 min_patients_per_group <- 2  # minimum patients per age group for statistical testing
 
-if ("SCT" %in% Assays(seurat_obj)) {
-  cat("  Using SCTransform data\n")
-  DefaultAssay(seurat_obj) <- "SCT"
-  expr_data <- GetAssayData(seurat_obj, layer = "data")
-} else {
-  cat("  WARNING: SCT not found, using RNA counts + CPM\n")
-  DefaultAssay(seurat_obj) <- "RNA"
-  expr_data <- GetAssayData(seurat_obj, layer = "counts")
-}
+# Use raw RNA counts for pseudo-bulk GSVA (not SCT)
+# SCT-normalized values have low inter-patient variance after averaging,
+# causing GSVA's constant-feature filter to remove most genes.
+# Raw counts → aggregate per patient → CPM → log2 is the correct approach.
+DefaultAssay(seurat_obj) <- "RNA"
+expr_data <- GetAssayData(seurat_obj, layer = "counts")
+cat("  Using RNA counts for pseudo-bulk (will CPM+log2 after aggregation)\n")
 
 # Clean tab-embedded gene names from expression matrix (Xu atlas artifact)
 if (any(grepl("\t", rownames(expr_data)))) {
@@ -181,7 +179,7 @@ for (ct in cell_types) {
   for (pat in ct_patients) {
     pat_cells <- intersect(ct_cells, colnames(seurat_obj)[seurat_obj$orig.ident == pat])
     if (length(pat_cells) >= min_cells_per_patient) {
-      pb_list[[pat]] <- Matrix::rowMeans(expr_data[, pat_cells, drop = FALSE])
+      pb_list[[pat]] <- Matrix::rowSums(expr_data[, pat_cells, drop = FALSE])
     }
   }
 
@@ -193,11 +191,9 @@ for (ct in cell_types) {
   pb_mat <- do.call(cbind, pb_list)
   colnames(pb_mat) <- names(pb_list)
 
-  # If using counts, normalize to CPM + log2
-  if (DefaultAssay(seurat_obj) != "SCT") {
-    pb_cpm <- sweep(pb_mat, 2, colSums(pb_mat), "/") * 1e6
-    pb_mat <- log2(pb_cpm + 1)
-  }
+  # Normalize aggregated counts to CPM + log2 (required for GSVA Gaussian kcdf)
+  pb_cpm <- sweep(pb_mat, 2, colSums(pb_mat), "/") * 1e6
+  pb_mat <- log2(pb_cpm + 1)
 
   cat(sprintf("    Pseudo-bulk: %d genes x %d patients\n", nrow(pb_mat), ncol(pb_mat)))
 
