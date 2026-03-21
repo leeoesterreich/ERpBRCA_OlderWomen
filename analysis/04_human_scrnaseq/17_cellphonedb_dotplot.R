@@ -189,20 +189,24 @@ if (filter_mode == "curated") {
 
   cat(sprintf("  Loaded %d curated L-R pairs\n", length(curated_pairs)))
 
-  # FIX: Normalize L-R pair names to handle ordering differences (CD74_APP vs APP_CD74)
-  # CellPhoneDB v5 may output pairs in different order than manuscript naming
-  normalize_lr_pair <- function(pair) {
-    # Handle complex names: remove common prefixes, normalize delimiters
-    pair <- gsub("integrin_", "", pair, ignore.case = TRUE)
-    pair <- gsub(" ", "_", pair)
-    pair <- toupper(pair)
-    # Sort components alphabetically to normalize A_B vs B_A
-    parts <- strsplit(pair, "_")[[1]]
-    if (length(parts) == 2) {
-      return(paste(sort(parts), collapse = "_"))
+  # FIX: Normalize L-R pair names to handle v4→v5 naming convention changes
+  # CellPhoneDB v5 uses different separators, "integrin_" prefixes, "_complex" and
+  # "_receptor" suffixes, and may reverse pair ordering (CD74_APP vs APP_CD74).
+  normalize_lr_pair <- function(pair_name) {
+    # Normalize spaces to underscores
+    pair_name <- gsub(" ", "_", pair_name)
+    # Split on underscore
+    parts <- strsplit(pair_name, "_")[[1]]
+
+    # For simple 2-part pairs (no complex/receptor/integrin tokens): sort alphabetically
+    if (length(parts) == 2 && !any(grepl("^(complex|receptor|integrin)$", parts, ignore.case = TRUE))) {
+      return(paste(sort(toupper(parts)), collapse = "_"))
     }
-    # For complex pairs (3+ parts), keep as-is
-    return(pair)
+
+    # For complex/multi-part pairs: strip structural keywords, sort remaining gene tokens
+    tokens <- toupper(parts)
+    tokens <- tokens[!grepl("^(COMPLEX|RECEPTOR|INTEGRIN)$", tokens)]
+    return(paste(sort(tokens), collapse = "_"))
   }
 
   # Create normalized lookup table for CellPhoneDB output
@@ -223,13 +227,16 @@ if (filter_mode == "curated") {
   matched_pairs <- unique(matched_pairs)
   cat(sprintf("  Matched %d curated pairs via normalization\n", length(matched_pairs)))
 
-  # Show unmatched curated pairs for debugging
+  # Diagnostic logging: show match rate and unmatched pairs
   curated_normalized <- sapply(curated_pairs, normalize_lr_pair)
   unmatched_curated <- curated_pairs[!curated_normalized %in% cpdb_normalized]
-  if (length(unmatched_curated) > 0 && length(unmatched_curated) <= 10) {
-    cat(sprintf("  Unmatched curated pairs: %s\n", paste(unmatched_curated, collapse = ", ")))
-  } else if (length(unmatched_curated) > 10) {
-    cat(sprintf("  %d curated pairs not found in CellPhoneDB output\n", length(unmatched_curated)))
+  cat(sprintf("  Matched: %d / %d curated pairs\n",
+      sum(curated_normalized %in% cpdb_normalized), length(curated_pairs)))
+  if (length(unmatched_curated) > 0) {
+    cat("  Unmatched curated pairs:\n")
+    for (uc in head(unmatched_curated, 10)) {
+      cat(sprintf("    %s (normalized: %s)\n", uc, normalize_lr_pair(uc)))
+    }
   }
 
   # Filter using matched pairs (not original curated_pairs)
