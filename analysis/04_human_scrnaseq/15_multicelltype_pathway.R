@@ -202,6 +202,16 @@ for (ct in cell_types) {
   cat(sprintf("    Pseudo-bulk: %d genes x %d patients\n", nrow(pb_mat), ncol(pb_mat)))
 
   # Run GSVA on this cell type's patient profiles
+  # Diagnostic: check gene overlap before GSVA
+  all_gs_genes <- unique(unlist(all_pathways))
+  overlap <- sum(all_gs_genes %in% rownames(pb_mat))
+  cat(sprintf("    Pseudo-bulk: %d genes x %d patients\n", nrow(pb_mat), ncol(pb_mat)))
+  cat(sprintf("    Gene set overlap: %d / %d pathway genes found in expression\n", overlap, length(all_gs_genes)))
+  if (overlap == 0) {
+    cat("    DIAGNOSTIC: First 5 pb_mat genes:", head(rownames(pb_mat), 5), "\n")
+    cat("    DIAGNOSTIC: First 5 pathway genes:", head(all_gs_genes, 5), "\n")
+  }
+
   gsva_ct <- tryCatch({
     gsva(gsvaParam(as.matrix(pb_mat), all_pathways, kcdf = "Gaussian", maxDiff = TRUE))
   }, error = function(e) {
