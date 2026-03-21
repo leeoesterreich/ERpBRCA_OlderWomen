@@ -146,12 +146,19 @@ expr_data <- GetAssayData(seurat_obj, layer = "counts")
 cat("  Using RNA counts for pseudo-bulk (will CPM+log2 after aggregation)\n")
 
 # Clean tab-embedded gene names from expression matrix (Xu atlas artifact)
-if (any(grepl("\t", rownames(expr_data)))) {
-  cat("  Cleaning tab-embedded gene names from expression matrix...\n")
-  clean_rn <- sapply(strsplit(rownames(expr_data), "\t"), function(x) x[length(x)])
-  rownames(expr_data) <- make.unique(clean_rn)
-  cat("  Expression matrix:", nrow(expr_data), "genes x", ncol(expr_data), "cells\n")
+# RNA layer may have "ESR1\tESR1" format; extract last tab-separated field
+rn <- rownames(expr_data)
+cat("  Raw gene count:", length(rn), "\n")
+if (any(grepl("\t", rn))) {
+  cat("  Cleaning tab-embedded gene names...\n")
+  rn <- sapply(strsplit(rn, "\t"), function(x) x[length(x)])
 }
+# Deduplicate: keep first occurrence of each gene
+dup_mask <- !duplicated(rn) & rn != "" & !is.na(rn)
+expr_data <- expr_data[dup_mask, ]
+rownames(expr_data) <- rn[dup_mask]
+cat("  After cleanup:", nrow(expr_data), "genes x", ncol(expr_data), "cells\n")
+cat("  Sample genes:", head(rownames(expr_data), 5), "\n")
 
 cell_types <- sort(unique(as.character(seurat_obj$CellTypeAnnotSH)))
 patients <- sort(unique(as.character(seurat_obj$orig.ident)))
