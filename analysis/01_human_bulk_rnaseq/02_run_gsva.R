@@ -21,6 +21,23 @@ suppressPackageStartupMessages({
   library(pheatmap)
 })
 
+# msigdbr v25 (collection/subcollection) with v9 fallback (category/subcategory)
+safe_msigdbr <- function(species, coll, subcoll = NULL) {
+  tryCatch({
+    if (is.null(subcoll)) {
+      msigdbr(species = species, collection = coll)
+    } else {
+      msigdbr(species = species, collection = coll, subcollection = subcoll)
+    }
+  }, error = function(e) {
+    if (is.null(subcoll)) {
+      msigdbr(species = species, category = coll)
+    } else {
+      msigdbr(species = species, category = coll, subcategory = subcoll)
+    }
+  })
+}
+
 # Helper function to check file existence
 check_file_exists <- function(filepath, description = "file") {
   if (!file.exists(filepath)) {
@@ -73,12 +90,13 @@ if (file.exists(e1_file)) {
   e1_gene_list <- list(E1UpRegGene = e1_genes$Gene)
   cat("  E1-upregulated genes:", length(e1_gene_list$E1UpRegGene), "\n")
 } else {
+  cat("  WARNING: E1 gene file not found:", e1_file, "\n")
+  cat("  E1UpRegGene pathway will be excluded from GSVA\n")
   e1_gene_list <- list()
-  cat("  Warning: E1 gene file not found\n")
 }
 
 # Hallmark estrogen pathways
-hallmark_sets <- msigdbr(species = "Homo sapiens", category = "H")
+hallmark_sets <- safe_msigdbr("Homo sapiens", "H")
 hallmark_list <- split(hallmark_sets$gene_symbol, hallmark_sets$gs_name)
 hallmark_estrogen <- hallmark_list[c(
   "HALLMARK_ESTROGEN_RESPONSE_EARLY",
@@ -86,17 +104,17 @@ hallmark_estrogen <- hallmark_list[c(
 )]
 
 # Reactome estrogen pathway
-reactome_sets <- msigdbr(species = "Homo sapiens", category = "C2", subcategory = "REACTOME")
+reactome_sets <- safe_msigdbr("Homo sapiens", "C2", "CP:REACTOME")
 reactome_list <- split(reactome_sets$gene_symbol, reactome_sets$gs_name)
 reactome_estrogen <- reactome_list["REACTOME_ESTROGEN_DEPENDENT_GENE_EXPRESSION"]
 
 # WikiPathways
-wiki_sets <- msigdbr(species = "Homo sapiens", category = "C2", subcategory = "WIKIPATHWAYS")
+wiki_sets <- safe_msigdbr("Homo sapiens", "C2", "CP:WIKIPATHWAYS")
 wiki_list <- split(wiki_sets$gene_symbol, wiki_sets$gs_name)
 wiki_estrogen <- wiki_list["WP_ESTROGEN_SIGNALING_PATHWAY"]
 
 # GO BP estrogen pathways
-gobp_sets <- msigdbr(species = "Homo sapiens", category = "C5", subcategory = "BP")
+gobp_sets <- safe_msigdbr("Homo sapiens", "C5", "GO:BP")
 gobp_list <- split(gobp_sets$gene_symbol, gobp_sets$gs_name)
 gobp_estrogen <- gobp_list[c(
   "GOBP_INTRACELLULAR_ESTROGEN_RECEPTOR_SIGNALING_PATHWAY",
@@ -107,6 +125,10 @@ gobp_estrogen <- gobp_list[c(
 estrogen_pathways <- c(hallmark_estrogen, e1_gene_list, reactome_estrogen, wiki_estrogen, gobp_estrogen)
 estrogen_pathways <- estrogen_pathways[!sapply(estrogen_pathways, is.null)]
 cat("  Total pathways:", length(estrogen_pathways), "\n")
+if (length(estrogen_pathways) < 7) {
+  cat("  WARNING: Expected at least 7 pathways, got", length(estrogen_pathways), "\n")
+  cat("  Missing pathways may indicate msigdbr API compatibility issues\n")
+}
 
 # Log which gene sets were found
 cat("  Gene sets included in GSVA:\n")
