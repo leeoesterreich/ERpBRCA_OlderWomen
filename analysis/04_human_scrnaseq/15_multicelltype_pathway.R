@@ -137,27 +137,25 @@ cat("\nStep 3: Creating per-patient pseudo-bulk and running GSVA per cell type..
 min_cells_per_patient <- 10  # minimum cells for a patient to be included in a cell type
 min_patients_per_group <- 2  # minimum patients per age group for statistical testing
 
-# Use raw RNA counts for pseudo-bulk GSVA (not SCT)
-# SCT-normalized values have low inter-patient variance after averaging,
-# causing GSVA's constant-feature filter to remove most genes.
-# Raw counts → aggregate per patient → CPM → log2 is the correct approach.
-DefaultAssay(seurat_obj) <- "RNA"
+# Use SCT data layer for pseudo-bulk GSVA
+# For pseudo-bulk: use rowSums on SCT corrected counts, then CPM+log2
+# This preserves gene-level variance across patients
+DefaultAssay(seurat_obj) <- "SCT"
 expr_data <- GetAssayData(seurat_obj, layer = "counts")
-cat("  Using RNA counts for pseudo-bulk (will CPM+log2 after aggregation)\n")
+cat("  Using SCT counts for pseudo-bulk\n")
+cat("  Genes:", nrow(expr_data), "Cells:", ncol(expr_data), "\n")
 
-# Clean tab-embedded gene names from expression matrix (Xu atlas artifact)
-# RNA layer may have "ESR1\tESR1" format; extract last tab-separated field
+# Clean tab-embedded gene names (Xu atlas artifact: "ESR1\tESR1")
 rn <- rownames(expr_data)
-cat("  Raw gene count:", length(rn), "\n")
-if (any(grepl("\t", rn))) {
+if (length(rn) > 0 && any(grepl("\t", rn[1:min(100, length(rn))]))) {
   cat("  Cleaning tab-embedded gene names...\n")
-  rn <- sapply(strsplit(rn, "\t"), function(x) x[length(x)])
+  clean_rn <- sapply(strsplit(rn, "\t"), function(x) x[length(x)])
+  # Deduplicate
+  keep <- !duplicated(clean_rn) & clean_rn != "" & !is.na(clean_rn)
+  expr_data <- expr_data[keep, ]
+  rownames(expr_data) <- clean_rn[keep]
+  cat("  After cleanup:", nrow(expr_data), "genes\n")
 }
-# Deduplicate: keep first occurrence of each gene
-dup_mask <- !duplicated(rn) & rn != "" & !is.na(rn)
-expr_data <- expr_data[dup_mask, ]
-rownames(expr_data) <- rn[dup_mask]
-cat("  After cleanup:", nrow(expr_data), "genes x", ncol(expr_data), "cells\n")
 cat("  Sample genes:", head(rownames(expr_data), 5), "\n")
 
 cell_types <- sort(unique(as.character(seurat_obj$CellTypeAnnotSH)))
@@ -198,9 +196,12 @@ for (ct in cell_types) {
   pb_mat <- do.call(cbind, pb_list)
   colnames(pb_mat) <- names(pb_list)
 
-  # Normalize aggregated counts to CPM + log2 (required for GSVA Gaussian kcdf)
-  pb_cpm <- sweep(pb_mat, 2, colSums(pb_mat), "/") * 1e6
-  pb_mat <- log2(pb_cpm + 1)
+  # Normalize aggregated counts to CPM + log2 (Gaussian kcdf for continuous data)
+  cs <- colSums(pb_mat)
+  if (any(cs > 0)) {
+    pb_cpm <- sweep(pb_mat, 2, cs, "/") * 1e6
+    pb_mat <- log2(pb_cpm + 1)
+  }
 
   cat(sprintf("    Pseudo-bulk: %d genes x %d patients\n", nrow(pb_mat), ncol(pb_mat)))
 
