@@ -180,11 +180,20 @@ mkdir -p "$DEST_06"
 # The repo has a symlink to the biopsy_adatas.pkl in CITEgeist
 if [[ -f "$BIOPSY_PKL" ]]; then
     safe_copy "$BIOPSY_PKL" "$DEST_06/biopsy_adatas.pkl" || true
+    # Compress pkl (2.5 GB → ~65 MB gzipped)
+    if [[ -f "$DEST_06/biopsy_adatas.pkl" && ! -f "$DEST_06/biopsy_adatas.pkl.gz" ]]; then
+        info "Compressing biopsy_adatas.pkl (saves ~2.4 GB)"
+        gzip "$DEST_06/biopsy_adatas.pkl"
+    fi
 else
     # Try the repo symlink
     REPO_SYMLINK="$REPO_ROOT/analysis/06_spatial_biopsies/data/biopsy_adatas.pkl"
     if [[ -L "$REPO_SYMLINK" || -f "$REPO_SYMLINK" ]]; then
         cp -L "$REPO_SYMLINK" "$DEST_06/biopsy_adatas.pkl"
+        if [[ -f "$DEST_06/biopsy_adatas.pkl" && ! -f "$DEST_06/biopsy_adatas.pkl.gz" ]]; then
+            info "Compressing biopsy_adatas.pkl (saves ~2.4 GB)"
+            gzip "$DEST_06/biopsy_adatas.pkl"
+        fi
     else
         warn "biopsy_adatas.pkl not found at either location"
     fi
