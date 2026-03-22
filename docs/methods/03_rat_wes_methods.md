@@ -41,7 +41,7 @@ COSMIC mutational signatures were assigned using SigProfilerAssignment (`02_cosm
 | `genome_build` | `"rn6"` (rat genome, Rnor_6.0) |
 | `cosmic_version` | `3.4` |
 
-The function performed signature decomposition by fitting observed trinucleotide mutation spectra to the COSMIC v3.4 single base substitution (SBS) reference signatures. Input VCF files were read directly from the shared input directory.
+The function performed signature decomposition by fitting observed trinucleotide mutation spectra to the COSMIC v3.4 single base substitution (SBS) reference signatures. Genome-wide trinucleotide context frequencies were used for normalization (`exome=False`); exome-specific normalization (`exome=True`) was not applied because SigProfilerMatrixGenerator's exome downsampling is non-functional for the rn6 rat genome (the exome interval file uses UCSC-style chromosome naming incompatible with the NCBI-style VCFs, and the downsampling step hangs after matrix generation). This means signature weights reflect whole-genome context rather than exome-specific context. Because exonic regions are GC-enriched relative to the genome, GC-associated signatures (e.g., SBS1, CpG deamination) may be modestly underweighted. However, since all six samples share this bias uniformly, relative comparisons between young and old groups are unaffected. Input VCF files were read directly from the shared input directory.
 
 After fitting, the script parsed the SigProfiler output file (`Assignment_Solution/Activities/Assignment_Solution_Activities.txt`), removed signatures with zero activity across all samples, and annotated each sample with its age group (Old or Young) based on a hardcoded ID-to-group mapping. Results were saved to `cosmic_signatures.csv`.
 

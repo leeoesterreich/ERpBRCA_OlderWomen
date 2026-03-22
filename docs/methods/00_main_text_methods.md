@@ -12,7 +12,7 @@ Single-nucleus RNA sequencing data from six NMU-induced rat mammary tumors (thre
 
 ### Rat Whole Exome Sequencing
 
-Somatic variants from whole exome sequencing of six rat mammary tumors (three young, three old; matched spleen germline controls) were annotated using Ensembl VEP v114.2 (Rnor_6.0 assembly, cache v104) and filtered for HIGH or MODERATE impact consequences on Ensembl-annotated genes. Mutational signatures were decomposed against COSMIC v3.4 SBS references using SigProfilerAssignment with 96-trinucleotide context on the rn6 genome. For oncoplot visualization, rat genes were mapped to human orthologs via BioMart and filtered against a curated panel of 229 cancer-associated genes. When multiple variants affected the same gene in a sample, the highest-impact consequence was retained.
+Somatic variants from whole exome sequencing of six rat mammary tumors (three young, three old; matched spleen germline controls) were annotated using Ensembl VEP v114.2 (Rnor_6.0 assembly, cache v104) and filtered for HIGH or MODERATE impact consequences on Ensembl-annotated genes. Mutational signatures were decomposed against COSMIC v3.4 SBS references using SigProfilerAssignment with 96-trinucleotide context on the rn6 genome, using genome-wide trinucleotide frequencies for normalization (exome-specific normalization was not applied due to a software limitation in SigProfiler for non-human genomes; all samples share the same bias, preserving relative comparisons). For oncoplot visualization, rat genes were mapped to human orthologs via BioMart and filtered against a curated panel of 229 cancer-associated genes. When multiple variants affected the same gene in a sample, the highest-impact consequence was retained.
 
 ### Human Single-Cell RNA-seq
 
