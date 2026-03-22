@@ -22,22 +22,57 @@ VCF_INPUT = Path("/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/NeilRatWES/Ra
 SIGPROFILER_OUTPUT = OUTPUT_DIR / "sigprofiler"
 
 
+def _add_chr_prefix_to_vcfs(input_dir, output_dir):
+    """Copy VCFs with 'chr' prefix added to chromosome names.
+
+    The Mutect2 VCFs use NCBI-style naming (1, 2, 10) but SigProfiler's
+    rn6 exome interval list uses UCSC-style (chr1, chr2, chr10). Without
+    matching prefixes, exome=True hangs because no variants intersect
+    the exome regions.
+    """
+    import shutil
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    vcf_files = list(input_dir.glob("*.vcf"))
+    print(f"  Adding 'chr' prefix to {len(vcf_files)} VCF files...")
+
+    for vcf in vcf_files:
+        out_path = output_dir / vcf.name
+        with open(vcf) as fin, open(out_path, 'w') as fout:
+            for line in fin:
+                if line.startswith('#'):
+                    # Fix contig headers too
+                    line = line.replace('##contig=<ID=', '##contig=<ID=chr')
+                    fout.write(line)
+                else:
+                    # Add chr prefix to chromosome field (first column)
+                    parts = line.split('\t', 1)
+                    chrom = parts[0]
+                    if not chrom.startswith('chr'):
+                        fout.write('chr' + line)
+                    else:
+                        fout.write(line)
+    print(f"  Wrote {len(vcf_files)} prefixed VCFs to {output_dir}")
+    return output_dir
+
+
 def run_sigprofiler():
     """Run SigProfiler COSMIC signature assignment."""
     from SigProfilerAssignment import Analyzer as Analyze
 
     print("=== Running SigProfiler Assignment ===")
 
+    # Add chr prefix to VCFs for compatibility with rn6 exome interval list
+    prefixed_vcf_dir = OUTPUT_DIR / "vcf_chr_prefixed"
+    _add_chr_prefix_to_vcfs(VCF_INPUT, prefixed_vcf_dir)
+
     Analyze.cosmic_fit(
-        samples=str(VCF_INPUT),
+        samples=str(prefixed_vcf_dir),
         output=str(SIGPROFILER_OUTPUT),
         input_type="vcf",
         context_type="96",
         genome_build="rn6",
-        # NOTE: exome=True hangs indefinitely for rn6 (SigProfilerAssignment bug).
-        # Using WGS trinucleotide context. This is a known limitation documented
-        # in the methods: rat WES signature attribution uses genome-wide context
-        # frequencies as exome-specific normalization is not functional for rn6.
+        exome=True,  # WES: use exonic trinucleotide context
         cosmic_version=3.4
     )
 
