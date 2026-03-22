@@ -21,6 +21,18 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
+# msigdbr v25 uses collection/subcollection; v10 used category/subcategory.
+# This wrapper tries the new API first and falls back to the old one.
+safe_msigdbr <- function(species, coll, subcoll = NULL) {
+  tryCatch({
+    if (is.null(subcoll)) msigdbr(species = species, collection = coll)
+    else msigdbr(species = species, collection = coll, subcollection = subcoll)
+  }, error = function(e) {
+    if (is.null(subcoll)) msigdbr(species = species, category = coll)
+    else msigdbr(species = species, category = coll, subcategory = subcoll)
+  })
+}
+
 # Simple enrichment function using hypergeometric test (Fisher's exact)
 run_simple_enrichment <- function(deg_genes, pathway_list, all_genes) {
   results <- lapply(names(pathway_list), function(pw_name) {
@@ -108,16 +120,12 @@ cat("  All tested genes:", length(all_tested), "\n")
 cat("\nStep 2: Loading gene sets...\n")
 
 # HALLMARK pathways
-hallmark_sets <- msigdbr(species = "Homo sapiens", category = "H")
+hallmark_sets <- safe_msigdbr("Homo sapiens", "H")
 hallmark_list <- split(hallmark_sets$gene_symbol, hallmark_sets$gs_name)
 cat("  HALLMARK:", length(hallmark_list), "pathways\n")
 
 # BIOCARTA pathways
-biocarta_sets <- msigdbr(species = "Homo sapiens", category = "C2", subcategory = "BIOCARTA")
-if (nrow(biocarta_sets) == 0) {
-  # Try CP:BIOCARTA
-  biocarta_sets <- msigdbr(species = "Homo sapiens", category = "C2", subcategory = "CP:BIOCARTA")
-}
+biocarta_sets <- safe_msigdbr("Homo sapiens", "C2", "CP:BIOCARTA")
 if (nrow(biocarta_sets) > 0) {
   biocarta_list <- split(biocarta_sets$gene_symbol, biocarta_sets$gs_name)
   cat("  BIOCARTA:", length(biocarta_list), "pathways\n")
