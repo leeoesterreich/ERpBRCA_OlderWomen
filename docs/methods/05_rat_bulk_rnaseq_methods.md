@@ -10,7 +10,7 @@ Raw paired-end reads were adapter-trimmed and quality-filtered using fastp v0.23
 
 ## 3. Read Alignment
 
-Trimmed reads were aligned to the rat genome (Rattus norvegicus, mRatBN7.2 assembly) using STAR v2.7.11b (`01_alignment.sh`). A pre-built STAR genome index located at `/ix1/alee/LO_LAB/Personal/Rahul/Reference_genome/Rat` was used. Alignment was performed with 64 threads (`--runThreadN 64`), compressed input handling via `zcat` (`--readFilesCommand zcat`), and output as coordinate-sorted BAM files (`--outSAMtype BAM SortedByCoordinate`). BAM sorting used 8 threads (`--outBAMsortingThreadN 8`). Quantification was performed in both transcriptome-level and gene-level modes (`--quantMode TranscriptomeSAM GeneCounts`).
+Trimmed reads were aligned to the rat genome (Rattus norvegicus, mRatBN7.2 assembly) using STAR v2.7.11b (`01_alignment.sh`). A pre-built STAR genome index located at `/ix1/alee/LO_LAB/Personal/Rahul/Reference_genome/Rat` was used. STAR alignment used binary version 2.7.11b against a genome index generated with version 2.7.4a. While Ensembl recommends version-matched indices, STAR maintains backward compatibility for minor version differences and no alignment errors were reported. Alignment was performed with 64 threads (`--runThreadN 64`), compressed input handling via `zcat` (`--readFilesCommand zcat`), and output as coordinate-sorted BAM files (`--outSAMtype BAM SortedByCoordinate`). BAM sorting used 8 threads (`--outBAMsortingThreadN 8`). Quantification was performed in both transcriptome-level and gene-level modes (`--quantMode TranscriptomeSAM GeneCounts`).
 
 ## 4. Gene-Level Quantification
 

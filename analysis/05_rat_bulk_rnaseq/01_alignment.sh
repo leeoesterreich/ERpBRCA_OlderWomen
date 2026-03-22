@@ -23,7 +23,7 @@ module load star/2.7.11b
 SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/05_rat_bulk_rnaseq"
 INPUT_DIR="${SCRIPT_DIR}/outputs/trimmed"
 OUTPUT_DIR="${SCRIPT_DIR}/outputs/aligned"
-GENOME_DIR="/ix1/alee/LO_LAB/Personal/Rahul/Reference_genome/Rat"
+GENOME_DIR="/ix1/alee/LO_LAB/Personal/Rahul/Reference_genome/Rat"  # Index built with STAR v2.7.4a; binary is v2.7.11b (minor version mismatch, backward compatible)
 THREADS=64
 
 mkdir -p "$OUTPUT_DIR"
