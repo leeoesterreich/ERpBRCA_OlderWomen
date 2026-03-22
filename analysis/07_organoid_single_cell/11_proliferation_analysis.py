@@ -46,7 +46,8 @@ from pathlib import Path
 warnings.filterwarnings('ignore')
 
 from _config import (
-    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments
+    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments,
+    TREATMENT_COLORS, TREATMENT_ORDER,
 )
 
 # =============================================================================
@@ -59,18 +60,6 @@ FIG_DIR = FIGURES_DIR / "proliferation"
 
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 FIG_DIR.mkdir(parents=True, exist_ok=True)
-
-# Treatment ordering and colors (E1 conditions blue, E2 conditions red)
-TREATMENT_ORDER = ['Vehicle', 'E1', 'E1+fulv', 'E1+HSD17B7i', 'E2', 'E2+fulv', 'E2+HSD17B7i']
-TREATMENT_COLORS = {
-    'Vehicle': '#808080',
-    'E1': '#3498db',
-    'E1+fulv': '#85c1e9',
-    'E1+HSD17B7i': '#1a5276',
-    'E2': '#e74c3c',
-    'E2+fulv': '#f1948a',
-    'E2+HSD17B7i': '#922b21',
-}
 
 # Quiescence/G0 gene set (RB1/HES1 excluded per spec)
 QUIESCENCE_GENES = ['CDKN1A', 'CDKN1B', 'BTG1', 'BTG2', 'TOB1', 'GAS1', 'CDKN2A', 'CCNG2']
@@ -395,7 +384,7 @@ def plot_score_violins(adata):
         ax.set_xlabel('')
         ax.set_ylabel(title, fontsize=11)
         ax.set_title(title + ' by Treatment', fontsize=12)
-        ax.tick_params(axis='x', rotation=45)
+        ax.tick_params(axis='x', rotation=30)
 
         # Add cell counts
         for i, t in enumerate(available):
@@ -432,7 +421,7 @@ def plot_cycling_fraction(adata):
     ax.set_ylabel('Proportion', fontsize=11)
     ax.set_title('Cycling vs Non-Cycling Cells by Treatment', fontsize=12, pad=14)
     ax.set_xticks(x)
-    ax.set_xticklabels(available, rotation=45, ha='right')
+    ax.set_xticklabels(available, rotation=30, ha='right')
     ax.set_ylim(0, 1)
     ax.legend(loc='upper right')
 
@@ -489,7 +478,7 @@ def plot_key_markers(adata):
         ax.set_title(gene, fontsize=12, fontweight='bold')
         ax.set_xlabel('')
         ax.set_ylabel('Expression')
-        ax.tick_params(axis='x', rotation=45)
+        ax.tick_params(axis='x', rotation=30)
 
     # Hide unused axes
     for j in range(n_markers, len(axes)):

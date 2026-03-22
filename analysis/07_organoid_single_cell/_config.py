@@ -73,6 +73,18 @@ def check_file_exists(filepath, description="file"):
 # h5ad files store "E1+ICI"/"E2+ICI" but figures should show "fulv"
 TREATMENT_RENAME = {"E1+ICI": "E1+fulv", "E2+ICI": "E2+fulv"}
 
+# Wong colorblind-safe palette for 7 treatments
+# Reference: Bang Wong (2011) Nature Methods 8:441
+TREATMENT_COLORS = {
+    "Vehicle": "#000000",
+    "E1": "#0072B2",
+    "E1+fulv": "#009E73",
+    "E1+HSD17B7i": "#56B4E9",
+    "E2": "#D55E00",
+    "E2+fulv": "#E69F00",
+    "E2+HSD17B7i": "#CC79A7",
+}
+
 # Canonical treatment order for all figures (Vehicle first, then E1 group, then E2 group)
 TREATMENT_ORDER = [
     "Vehicle",

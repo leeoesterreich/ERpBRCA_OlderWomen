@@ -548,7 +548,7 @@ def dose_response_analysis(adata):
 
             # Plot
             ax = axes[i, j]
-            ax.scatter(hsd_expr, er_vals, s=1, alpha=0.1, c="#333333")
+            ax.scatter(hsd_expr, er_vals, s=1, alpha=0.2, c="#333333")
 
             # Bin and show trend
             if (hsd_expr > 0).sum() > 50:
@@ -560,7 +560,7 @@ def dose_response_analysis(adata):
                     b_mask = bin_idx == b
                     if b_mask.sum() > 0:
                         ax.scatter(hsd_expr[b_mask].mean(), er_vals[b_mask].mean(),
-                                  c="red", s=50, zorder=5, edgecolors="black")
+                                  c="#D55E00", s=50, zorder=5, edgecolors="black")
 
             ax.set_xlabel("HSD17B7 expression", fontsize=16)
             ax.set_ylabel(score_col.replace("_score", ""), fontsize=16)

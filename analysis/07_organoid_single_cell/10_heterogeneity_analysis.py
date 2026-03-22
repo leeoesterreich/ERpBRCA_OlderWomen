@@ -56,7 +56,8 @@ from pathlib import Path
 warnings.filterwarnings('ignore')
 
 from _config import (
-    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments
+    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, standardize_treatments,
+    TREATMENT_COLORS, TREATMENT_ORDER,
 )
 
 # =============================================================================
@@ -69,18 +70,6 @@ FIG_DIR = FIGURES_DIR / "heterogeneity"
 
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 FIG_DIR.mkdir(parents=True, exist_ok=True)
-
-# Treatment ordering and colors
-TREATMENT_ORDER = ['Vehicle', 'E1', 'E1+fulv', 'E1+HSD17B7i', 'E2', 'E2+fulv', 'E2+HSD17B7i']
-TREATMENT_COLORS = {
-    'Vehicle': '#999999',
-    'E1': '#E41A1C',
-    'E1+fulv': '#FF7F00',
-    'E1+HSD17B7i': '#984EA3',
-    'E2': '#377EB8',
-    'E2+fulv': '#4DAF4A',
-    'E2+HSD17B7i': '#A65628',
-}
 
 # Score columns for biological axis analysis
 PATHWAY_SCORE_COLS = [
@@ -479,7 +468,7 @@ def module4_cluster_composition(adata):
     cluster_color_map = {row['cluster']: TREATMENT_COLORS[row['treatment']]
                          for _, row in dominant_treat.iterrows()}
     cell_colors = [cluster_color_map.get(c, '#cccccc') for c in clusters]
-    ax.scatter(umap[:, 0], umap[:, 1], c=cell_colors, s=0.5, alpha=0.2, rasterized=True)
+    ax.scatter(umap[:, 0], umap[:, 1], c=cell_colors, s=0.5, alpha=0.45, rasterized=True)
     # Add cluster labels
     for cl in cluster_cats:
         mask = clusters == cl
