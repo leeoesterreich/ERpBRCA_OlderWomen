@@ -220,12 +220,20 @@ def run_decoupler_progeny(adata):
     dc.mt.mlm(data=adata, net=progeny, raw=False)
 
     # Store results
+    found_key = None
     for key in ["score_mlm", "mlm_estimate", "mlm_scores"]:
         if key in adata.obsm:
             adata.obsm["progeny"] = adata.obsm[key].copy()
+            found_key = key
             break
-    log_message(f"  Stored PROGENy scores in adata.obsm['progeny']")
-    log_message(f"    Shape: {adata.obsm['progeny'].shape}")
+
+    if found_key:
+        log_message(f"  PROGENy scores stored from obsm['{found_key}']")
+        log_message(f"    Shape: {adata.obsm['progeny'].shape}")
+    else:
+        available = list(adata.obsm.keys())
+        log_message(f"  WARNING: No PROGENy score key found in obsm. Available: {available}")
+        log_message(f"  PROGENy heatmap will be skipped.")
 
     return adata
 
@@ -256,12 +264,20 @@ def run_decoupler_dorothea(adata):
     dc.mt.mlm(data=adata, net=dorothea, raw=False)
 
     # Store results
+    found_key = None
     for key in ["score_mlm", "mlm_estimate", "mlm_scores"]:
         if key in adata.obsm:
             adata.obsm["dorothea"] = adata.obsm[key].copy()
+            found_key = key
             break
-    log_message(f"  Stored DoRothEA scores in adata.obsm['dorothea']")
-    log_message(f"    Shape: {adata.obsm['dorothea'].shape}")
+
+    if found_key:
+        log_message(f"  DoRothEA scores stored from obsm['{found_key}']")
+        log_message(f"    Shape: {adata.obsm['dorothea'].shape}")
+    else:
+        available = list(adata.obsm.keys())
+        log_message(f"  WARNING: No DoRothEA score key found in obsm. Available: {available}")
+        log_message(f"  TF boxplots will be skipped.")
 
     return adata
 
