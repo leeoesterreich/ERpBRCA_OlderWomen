@@ -179,15 +179,25 @@ def generate_oncoplot_figure(df):
     plot_data = plot_data[sample_order]
 
     # Create consequence-to-number mapping
-    unique_consequences = df['Consequence'].dropna().unique()
-    consequence_map = {cons: i+1 for i, cons in enumerate(unique_consequences)}
+    # Fixed consequence priority order (HIGH→MODERATE) for reproducible coloring
+    CONSEQUENCE_PRIORITY = [
+        'Frameshift Variant', 'Stop Gained', 'Splice Donor Variant',
+        'Splice Acceptor Variant', 'Stop Lost', 'Start Lost',
+        'Missense Variant', 'Inframe Insertion', 'Inframe Deletion',
+        'Protein Altering Variant',
+    ]
+    # Include any consequences in the data, in priority order
+    observed = df['Consequence'].dropna().unique()
+    ordered_consequences = [c for c in CONSEQUENCE_PRIORITY if c in observed]
+    # Append any unexpected consequences alphabetically
+    ordered_consequences += sorted(c for c in observed if c not in CONSEQUENCE_PRIORITY)
+    consequence_map = {cons: i+1 for i, cons in enumerate(ordered_consequences)}
 
     # Convert to numeric matrix (0 for missing)
-    # Use map for pandas 2.x compatibility
-    plot_numeric = plot_data.applymap(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
+    plot_numeric = plot_data.map(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
 
     # Create colormap with white for missing
-    n_colors = len(unique_consequences) + 1
+    n_colors = len(ordered_consequences) + 1
     colors = plt.cm.tab20(np.linspace(0, 1, n_colors))
     colors[0] = [1, 1, 1, 1]  # White for missing
     custom_cmap = ListedColormap(colors)
@@ -226,7 +236,7 @@ def generate_oncoplot_figure(df):
     legend_elements = [
         plt.Rectangle((0,0), 1, 1, facecolor=colors[consequence_map[cons]],
                       edgecolor='none', label=cons.replace('_', ' ').title())
-        for cons in unique_consequences
+        for cons in ordered_consequences
     ]
     ax.legend(handles=legend_elements, title='Consequence',
              bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=9)
