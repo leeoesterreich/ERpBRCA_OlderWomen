@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # analysis/04_human_scrnaseq/03_cell_type_annotation.R
-# Cell type annotation using marker genes
+# Map Xu et al. 2024 cell type annotations to pipeline-standard names
 #
 # Inputs:
 #   - analysis/04_human_scrnaseq/outputs/seurat_young_midage_elderly.rds
@@ -35,7 +35,31 @@ output_dir <- file.path(script_dir, "outputs")
 figures_dir <- file.path(script_dir, "figures")
 dir.create(figures_dir, showWarnings = FALSE, recursive = TRUE)
 
-cat("=== Cell Type Annotation ===\n")
+cat("=== Cell Type Annotation (Xu et al. 2024 → Pipeline Names) ===\n")
+
+# -----------------------------------------------------------------------------
+# Cell type mapping: Xu annotation → pipeline standard names
+# -----------------------------------------------------------------------------
+CELLTYPE_MAP <- c(
+  "Cancer Epithelial Cells"       = "CancerEpithelial",
+  "CD4+ T Cells"                  = "TcellsCD4",
+  "CD8+ T Cells"                  = "TcellsCD8",
+  "Regulatory T Cells"            = "Tregs",
+  "NK Cells"                      = "NKcells",
+  "B Cells"                       = "Bcells",
+  "Plasma Cells"                  = "Plasmablasts",
+  "Macrophages"                   = "Macrophage",
+  "Monocytes"                     = "Monocyte",
+  "Dendritic Cells"               = "DCs",
+  "Fibroblasts"                   = "CAFs",
+  "Endothelial Cells"             = "Endothelial",
+  "Perivascular-like (PVL) Cells" = "PVL",
+  "Epithelial Cells"              = "NormalEpithelial",
+  "Myoepithelial Cells"           = "Myoepithelial",
+  "MDSCs"                         = "MDSCs",
+  "Mast Cells"                    = "MastCells",
+  "Neutrophils"                   = "Neutrophils"
+)
 
 # -----------------------------------------------------------------------------
 # Step 1: Load data
@@ -45,83 +69,86 @@ cat("Step 1: Loading data...\n")
 seurat_obj <- readRDS(file.path(output_dir, "seurat_young_midage_elderly.rds"))
 cat("  Cells:", ncol(seurat_obj), "\n")
 
-# Check if cell type annotations exist from original data
-if ("CellTypeMajor" %in% colnames(seurat_obj@meta.data)) {
-  cat("  Using existing cell type annotations\n")
+# -----------------------------------------------------------------------------
+# Step 2: Map cell type annotations
+# -----------------------------------------------------------------------------
+cat("\nStep 2: Mapping cell types...\n")
 
-  # Clean up cell type names (remove special characters)
-  seurat_obj$CellTypeMajor <- gsub("-", "", seurat_obj$CellTypeMajor)
+# Get original Xu annotations
+xu_types <- seurat_obj$CellTypeMajor
+cat("  Original Xu cell types:\n")
+print(table(xu_types, useNA = "ifany"))
 
-  # Create combined annotation
-  # FIX: Ensure CellTypeMinor exists before using
-  if ("CellTypeMinor" %in% colnames(seurat_obj@meta.data)) {
-    seurat_obj$CellTypeAnnot <- ifelse(
-      seurat_obj$CellTypeMajor %in% c("Myeloid", "Tcells"),
-      seurat_obj$CellTypeMinor,
-      seurat_obj$CellTypeMajor
-    )
-  } else {
-    seurat_obj$CellTypeAnnot <- seurat_obj$CellTypeMajor
-  }
+# Map to pipeline names
+mapped_types <- CELLTYPE_MAP[xu_types]
 
-  # Clean annotation names
-  seurat_obj$CellTypeAnnot <- gsub("-|_|\\+", "", seurat_obj$CellTypeAnnot)
-
-} else {
-  cat("  No existing annotations, using cluster-based annotation\n")
-  # Placeholder - would use marker-based annotation here
-  seurat_obj$CellTypeAnnot <- paste0("Cluster_", seurat_obj$seurat_clusters)
+# Check for unmapped types
+unmapped <- xu_types[is.na(mapped_types)]
+if (length(unmapped) > 0) {
+  cat("\n  WARNING: Unmapped cell types found:\n")
+  print(table(unmapped))
+  cat("  These cells will be labeled 'Unknown'\n")
+  mapped_types[is.na(mapped_types)] <- "Unknown"
 }
 
-cat("  Cell types:\n")
+seurat_obj$CellTypeAnnot <- as.character(mapped_types)
+seurat_obj$CellTypeAnnotSH <- seurat_obj$CellTypeAnnot
+
+cat("\n  Mapped cell types:\n")
 print(table(seurat_obj$CellTypeAnnot))
 
 # -----------------------------------------------------------------------------
-# Step 2: Set identity and visualize
+# Step 3: Set identity and visualize
 # -----------------------------------------------------------------------------
-cat("\nStep 2: Visualizing...\n")
+cat("\nStep 3: Visualizing...\n")
 
 Idents(seurat_obj) <- seurat_obj$CellTypeAnnot
 
 p1 <- DimPlot(seurat_obj, reduction = "umap", label = TRUE, label.size = 4) +
   ggtitle("Cell Types") +
+  theme_classic(base_size = 14) +
   theme(legend.position = "right")
 
-p2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "AgeGroup") +
-  ggtitle("Age Groups")
+p2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "AgeGroup",
+              cols = c(Elderly = "#D55E00", MidAge = "#009E73", Young = "#56B4E9")) +
+  ggtitle("Age Groups") +
+  theme_classic(base_size = 14)
+
+combined <- wrap_plots(list(p1, p2), ncol = 2)
 
 pdf(file.path(output_dir, "umap_celltypes.pdf"), width = 14, height = 6)
-print(p1 + p2)
+print(combined)
 dev.off()
 
-# Save PNG for validation pipeline
-ggsave(file.path(figures_dir, "umap_celltypes.png"), p1 + p2,
+ggsave(file.path(figures_dir, "umap_celltypes.png"), combined,
        width = 14, height = 6, dpi = 300, bg = "white")
 
 # Feature plots for key markers
-markers <- c("EPCAM", "KRT19", "CD68", "CD3D", "MS4A1", "PECAM1")
+markers <- c("EPCAM", "KRT19", "CD68", "CD3D", "MS4A1", "PECAM1",
+             "CTLA4", "PDCD1", "CCL2", "TGFB1", "MRC1", "CD163")
 markers_present <- markers[markers %in% rownames(seurat_obj)]
 
 if (length(markers_present) > 0) {
-  pdf(file.path(output_dir, "feature_markers.pdf"), width = 12, height = 8)
-  print(FeaturePlot(seurat_obj, features = markers_present, ncol = 3))
+  pdf(file.path(output_dir, "feature_markers.pdf"), width = 16, height = 12)
+  print(FeaturePlot(seurat_obj, features = markers_present, ncol = 4))
   dev.off()
 }
 
 # -----------------------------------------------------------------------------
-# Step 3: Save metadata
+# Step 4: Save metadata
 # -----------------------------------------------------------------------------
-cat("\nStep 3: Saving...\n")
+cat("\nStep 4: Saving...\n")
 
-# Save annotated object
 saveRDS(seurat_obj, file.path(output_dir, "seurat_annotated.rds"))
 
-# Save metadata
 metadata <- seurat_obj@meta.data %>%
   tibble::rownames_to_column("CellID") %>%
-  select(CellID, orig.ident, AgeGroup, CellTypeAnnot)
+  select(CellID, orig.ident, AgeGroup, CellTypeAnnot, CellTypeAnnotSH, Dataset)
 
 fwrite(metadata, file.path(output_dir, "metadata_annotated.txt"),
        sep = "\t", quote = FALSE)
+
+cat("  Saved seurat_annotated.rds:", ncol(seurat_obj), "cells\n")
+cat("  Saved metadata_annotated.txt\n")
 
 cat("\n=== Annotation complete ===\n")

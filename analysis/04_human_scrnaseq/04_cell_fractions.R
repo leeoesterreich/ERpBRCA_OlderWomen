@@ -131,11 +131,11 @@ plot_data <- fraction_data %>%
 p <- ggplot(plot_data, aes(x = CellType, y = Fraction, fill = AgeGroup)) +
   geom_boxplot(outlier.shape = NA) +
   geom_point(aes(color = AgeGroup), position = position_jitterdodge(jitter.width = 0.1)) +
-  scale_fill_manual(values = c("Young" = "#4DAF4A", "Elderly" = "#E41A1C")) +
-  scale_color_manual(values = c("Young" = "#4DAF4A", "Elderly" = "#E41A1C")) +
+  scale_fill_manual(values = c("Young" = "#56B4E9", "Elderly" = "#D55E00")) +
+  scale_color_manual(values = c("Young" = "#56B4E9", "Elderly" = "#D55E00")) +
   theme_classic() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+    axis.text.x = element_text(angle = 35, hjust = 1, size = 12),
     axis.text.y = element_text(size = 10),
     legend.position = "top"
   ) +

@@ -493,7 +493,7 @@ colnames(gsva_biocarta) <- gsub("^BIOCARTA_", "", colnames(gsva_biocarta))
 colnames(gsva_biocarta) <- gsub("_", " ", colnames(gsva_biocarta))
 
 ann_colors <- list(
-  Category = c(Lymphocyte = "#4DAF4A", Myeloid = "#E41A1C", Epithelial = "#377EB8", Stromal = "#984EA3", Other = "#999999")
+  Category = c(Lymphocyte = "#009E73", Myeloid = "#D55E00", Epithelial = "#0072B2", Stromal = "#CC79A7", Other = "#000000")
 )
 
 hallmark_col_fun <- colorRamp2(c(-3, -1.5, 0, 1.5, 3), c("#3E5CA8", "#8BC5E4", "#EDF3F1", "#F6BD6A", "#E75321"))

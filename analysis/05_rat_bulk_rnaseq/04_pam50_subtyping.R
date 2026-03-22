@@ -242,15 +242,22 @@ annotation_col <- data.frame(
   row.names = colnames(centered_data)
 )
 
+annotation_colors <- list(
+  Subtype = c(Basal = "#D55E00", Her2 = "#0072B2", LumA = "#009E73", LumB = "#E69F00", Normal = "#CC79A7")
+)
+
 pdf(file.path(output_dir, "pam50_heatmap.pdf"), width = 12, height = 15)
 pheatmap(
   centered_data,
   annotation_col = annotation_col,
+  annotation_colors = annotation_colors,
+  color = colorRampPalette(c("#0072B2", "#F0E442", "#D55E00"))(101),
   show_rownames = TRUE,
   show_colnames = TRUE,
   main = "PAM50 Gene Expression with Predicted Subtypes",
-  fontsize_row = 10,
-  fontsize_col = 10,
+  fontsize_row = 12,
+  fontsize_col = 12,
+  angle_col = 45,
   cluster_cols = FALSE
 )
 dev.off()
@@ -262,11 +269,14 @@ png(file.path(figures_dir, "pam50_heatmap.png"), width = 12*300, height = 15*300
 pheatmap(
   centered_data,
   annotation_col = annotation_col,
+  annotation_colors = annotation_colors,
+  color = colorRampPalette(c("#0072B2", "#F0E442", "#D55E00"))(101),
   show_rownames = TRUE,
   show_colnames = TRUE,
   main = "PAM50 Gene Expression with Predicted Subtypes",
-  fontsize_row = 10,
-  fontsize_col = 10,
+  fontsize_row = 12,
+  fontsize_col = 12,
+  angle_col = 45,
   cluster_cols = FALSE
 )
 dev.off()
@@ -279,7 +289,10 @@ pheatmap(
   show_rownames = TRUE,
   show_colnames = TRUE,
   main = "PAM50 Subtype Probabilities",
-  fontsize_row = 10,
+  color = colorRampPalette(c("#0072B2", "#56B4E9", "#F0E442", "#E69F00", "#D55E00"))(101),
+  fontsize_row = 12,
+  fontsize_col = 12,
+  angle_col = 45,
   cluster_cols = FALSE,
   cluster_rows = FALSE
 )
@@ -292,7 +305,10 @@ pheatmap(
   show_rownames = TRUE,
   show_colnames = TRUE,
   main = "PAM50 Subtype Probabilities",
-  fontsize_row = 10,
+  color = colorRampPalette(c("#0072B2", "#56B4E9", "#F0E442", "#E69F00", "#D55E00"))(101),
+  fontsize_row = 12,
+  fontsize_col = 12,
+  angle_col = 45,
   cluster_cols = FALSE,
   cluster_rows = FALSE
 )

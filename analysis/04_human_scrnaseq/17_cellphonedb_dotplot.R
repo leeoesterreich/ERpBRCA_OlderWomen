@@ -359,14 +359,13 @@ p <- ggplot(plot_data, aes(x = cell_pair_age, y = interacting_pair)) +
   ) +
   scale_color_gradientn(
     name = expression(Log[2]~mean~(Molecule~1~","~Molecule~2)),
-    colors = c("#2166AC", "#4393C3", "#92C5DE", "#D1E5F0", "#F7F7F7",
-               "#FDDBC7", "#F4A582", "#D6604D", "#B2182B"),  # RdBu diverging
+    colors = c("#0072B2", "#56B4E9", "#F0E442", "#E69F00", "#D55E00"),
     na.value = "grey90",
     limits = c(-10, 5),  # Manuscript range: -10 to +5
     guide = guide_colorbar(order = 2, barheight = unit(4, "cm"))
   ) +
   scale_x_discrete(position = "top") +  # X-axis labels on TOP (manuscript style)
-  theme_minimal(base_size = 10) +
+  theme_minimal(base_size = 14) +
   theme(
     # X-axis: rotated labels on top - LARGER font
     axis.text.x.top = element_text(angle = 90, hjust = 0, vjust = 0.5, size = 7, color = "black"),
