@@ -135,7 +135,7 @@ cat("  Total pathways:", length(all_pathways), "\n")
 cat("\nStep 3: Creating per-patient pseudo-bulk and running GSVA per cell type...\n")
 
 min_cells_per_patient <- 10  # minimum cells for a patient to be included in a cell type
-min_patients_per_group <- 2  # minimum patients per age group for statistical testing
+min_patients_per_group <- 3  # minimum patients per age group (n=2 gives df=1, unreliable)
 
 # Use SCT data layer for pseudo-bulk GSVA
 # For pseudo-bulk: use rowSums on SCT corrected counts, then CPM+log2

@@ -223,7 +223,8 @@ make_hsd17b7_heatmap <- function(gsva_mat, expr_mat, suffix, seurat_obj) {
       annotation_col = ann_col,
       annotation_colors = ann_colors,
       cluster_rows = FALSE,
-      scale = "row",
+      # GSVA scores are already bounded [-1, 1]; do not apply additional row-scaling
+      scale = "none",
       show_colnames = TRUE,
       main = paste0("GSVA per-sample (", suffix, ")")
     )
