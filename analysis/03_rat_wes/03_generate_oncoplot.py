@@ -135,7 +135,7 @@ def map_to_human_symbols(df):
 
 def filter_cancer_genes(df, gene_list_file):
     """Filter for genes in cancer gene list."""
-    cancer_genes = pd.read_csv(gene_list_file)
+    cancer_genes = pd.read_csv(gene_list_file, encoding='utf-8-sig')
     cancer_gene_set = set(cancer_genes['Gene'].tolist())
     return df[df['gene_symbol'].isin(cancer_gene_set)]
 
