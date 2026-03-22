@@ -34,7 +34,10 @@ def run_sigprofiler():
         input_type="vcf",
         context_type="96",
         genome_build="rn6",
-        exome=True,  # WES data: use exonic trinucleotide context
+        # NOTE: exome=True hangs indefinitely for rn6 (SigProfilerAssignment bug).
+        # Using WGS trinucleotide context. This is a known limitation documented
+        # in the methods: rat WES signature attribution uses genome-wide context
+        # frequencies as exome-specific normalization is not functional for rn6.
         cosmic_version=3.4
     )
 
