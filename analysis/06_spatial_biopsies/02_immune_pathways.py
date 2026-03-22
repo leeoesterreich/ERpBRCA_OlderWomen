@@ -139,12 +139,13 @@ def run_enrichment_analysis(gene_list, gene_set, sample_name, celltype, directio
             ax.axvline(-np.log10(0.05), color='red', linestyle='--', alpha=0.7)
             
             plt.tight_layout()
-            
-            # Save plot
+
+            # Save plot as PNG and SVG
             output_path = f"figures/immune_pathways/enrichment/{sample_name}_{celltype}_{gene_set}_{direction}_enrichment.png"
             plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.savefig(output_path.replace('.png', '.svg'), format='svg', bbox_inches='tight')
             plt.close()
-            
+
             logging.info(f"Saved enrichment plot: {output_path}")
         
         return filtered_results

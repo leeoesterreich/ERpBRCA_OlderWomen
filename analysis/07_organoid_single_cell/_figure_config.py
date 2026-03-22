@@ -5,17 +5,22 @@ Import this module early (after matplotlib.use('Agg')) to set:
 - Publication-quality font sizes
 - save_fig() helper that outputs both PNG and SVG
 """
+import os
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
 # Register Arial font
-_arial_path = "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf"
-fm.fontManager.addfont(_arial_path)
+ARIAL_PATH = '/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf'
+if os.path.exists(ARIAL_PATH):
+    fm.fontManager.addfont(ARIAL_PATH)
+    matplotlib.rcParams['font.family'] = 'Arial'
+else:
+    matplotlib.rcParams['font.family'] = 'sans-serif'
 
 # Global rcParams: Arial font, larger sizes
 plt.rcParams.update({
-    'font.family': 'sans-serif',
+    'font.family': matplotlib.rcParams['font.family'],
     'font.sans-serif': ['Arial'],
     'font.size': 12,
     'axes.titlesize': 16,

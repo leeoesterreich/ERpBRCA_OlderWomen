@@ -4,9 +4,19 @@
 import os
 import pandas as pd
 from pathlib import Path
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import seaborn as sns
 import numpy as np
+
+# Register Arial font
+ARIAL_PATH = '/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf'
+if os.path.exists(ARIAL_PATH):
+    fm.fontManager.addfont(ARIAL_PATH)
+    matplotlib.rcParams['font.family'] = 'Arial'
+else:
+    matplotlib.rcParams['font.family'] = 'sans-serif'
 
 np.random.seed(12345)
 

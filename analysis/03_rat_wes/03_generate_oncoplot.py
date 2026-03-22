@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
 """Generate oncoplot data and figure from filtered VEP output."""
 
+import os
 import pandas as pd
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import seaborn as sns
 from matplotlib.colors import ListedColormap
 from matplotlib.collections import LineCollection
 from pathlib import Path
 from pybiomart import Dataset
+
+# Register Arial font
+ARIAL_PATH = '/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf'
+if os.path.exists(ARIAL_PATH):
+    fm.fontManager.addfont(ARIAL_PATH)
+    matplotlib.rcParams['font.family'] = 'Arial'
+else:
+    matplotlib.rcParams['font.family'] = 'sans-serif'
 
 OUTPUT_DIR = Path(__file__).parent / "outputs"
 FIGURES_DIR = Path(__file__).parent / "figures"

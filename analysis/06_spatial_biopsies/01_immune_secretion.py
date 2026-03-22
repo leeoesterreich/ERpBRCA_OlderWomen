@@ -7,11 +7,15 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 from utils import log_memory_usage
+from figure_config import setup_figure_params
 
 # Create necessary directories
 os.makedirs('logs', exist_ok=True)
 os.makedirs('figures', exist_ok=True)
 os.makedirs('figures/immune_secretion', exist_ok=True)
+
+# Apply standardized figure parameters (14pt minimum, Arial font)
+setup_figure_params()
 
 # Set up logging
 logging.basicConfig(
@@ -118,7 +122,12 @@ def create_spatial_plot(adata, gene, layer_name=None, sample_name="", output_dir
         else:
             logging.warning(f"Could not find saved plot file for {gene} in {sample_name}")
             return False
-        
+
+        # Save SVG alongside PNG
+        svg_path = desired_path.replace('.png', '.svg')
+        plt.savefig(svg_path, format='svg', bbox_inches='tight')
+        logging.info(f"Saved SVG spatial plot: {svg_path}")
+
         return True
         
     except Exception as e:
