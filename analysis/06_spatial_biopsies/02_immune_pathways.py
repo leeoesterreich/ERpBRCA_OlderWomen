@@ -245,15 +245,16 @@ def create_pathway_dotplot(all_results, output_path):
         logging.warning("No CD163+ macrophage data found")
         return
 
-    # Filter to specific interleukin pathways
-    target_ils = ['interleukin-4', 'interleukin-10', 'interleukin-13',
-                  'interleukin-12', 'interleukin-23', 'interleukin-1', 'interleukin-6',
-                  'il-4', 'il-10', 'il-13', 'il-12', 'il-23', 'il-1', 'il-6']
-    il_mask = full_df['Term'].str.lower().str.contains('|'.join(target_ils), regex=True)
+    # Filter to specific interleukin and TGF-beta pathways
+    target_pathways = ['interleukin-4', 'interleukin-10', 'interleukin-13',
+                       'interleukin-12', 'interleukin-23', 'interleukin-1', 'interleukin-6',
+                       'il-4', 'il-10', 'il-13', 'il-12', 'il-23', 'il-1', 'il-6',
+                       'tgf-beta', 'tgf beta', 'transforming growth factor']
+    il_mask = full_df['Term'].str.lower().str.contains('|'.join(target_pathways), regex=True)
     full_df = full_df[il_mask]
 
     if full_df.empty:
-        logging.warning("No target interleukin pathways found")
+        logging.warning("No target interleukin or TGF-beta pathways found")
         return
 
     # Clean pathway names - remove R-HSA-XXXXXXX patterns
@@ -308,7 +309,7 @@ def create_pathway_dotplot(all_results, output_path):
                          linewidths=0.5,
                          linecolor='white')
 
-    ax.set_title('Interleukin Pathway Activity in CD163+ Macrophages', fontsize=16)
+    ax.set_title('Interleukin & TGF-β Pathway Activity in CD163+ Macrophages', fontsize=16)
     ax.set_xlabel('Sample', fontsize=14)
     ax.set_ylabel('Pathway', fontsize=14)
 
