@@ -20,11 +20,10 @@ suppressPackageStartupMessages({
   library(biomaRt)
 })
 
-# Set Arial as default font for all plots
+# Set Arial as default font for pheatmap plots
 library(showtext)
 font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
 showtext_auto()
-theme_set(theme_bw(base_size = 14, base_family = "Arial"))
 
 # Define paths
 get_script_dir <- function() {

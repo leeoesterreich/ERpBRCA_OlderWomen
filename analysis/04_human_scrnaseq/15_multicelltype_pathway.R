@@ -36,7 +36,6 @@ suppressPackageStartupMessages({
 library(showtext)
 font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
 showtext_auto()
-theme_set(theme_bw(base_size = 14, base_family = "Arial"))
 
 # -----------------------------------------------------------------------------
 # Parse command line arguments
