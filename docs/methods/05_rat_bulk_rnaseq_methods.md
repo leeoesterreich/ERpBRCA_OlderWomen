@@ -14,7 +14,7 @@ Trimmed reads were aligned to the rat genome (Rattus norvegicus, mRatBN7.2 assem
 
 ## 4. Gene-Level Quantification
 
-Gene-level read counts were generated from sorted BAM files using htseq-count v0.13.5 (`02_htseq_count.sh`). Reads were counted against the Ensembl rat gene annotation (Rattus_norvegicus.mRatBN7.2.112.gtf). Parameters were: BAM format input (`-f bam`), position-sorted reads (`-r pos`), reverse-stranded library protocol (`-s reverse`), feature type exon (`-t exon`), and gene identifier attribute `gene_id` (`-i gene_id`). HTSeq summary lines (prefixed with `__`) were excluded from downstream analyses.
+Gene-level read counts were generated from sorted BAM files using htseq-count v0.13.5 (`02_htseq_count.sh`). Reads were counted against the Ensembl rat gene annotation (Rattus_norvegicus.mRatBN7.2.112.gtf). Parameters were: BAM format input (`-f bam`), position-sorted reads (`-r pos`), reverse-stranded library protocol (`-s reverse`), feature type exon (`-t exon`), and gene identifier attribute `gene_id` (`-i gene_id`). HTSeq-count was run in reverse-stranded mode, consistent with the dUTP-based library preparation protocol used for these samples. HTSeq summary lines (prefixed with `__`) were excluded from downstream analyses.
 
 ## 5. Differential Expression Analysis
 

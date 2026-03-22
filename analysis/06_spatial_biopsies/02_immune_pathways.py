@@ -102,9 +102,16 @@ def run_enrichment_analysis(gene_list, gene_set, sample_name, celltype, directio
         if enr.results.empty:
             logging.warning(f"No significant pathways found for {sample_name} {celltype} {gene_set}")
             return None
-        
+
+        # Filter to significant results only (Adjusted P-value < 0.05)
+        sig_results = enr.results[enr.results['Adjusted P-value'] < 0.05]
+
+        if sig_results.empty:
+            logging.warning(f"No pathways with Adjusted P-value < 0.05 for {sample_name} {celltype} {gene_set}")
+            return None
+
         # Filter for IL/TGF pathways
-        filtered_results = filter_il_tgf_pathways(enr.results)
+        filtered_results = filter_il_tgf_pathways(sig_results)
         
         if filtered_results.empty:
             logging.info(f"No IL/TGF pathways found for {sample_name} {celltype} {gene_set}")

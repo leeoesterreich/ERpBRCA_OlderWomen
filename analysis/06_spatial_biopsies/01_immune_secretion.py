@@ -98,12 +98,20 @@ def create_spatial_plot(adata, gene, layer_name=None, sample_name="", output_dir
         
         # The file is saved by scanpy in the current working directory under 'figures/'
         # Move it to our desired output directory if different
-        default_path = f"figures/show_{filename}.png"
         desired_path = os.path.join(output_dir, f"{filename}.png")
-        
-        if os.path.exists(default_path) and default_path != desired_path:
+
+        # Try multiple possible scanpy output paths (prefix varies across scanpy versions)
+        from pathlib import Path
+        possible_paths = [
+            Path(f"figures/show_{filename}.png"),
+            Path(f"figures/{filename}.png"),
+            Path(output_dir) / f"show_{filename}.png",
+        ]
+        saved_path = next((p for p in possible_paths if p.exists()), None)
+
+        if saved_path is not None and str(saved_path) != desired_path:
             os.makedirs(output_dir, exist_ok=True)
-            os.rename(default_path, desired_path)
+            os.rename(str(saved_path), desired_path)
             logging.info(f"Saved spatial plot: {desired_path}")
         elif os.path.exists(desired_path):
             logging.info(f"Saved spatial plot: {desired_path}")
