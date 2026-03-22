@@ -23,6 +23,12 @@ suppressPackageStartupMessages({
   library(ggrepel)
 })
 
+# Set Arial as default font for all plots
+library(showtext)
+font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
+showtext_auto()
+theme_set(theme_bw(base_size = 14, base_family = "Arial"))
+
 get_script_dir <- function() {
   args <- commandArgs(trailingOnly = FALSE)
   file_arg <- grep("--file=", args, value = TRUE)
@@ -209,7 +215,9 @@ volcano_plot <- ggplot(degs, aes(x = log2FoldChange, y = -log10(padj + 1e-300)))
   theme(legend.position = "right")
 
 ggsave(file.path(figures_dir, "fig7b_macrophage_volcano.png"),
-       volcano_plot, width = 10, height = 8, dpi = 300)
+       volcano_plot, width = 10, height = 8, dpi = 300, bg = "white")
+ggsave(file.path(figures_dir, "fig7b_macrophage_volcano.svg"),
+       volcano_plot, width = 10, height = 8)  # SVG for vector assembly
 cat("  Saved fig7b_macrophage_volcano.png\n")
 
 # -----------------------------------------------------------------------------
@@ -243,9 +251,24 @@ if (length(top_degs) > 0) {
     cluster_cols = TRUE,
     cluster_rows = TRUE,
     show_rownames = TRUE,
-    fontsize_row = 8
+    fontsize_row = 8,
+    fontfamily = "Arial"
   )
   dev.off()
+  svg(file.path(figures_dir, "fig7b_macrophage_heatmap.svg"), width = 10, height = 10)
+  pheatmap(
+    as.matrix(heatmap_mat),
+    scale = "row",
+    annotation_col = ann_col,
+    annotation_colors = ann_colors,
+    main = "Top Pseudobulk DEGs: Macrophages Elderly vs Young",
+    cluster_cols = TRUE,
+    cluster_rows = TRUE,
+    show_rownames = TRUE,
+    fontsize_row = 8,
+    fontfamily = "Arial"
+  )
+  dev.off()  # SVG for vector assembly
   cat("  Saved fig7b_macrophage_heatmap.png\n")
 } else {
   cat("  No significant DEGs found for heatmap\n")

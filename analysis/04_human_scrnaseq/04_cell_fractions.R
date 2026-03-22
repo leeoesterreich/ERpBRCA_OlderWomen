@@ -22,6 +22,12 @@ suppressPackageStartupMessages({
   library(data.table)
 })
 
+# Set Arial as default font for all plots
+library(showtext)
+font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
+showtext_auto()
+theme_set(theme_bw(base_size = 14, base_family = "Arial"))
+
 get_script_dir <- function() {
   args <- commandArgs(trailingOnly = FALSE)
   file_arg <- grep("--file=", args, value = TRUE)
@@ -148,5 +154,7 @@ dev.off()
 # Save PNG for validation pipeline
 ggsave(file.path(figures_dir, "fraction_boxplot.png"), p,
        width = 12, height = 6, dpi = 300, bg = "white")
+ggsave(file.path(figures_dir, "fraction_boxplot.svg"), p,
+       width = 12, height = 6)  # SVG for vector assembly
 
 cat("\n=== Cell fraction analysis complete ===\n")

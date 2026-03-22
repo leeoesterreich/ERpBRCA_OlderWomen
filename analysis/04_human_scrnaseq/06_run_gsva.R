@@ -44,6 +44,12 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
+# Set Arial as default font for all plots
+library(showtext)
+font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
+showtext_auto()
+theme_set(theme_bw(base_size = 14, base_family = "Arial"))
+
 # Parse --mode argument
 args <- commandArgs(trailingOnly = TRUE)
 mode_arg <- grep("--mode=", args, value = TRUE)
@@ -174,9 +180,9 @@ make_hsd17b7_heatmap <- function(gsva_mat, expr_mat, suffix, seurat_obj) {
     cluster_rows = FALSE,
     cluster_columns = FALSE,
     row_names_side = "left",
-    row_names_gp = gpar(fontsize = 10),
+    row_names_gp = gpar(fontsize = 10, fontfamily = "Arial"),
     column_names_rot = 45,
-    column_names_gp = gpar(fontsize = 12),
+    column_names_gp = gpar(fontsize = 12, fontfamily = "Arial"),
     column_names_side = "bottom",
     rect_gp = gpar(col = NA),
     width = unit(2, "cm"),
@@ -191,12 +197,15 @@ make_hsd17b7_heatmap <- function(gsva_mat, expr_mat, suffix, seurat_obj) {
 
   # Save heatmap
   pdf(file.path(output_dir, paste0("gsva_heatmap_", suffix, ".pdf")), width = 10, height = 6)
-  draw(ht, padding = unit(c(2, 2, 2, 2), "cm"))
+  draw(ht, padding = unit(c(10, 10, 10, 10), "mm"))
   dev.off()
 
   png(file.path(figures_dir, paste0("gsva_heatmap_", suffix, ".png")), width = 10*300, height = 6*300, res = 300)
-  draw(ht, padding = unit(c(2, 2, 2, 2), "cm"))
+  draw(ht, padding = unit(c(10, 10, 10, 10), "mm"))
   dev.off()
+  svg(file.path(figures_dir, paste0("gsva_heatmap_", suffix, ".svg")), width = 10, height = 6)
+  draw(ht, padding = unit(c(10, 10, 10, 10), "mm"))
+  dev.off()  # SVG for vector assembly
 
   # Per-sample heatmap
   age_groups <- seurat_obj@meta.data %>%
@@ -226,9 +235,22 @@ make_hsd17b7_heatmap <- function(gsva_mat, expr_mat, suffix, seurat_obj) {
       # GSVA scores are already bounded [-1, 1]; do not apply additional row-scaling
       scale = "none",
       show_colnames = TRUE,
-      main = paste0("GSVA per-sample (", suffix, ")")
+      main = paste0("GSVA per-sample (", suffix, ")"),
+      fontfamily = "Arial"
     )
     dev.off()
+    svg(file.path(figures_dir, paste0("gsva_heatmap_per_sample_", suffix, ".svg")), width = 12, height = 8)
+    pheatmap(
+      gsva_mat[, sample_cols],
+      annotation_col = ann_col,
+      annotation_colors = ann_colors,
+      cluster_rows = FALSE,
+      scale = "none",
+      show_colnames = TRUE,
+      main = paste0("GSVA per-sample (", suffix, ")"),
+      fontfamily = "Arial"
+    )
+    dev.off()  # SVG for vector assembly
   }
 
   return(list(gsva_mat = gsva_mat, gsva_agg = gsva_agg, hsd17b7_group = hsd17b7_group))
@@ -423,9 +445,9 @@ if (!is.null(pseudobulk_result) && !is.null(singlecell_result)) {
     cluster_rows = FALSE,
     cluster_columns = FALSE,
     row_names_side = "left",
-    row_names_gp = gpar(fontsize = 9),
+    row_names_gp = gpar(fontsize = 9, fontfamily = "Arial"),
     column_names_rot = 45,
-    column_names_gp = gpar(fontsize = 10),
+    column_names_gp = gpar(fontsize = 10, fontfamily = "Arial"),
     column_split = factor(c("Pseudo-bulk", "Pseudo-bulk", "Single-cell", "Single-cell"),
                           levels = c("Pseudo-bulk", "Single-cell")),
     rect_gp = gpar(col = "grey90", lwd = 0.5),
@@ -435,11 +457,14 @@ if (!is.null(pseudobulk_result) && !is.null(singlecell_result)) {
   )
 
   png(file.path(figures_dir, "gsva_comparison_heatmap.png"), width = 14*300, height = 8*300, res = 300)
-  draw(ht_cmp, padding = unit(c(2, 2, 2, 2), "cm"))
+  draw(ht_cmp, padding = unit(c(10, 10, 10, 10), "mm"))
   dev.off()
+  svg(file.path(figures_dir, "gsva_comparison_heatmap.svg"), width = 14, height = 8)
+  draw(ht_cmp, padding = unit(c(10, 10, 10, 10), "mm"))
+  dev.off()  # SVG for vector assembly
 
   pdf(file.path(output_dir, "gsva_comparison_heatmap.pdf"), width = 14, height = 8)
-  draw(ht_cmp, padding = unit(c(2, 2, 2, 2), "cm"))
+  draw(ht_cmp, padding = unit(c(10, 10, 10, 10), "mm"))
   dev.off()
 }
 

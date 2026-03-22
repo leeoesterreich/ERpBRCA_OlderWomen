@@ -20,6 +20,12 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
+# Set Arial as default font for all plots
+library(showtext)
+font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
+showtext_auto()
+theme_set(theme_bw(base_size = 14, base_family = "Arial"))
+
 get_script_dir <- function() {
   args <- commandArgs(trailingOnly = FALSE)
   file_arg <- grep("--file=", args, value = TRUE)
@@ -109,7 +115,8 @@ pheatmap(
   annotation_colors = ann_colors,
   main = "PROGENy Pathway Activity (Pseudo-bulk)",
   scale = "column",
-  cluster_cols = FALSE
+  cluster_cols = FALSE,
+  fontfamily = "Arial"
 )
 dev.off()
 
@@ -121,9 +128,21 @@ pheatmap(
   annotation_colors = ann_colors,
   main = "PROGENy Pathway Activity (Pseudo-bulk)",
   scale = "column",
-  cluster_cols = FALSE
+  cluster_cols = FALSE,
+  fontfamily = "Arial"
 )
 dev.off()
+svg(file.path(figures_dir, "progeny_heatmap.svg"), width = 10, height = 8)
+pheatmap(
+  pathway_activity,
+  annotation_row = ann_row,
+  annotation_colors = ann_colors,
+  main = "PROGENy Pathway Activity (Pseudo-bulk)",
+  scale = "column",
+  cluster_cols = FALSE,
+  fontfamily = "Arial"
+)
+dev.off()  # SVG for vector assembly
 
 # Focus on Estrogen pathway
 if ("Estrogen" %in% colnames(pathway_activity)) {

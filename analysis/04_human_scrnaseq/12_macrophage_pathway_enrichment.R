@@ -21,6 +21,12 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
+# Set Arial as default font for all plots
+library(showtext)
+font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
+showtext_auto()
+theme_set(theme_bw(base_size = 14, base_family = "Arial"))
+
 # msigdbr v25 uses collection/subcollection; v10 used category/subcategory.
 # This wrapper tries the new API first and falls back to the old one.
 safe_msigdbr <- function(species, coll, subcoll = NULL) {
@@ -222,7 +228,9 @@ p <- ggplot(top_pathways, aes(x = reorder(pathway_clean, signed_score), y = sign
   )
 
 ggsave(file.path(figures_dir, "fig7c_pathway_barplot.png"),
-       p, width = 10, height = 8, dpi = 300)
+       p, width = 10, height = 8, dpi = 300, bg = "white")
+ggsave(file.path(figures_dir, "fig7c_pathway_barplot.svg"),
+       p, width = 10, height = 8)  # SVG for vector assembly
 cat("  Saved fig7c_pathway_barplot.png\n")
 
 # Also create a heatmap version showing enrichment direction
@@ -257,9 +265,27 @@ if (nrow(top_pathways) > 0 && any(!is.na(top_pathways$signed_score) & is.finite(
       fontsize_row = 11,
       fontsize_col = 12,
       fontsize = 12,
-      show_colnames = TRUE
+      show_colnames = TRUE,
+      fontfamily = "Arial"
     )
     dev.off()
+    svg(file.path(figures_dir, "fig7c_pathway_heatmap.svg"), width = 8, height = 10)
+    pheatmap(
+      pathway_mat,
+      cluster_cols = FALSE,
+      cluster_rows = TRUE,
+      annotation_row = row_ann,
+      annotation_colors = ann_colors,
+      main = "Pathway Enrichment: Macrophages Elderly vs Young",
+      color = colorRampPalette(c("#377EB8", "white", "#E41A1C"))(100),
+      breaks = seq(-max_val, max_val, length.out = 101),
+      fontsize_row = 11,
+      fontsize_col = 12,
+      fontsize = 12,
+      show_colnames = TRUE,
+      fontfamily = "Arial"
+    )
+    dev.off()  # SVG for vector assembly
     cat("  Saved fig7c_pathway_heatmap.png\n")
   } else {
     cat("  Warning: No valid pathway scores for heatmap\n")

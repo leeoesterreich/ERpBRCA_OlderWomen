@@ -20,6 +20,12 @@ suppressPackageStartupMessages({
   library(biomaRt)
 })
 
+# Set Arial as default font for all plots
+library(showtext)
+font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
+showtext_auto()
+theme_set(theme_bw(base_size = 14, base_family = "Arial"))
+
 # Define paths
 get_script_dir <- function() {
   args <- commandArgs(trailingOnly = FALSE)
@@ -258,7 +264,8 @@ pheatmap(
   fontsize_row = 12,
   fontsize_col = 12,
   angle_col = 45,
-  cluster_cols = FALSE
+  cluster_cols = FALSE,
+  fontfamily = "Arial"
 )
 dev.off()
 cat("  Saved: pam50_heatmap.pdf\n")
@@ -277,9 +284,26 @@ pheatmap(
   fontsize_row = 12,
   fontsize_col = 12,
   angle_col = 45,
-  cluster_cols = FALSE
+  cluster_cols = FALSE,
+  fontfamily = "Arial"
 )
 dev.off()
+svg(file.path(figures_dir, "pam50_heatmap.svg"), width = 12, height = 15)
+pheatmap(
+  centered_data,
+  annotation_col = annotation_col,
+  annotation_colors = annotation_colors,
+  color = colorRampPalette(c("#0072B2", "#F0E442", "#D55E00"))(101),
+  show_rownames = TRUE,
+  show_colnames = TRUE,
+  main = "PAM50 Gene Expression with Predicted Subtypes",
+  fontsize_row = 12,
+  fontsize_col = 12,
+  angle_col = 45,
+  cluster_cols = FALSE,
+  fontfamily = "Arial"
+)
+dev.off()  # SVG for vector assembly
 cat("  Saved: pam50_heatmap.png\n")
 
 # Save probability heatmap
@@ -294,7 +318,8 @@ pheatmap(
   fontsize_col = 12,
   angle_col = 45,
   cluster_cols = FALSE,
-  cluster_rows = FALSE
+  cluster_rows = FALSE,
+  fontfamily = "Arial"
 )
 dev.off()
 cat("  Saved: pam50_probabilities_heatmap.pdf\n")
@@ -310,9 +335,25 @@ pheatmap(
   fontsize_col = 12,
   angle_col = 45,
   cluster_cols = FALSE,
-  cluster_rows = FALSE
+  cluster_rows = FALSE,
+  fontfamily = "Arial"
 )
 dev.off()
+svg(file.path(figures_dir, "pam50_probabilities_heatmap.svg"), width = 12, height = 8)
+pheatmap(
+  t(PAM50_subtype$subtype.proba),
+  show_rownames = TRUE,
+  show_colnames = TRUE,
+  main = "PAM50 Subtype Probabilities",
+  color = colorRampPalette(c("#0072B2", "#56B4E9", "#F0E442", "#E69F00", "#D55E00"))(101),
+  fontsize_row = 12,
+  fontsize_col = 12,
+  angle_col = 45,
+  cluster_cols = FALSE,
+  cluster_rows = FALSE,
+  fontfamily = "Arial"
+)
+dev.off()  # SVG for vector assembly
 cat("  Saved: pam50_probabilities_heatmap.png\n")
 
 cat("\n=== PAM50 complete ===\n")

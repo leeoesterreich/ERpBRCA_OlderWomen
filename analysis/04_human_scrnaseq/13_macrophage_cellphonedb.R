@@ -24,6 +24,12 @@ suppressPackageStartupMessages({
   library(pheatmap)
 })
 
+# Set Arial as default font for all plots
+library(showtext)
+font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
+showtext_auto()
+theme_set(theme_bw(base_size = 14, base_family = "Arial"))
+
 # Check if CellChat is available (may need separate installation)
 cellchat_available <- requireNamespace("CellChat", quietly = TRUE)
 
@@ -165,7 +171,9 @@ if (file.exists(deg_file)) {
       theme(legend.position = "bottom")
 
     ggsave(file.path(figures_dir, "fig7d_communication_genes.png"),
-           p, width = 8, height = 8, dpi = 300)
+           p, width = 8, height = 8, dpi = 300, bg = "white")
+    ggsave(file.path(figures_dir, "fig7d_communication_genes.svg"),
+           p, width = 8, height = 8)  # SVG for vector assembly
     cat("\n  Saved fig7d_communication_genes.png\n")
   }
 }

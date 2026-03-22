@@ -17,6 +17,12 @@ suppressPackageStartupMessages({
   library(patchwork)
 })
 
+# Set Arial as default font for all plots
+library(showtext)
+font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
+showtext_auto()
+theme_set(theme_bw(base_size = 14, base_family = "Arial"))
+
 # Helper function to check file existence
 check_file_exists <- function(filepath, description = "file") {
   if (!file.exists(filepath)) {
@@ -94,7 +100,8 @@ p_original <- ggplot(plot_data, aes(x = GeneSymb, y = PathwayName_short)) +
 
 # Save in multiple formats
 ggsave(file.path(fig_dir, "correlation_bubbleplot_original.pdf"), p_original, width = 12, height = 7)
-ggsave(file.path(fig_dir, "correlation_bubbleplot_original.png"), p_original, width = 12, height = 7, dpi = 300)
+ggsave(file.path(fig_dir, "correlation_bubbleplot_original.png"), p_original, width = 12, height = 7, dpi = 300, bg = "white")
+ggsave(file.path(fig_dir, "correlation_bubbleplot_original.svg"), p_original, width = 12, height = 7)  # SVG for vector assembly
 
 # -----------------------------------------------------------------------------
 # Step 3: FDR-Corrected Bubble Plot
@@ -121,7 +128,8 @@ p_fdr <- ggplot(plot_data, aes(x = GeneSymb, y = PathwayName_short)) +
 
 # Save in multiple formats
 ggsave(file.path(fig_dir, "correlation_bubbleplot_fdr.pdf"), p_fdr, width = 12, height = 7)
-ggsave(file.path(fig_dir, "correlation_bubbleplot_fdr.png"), p_fdr, width = 12, height = 7, dpi = 300)
+ggsave(file.path(fig_dir, "correlation_bubbleplot_fdr.png"), p_fdr, width = 12, height = 7, dpi = 300, bg = "white")
+ggsave(file.path(fig_dir, "correlation_bubbleplot_fdr.svg"), p_fdr, width = 12, height = 7)  # SVG for vector assembly
 
 # -----------------------------------------------------------------------------
 # Step 4: Side-by-side Comparison
@@ -139,7 +147,8 @@ p_combined <- p_original + p_fdr +
 
 # Save in multiple formats
 ggsave(file.path(fig_dir, "correlation_bubbleplot_comparison.pdf"), p_combined, width = 20, height = 8)
-ggsave(file.path(fig_dir, "correlation_bubbleplot_comparison.png"), p_combined, width = 20, height = 8, dpi = 300)
+ggsave(file.path(fig_dir, "correlation_bubbleplot_comparison.png"), p_combined, width = 20, height = 8, dpi = 300, bg = "white")
+ggsave(file.path(fig_dir, "correlation_bubbleplot_comparison.svg"), p_combined, width = 20, height = 8)  # SVG for vector assembly
 
 cat("\n=== Visualization complete ===\n")
 cat("Figures saved to:", fig_dir, "\n")

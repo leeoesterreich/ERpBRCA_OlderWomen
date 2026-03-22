@@ -21,6 +21,12 @@ suppressPackageStartupMessages({
   library(DESeq2)
 })
 
+# Set Arial as default font for all plots
+library(showtext)
+font_add("Arial", "/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf")
+showtext_auto()
+theme_set(theme_bw(base_size = 14, base_family = "Arial"))
+
 get_script_dir <- function() {
   args <- commandArgs(trailingOnly = FALSE)
   file_arg <- grep("--file=", args, value = TRUE)
@@ -237,7 +243,9 @@ if (nrow(plot_df) > 0) {
     )
 
   ggsave(file.path(figures_dir, "fig7b_celltype_deg_barplot.png"),
-         p, width = 8, height = 8, dpi = 300)
+         p, width = 8, height = 8, dpi = 300, bg = "white")
+  ggsave(file.path(figures_dir, "fig7b_celltype_deg_barplot.svg"),
+         p, width = 8, height = 8)  # SVG for vector assembly
   cat("  Saved fig7b_celltype_deg_barplot.png\n")
 } else {
   cat("  No cell types with significant DEGs for plot\n")
