@@ -30,7 +30,7 @@ import gseapy as gp
 import decoupler as dc
 
 from _config import (
-    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists
+    OUTPUT_DIR, FIGURES_DIR, h5ad_path, check_file_exists, TREATMENT_ORDER
 )
 
 # =============================================================================
@@ -326,8 +326,8 @@ def plot_tf_boxplots(adata, tfs_to_plot):
         axes = np.array([axes])
     axes = axes.flatten()
 
-    # Get treatment order for consistent plotting
-    treatment_order = sorted(adata.obs["treatment"].unique())
+    # Get treatment order for consistent plotting (canonical order, filtered to present treatments)
+    treatment_order = [t for t in TREATMENT_ORDER if t in adata.obs["treatment"].unique()]
 
     for i, tf in enumerate(available_tfs):
         ax = axes[i]

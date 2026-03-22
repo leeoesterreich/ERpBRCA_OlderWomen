@@ -73,6 +73,13 @@ def check_file_exists(filepath, description="file"):
 # h5ad files store "E1+ICI"/"E2+ICI" but figures should show "fulv"
 TREATMENT_RENAME = {"E1+ICI": "E1+fulv", "E2+ICI": "E2+fulv"}
 
+# Canonical treatment order for all figures (Vehicle first, then E1 group, then E2 group)
+TREATMENT_ORDER = [
+    "Vehicle",
+    "E1", "E1+fulv", "E1+HSD17B7i",
+    "E2", "E2+fulv", "E2+HSD17B7i",
+]
+
 
 def standardize_treatments(adata):
     """Rename ICI→fulv in adata.obs['treatment'] for figure clarity."""

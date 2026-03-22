@@ -238,8 +238,8 @@ def module2_neighborhood_mixing(adata):
     ax.set_title('Condition Mixing Matrix', fontsize=14, fontweight='bold')
     ax.set_xlabel('Neighbor Condition')
     ax.set_ylabel('Cell Condition')
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right', fontsize=11)
-    ax.set_yticklabels(ax.get_yticklabels(), rotation=45, ha='right', fontsize=11)
+    ax.set_xticklabels(TREATMENT_ORDER, rotation=45, ha='right', fontsize=11)
+    ax.set_yticklabels(TREATMENT_ORDER, rotation=45, ha='right', fontsize=11)
 
     # Entropy violin by condition
     ax = axes[2]
@@ -250,7 +250,7 @@ def module2_neighborhood_mixing(adata):
     sns.violinplot(data=plot_df, x='Treatment', y='Mixing Entropy',
                    order=TREATMENT_ORDER, palette=TREATMENT_COLORS,
                    ax=ax, inner='box', cut=0, scale='width')
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+    ax.set_xticklabels(TREATMENT_ORDER, rotation=45, ha='right')
     ax.set_title('Mixing Entropy by Condition', fontsize=14, fontweight='bold')
 
     save_fig(FIG_DIR / "02_neighborhood_mixing.png")
@@ -447,7 +447,7 @@ def module4_cluster_composition(adata):
     ax.set_xlabel('Leiden Cluster')
     ax.set_title('Cluster Composition by Treatment', fontsize=11, fontweight='bold')
     ax.legend(title='Treatment', bbox_to_anchor=(1.0, 1.0), fontsize=10)
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
+    ax.set_xticklabels(cluster_cats, rotation=0)
 
     # Enrichment heatmap (log2 odds ratio, significance marked)
     ax = axes[1]
@@ -583,7 +583,7 @@ def module5_biological_axis(adata):
     sns.violinplot(data=plot_df, x='Treatment', y='PC1',
                    order=TREATMENT_ORDER, palette=TREATMENT_COLORS,
                    ax=ax, inner='box', cut=0, scale='width')
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+    ax.set_xticklabels(TREATMENT_ORDER, rotation=45, ha='right')
     ax.set_title('PC1 by Condition', fontsize=11, fontweight='bold')
     ax.set_ylabel('Biological Axis PC1')
 

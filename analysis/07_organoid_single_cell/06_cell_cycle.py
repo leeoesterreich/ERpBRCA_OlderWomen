@@ -23,6 +23,7 @@ import numpy as np
 import os
 from datetime import datetime
 from scipy.stats import chi2_contingency
+from statsmodels.stats.multitest import multipletests
 
 np.random.seed(42)
 
@@ -202,27 +203,41 @@ def run_chi_square_tests(phase_counts):
 
         chi2, p, dof, expected = chi2_test(phase_counts, treatment1, treatment2)
 
-        # Determine significance
-        if p < 0.001:
-            sig = "***"
-        elif p < 0.01:
-            sig = "**"
-        elif p < 0.05:
-            sig = "*"
-        else:
-            sig = "ns"
-
         results.append({
             "Comparison": f"{treatment1} vs {treatment2}",
             "Chi2": chi2,
             "p-value": p,
             "dof": dof,
-            "Significance": sig
         })
 
-        log_message(f"  {treatment1} vs {treatment2}: chi2={chi2:.2f}, p={p:.4e} {sig}")
+    if not results:
+        return pd.DataFrame(results)
 
     results_df = pd.DataFrame(results)
+
+    # Apply Benjamini-Hochberg correction across all comparisons
+    _, padj, _, _ = multipletests(results_df["p-value"].values, method="fdr_bh")
+    results_df["p-adj"] = padj
+
+    # Determine significance from adjusted p-values
+    def _sig_stars(p):
+        if p < 0.001:
+            return "***"
+        elif p < 0.01:
+            return "**"
+        elif p < 0.05:
+            return "*"
+        else:
+            return "ns"
+
+    results_df["Significance"] = results_df["p-adj"].apply(_sig_stars)
+
+    for _, row in results_df.iterrows():
+        log_message(
+            f"  {row['Comparison']}: chi2={row['Chi2']:.2f}, "
+            f"p={row['p-value']:.4e}, p-adj={row['p-adj']:.4e} {row['Significance']}"
+        )
+
     return results_df
 
 
