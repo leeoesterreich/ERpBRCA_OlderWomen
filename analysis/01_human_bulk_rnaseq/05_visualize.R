@@ -103,8 +103,6 @@ p_fdr <- ggplot(plot_data, aes(x = GeneSymb, y = PathwayName_short)) +
   geom_point(aes(size = -log10(FDR_qval), color = Spearman_Rho)) +
   scale_color_gradientn("Spearman Rho", colors = my_palette, limits = c(-1, 1)) +
   scale_size_continuous("-log10(FDR)", range = c(1, 10)) +
-  # Add significance threshold line
-  geom_hline(yintercept = 0, linetype = "dashed", alpha = 0.3) +
   theme_bw() +
   theme(
     panel.grid.minor = element_blank(),
