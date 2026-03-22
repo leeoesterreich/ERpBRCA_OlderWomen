@@ -505,33 +505,60 @@ print(sort(main_counts, decreasing = TRUE))
 # -----------------------------------------------------------------------------
 cat("\nStep 7: Generating visualizations...\n")
 
+# Wong colorblind-safe palette for UMAP cell type plots
+wong_palette <- c("#D55E00", "#E69F00", "#009E73", "#56B4E9",
+                  "#0072B2", "#CC79A7", "#999999")
+
 # UMAP by scType cell type
 pdf(file.path(fig_dir, "sctype_annotation_umap.pdf"), width = 14, height = 10)
 
 # Detailed cell types
 p1 <- DimPlot(seurat_obj, reduction = "umap", group.by = "sctype_celltype",
-              label = TRUE, label.size = 4, repel = TRUE) +
+              label = TRUE, label.size = 4, repel = TRUE,
+              cols = wong_palette) +
   ggtitle("scType Cell-by-Cell Annotation (Detailed)") +
-  theme(legend.position = "right")
+  theme_bw(base_size = 12) +
+  theme(
+    legend.position = "right",
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.background = element_rect(fill = "white")
+  )
 print(p1)
 
 # Main cell types
 p2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "CellTypeByMarker_RatsnRNAseq",
-              label = TRUE, label.size = 5, repel = TRUE) +
+              label = TRUE, label.size = 5, repel = TRUE,
+              cols = wong_palette) +
   ggtitle("scType Cell-by-Cell Annotation (Main Types)") +
-  theme(legend.position = "right")
+  theme_bw(base_size = 12) +
+  theme(
+    legend.position = "right",
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.background = element_rect(fill = "white")
+  )
 print(p2)
 
 # By cluster
 p3 <- DimPlot(seurat_obj, reduction = "umap", group.by = "seurat_clusters",
               label = TRUE, label.size = 4) +
-  ggtitle(paste0("Seurat Clusters (n=", n_clusters, ", resolution 1.5)"))
+  ggtitle(paste0("Seurat Clusters (n=", n_clusters, ", resolution 1.5)")) +
+  theme_bw(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.background = element_rect(fill = "white")
+  )
 print(p3)
 
 # By age group
 p4 <- DimPlot(seurat_obj, reduction = "umap", group.by = "AgeGroup",
-              label = FALSE) +
-  ggtitle("Age Group Distribution")
+              label = FALSE,
+              cols = c("#0072B2", "#D55E00")) +
+  ggtitle("Age Group Distribution") +
+  theme_bw(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.background = element_rect(fill = "white")
+  )
 print(p4)
 
 # Confidence score

@@ -263,15 +263,15 @@ for (ct in unique(all_de_results$celltype)) {
   # Label top genes (require FC filter so labels come from biologically meaningful hits)
   top_genes <- ct_results %>%
     filter(Sig_FC != "NS") %>%
-    slice_min(FDR, n = 10)
+    slice_min(FDR, n = 5)
 
   p <- ggplot(ct_results, aes(x = avg_log2FC, y = -log10(FDR))) +
     geom_point(aes(color = Sig_FC), alpha = 0.6) +
     geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
     geom_vline(xintercept = c(-0.5, 0.5), linetype = "dashed", color = "gray") +
-    geom_text_repel(data = top_genes, aes(label = gene), max.overlaps = 20, size = 3) +
-    scale_color_manual(values = c("NS" = "gray", "Up" = "red", "Down" = "steelblue")) +
-    theme_bw() +
+    geom_text_repel(data = top_genes, aes(label = gene), max.overlaps = 10, size = 3.2) +
+    scale_color_manual(values = c("NS" = "#BDBDBD", "Up" = "#D55E00", "Down" = "#0072B2")) +
+    theme_bw(base_size = 12) +
     labs(
       title = paste("Differential Expression:", ct),
       subtitle = sprintf("%d up (|FC|>1.5), %d down at FDR<0.05",

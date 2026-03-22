@@ -196,10 +196,21 @@ def generate_oncoplot_figure(df):
     # Convert to numeric matrix (0 for missing)
     plot_numeric = plot_data.map(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
 
-    # Create colormap with white for missing
+    # Create colormap with white for missing (Wong colorblind-safe palette)
     n_colors = len(ordered_consequences) + 1
-    colors = plt.cm.tab20(np.linspace(0, 1, n_colors))
-    colors[0] = [1, 1, 1, 1]  # White for missing
+    wong_colors = np.array([
+        [1,    1,    1,    1],   # white (missing)
+        [0.00, 0.45, 0.70, 1],   # #0072B2 blue
+        [0.84, 0.37, 0.00, 1],   # #D55E00 vermillion
+        [0.00, 0.62, 0.45, 1],   # #009E73 green
+        [0.80, 0.47, 0.74, 1],   # #CC79A7 pink
+        [0.35, 0.70, 0.90, 1],   # #56B4E9 sky blue
+        [0.94, 0.89, 0.26, 1],   # #F0E442 yellow
+        [0.90, 0.60, 0.00, 1],   # #E69F00 amber
+        [0.00, 0.00, 0.00, 1],   # #000000 black
+        [0.60, 0.60, 0.60, 1],   # #999999 gray
+    ])
+    colors = wong_colors[:n_colors]
     custom_cmap = ListedColormap(colors)
 
     # Plot
@@ -207,6 +218,8 @@ def generate_oncoplot_figure(df):
     fig_height = max(num_genes * 0.4, 6)
 
     fig, ax = plt.subplots(figsize=(10, fig_height))
+    fig.patch.set_facecolor("white")
+    ax.set_facecolor("white")
     sns.heatmap(plot_numeric, cmap=custom_cmap, cbar=False, linewidths=0.5, ax=ax)
 
     # Add gridlines
@@ -239,12 +252,12 @@ def generate_oncoplot_figure(df):
         for cons in ordered_consequences
     ]
     ax.legend(handles=legend_elements, title='Consequence',
-             bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=9)
+             bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=10)
 
     plt.tight_layout()
 
-    fig.savefig(FIGURES_DIR / "oncoplot.svg", format='svg', bbox_inches='tight')
-    fig.savefig(FIGURES_DIR / "oncoplot.png", format='png', dpi=300, bbox_inches='tight')
+    fig.savefig(FIGURES_DIR / "oncoplot.svg", format='svg', bbox_inches='tight', facecolor="white")
+    fig.savefig(FIGURES_DIR / "oncoplot.png", format='png', dpi=300, bbox_inches='tight', facecolor="white")
     plt.close(fig)
 
     print(f"Saved oncoplot figure: {num_genes} genes x {plot_data.shape[1]} samples")

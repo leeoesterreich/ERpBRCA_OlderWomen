@@ -217,8 +217,9 @@ if (!is.null(da_all)) {
     geom_bar(stat = "identity") +
     geom_hline(yintercept = 0, linetype = "dashed") +
     coord_flip() +
-    scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red")) +
-    theme_bw() +
+    scale_fill_manual(values = c("FALSE" = "#BDBDBD", "TRUE" = "#D55E00"),
+                      labels = c("FALSE" = "FDR >= 0.05", "TRUE" = "FDR < 0.05")) +
+    theme_bw(base_size = 12) +
     labs(
       title = "Differential Abundance: Aged vs Young (scType annotation)",
       subtitle = "Red = FDR < 0.05",
@@ -231,8 +232,9 @@ if (!is.null(da_all)) {
     geom_bar(stat = "identity") +
     geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "red") +
     coord_flip() +
-    scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red")) +
-    theme_bw() +
+    scale_fill_manual(values = c("FALSE" = "#BDBDBD", "TRUE" = "#D55E00"),
+                      labels = c("FALSE" = "FDR >= 0.05", "TRUE" = "FDR < 0.05")) +
+    theme_bw(base_size = 12) +
     labs(
       title = "Differential Abundance Significance (scType annotation)",
       subtitle = "Dashed line = FDR 0.05",

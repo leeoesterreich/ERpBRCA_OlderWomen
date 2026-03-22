@@ -126,11 +126,14 @@ def generate_signature_figure():
 
     # Plot stacked bar chart
     fig, ax = plt.subplots(figsize=(14, 8))
-    plot_df.plot(kind='bar', stacked=True, ax=ax, colormap='tab20')
+    fig.patch.set_facecolor("white")
+    ax.set_facecolor("white")
+    plot_df.plot(kind='bar', stacked=True, ax=ax, colormap='tab10')
 
     ax.set_ylabel('Total Counts', fontsize=18)
     ax.set_xlabel('Samples', fontsize=18)
-    ax.legend(title='SBS Signatures', bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax.legend(title='SBS Signatures', bbox_to_anchor=(1.05, 1), loc='upper left',
+              fontsize=11, title_fontsize=12, frameon=False)
 
     # Set x-axis labels with proper ID-based age suffixes
     ax.set_xticklabels(display_labels, fontsize=14, rotation=45, ha='right')
@@ -139,8 +142,10 @@ def generate_signature_figure():
     plt.tight_layout(rect=[0, 0, 0.85, 1])
 
     # Save figure
-    fig.savefig(FIGURES_DIR / "cosmic_signatures.svg", format='svg', bbox_inches='tight')
-    fig.savefig(FIGURES_DIR / "cosmic_signatures.png", format='png', dpi=300, bbox_inches='tight')
+    fig.savefig(FIGURES_DIR / "cosmic_signatures.svg", format='svg', bbox_inches='tight',
+                facecolor="white")
+    fig.savefig(FIGURES_DIR / "cosmic_signatures.png", format='png', dpi=300, bbox_inches='tight',
+                facecolor="white")
     plt.close(fig)
 
     print(f"Saved COSMIC signatures figure to {FIGURES_DIR}")

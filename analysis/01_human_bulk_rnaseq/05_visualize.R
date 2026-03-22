@@ -66,8 +66,8 @@ plot_data <- corr_results %>%
     PathwayName_short = gsub("GOBP_", "GO_", PathwayName_short)
   )
 
-# Color palette
-my_palette <- colorRampPalette(c("blue", "dodgerblue", "yellow", "orange", "red"))(100)
+# Color palette (Wong colorblind-safe diverging: blue → white → vermillion)
+my_palette <- colorRampPalette(c("#0072B2", "#F7F7F7", "#D55E00"))(100)
 
 # -----------------------------------------------------------------------------
 # Step 2: Original Bubble Plot (no FDR)
@@ -78,14 +78,16 @@ p_original <- ggplot(plot_data, aes(x = GeneSymb, y = PathwayName_short)) +
   geom_point(aes(size = -log10(Spearman_pval), color = Spearman_Rho)) +
   scale_color_gradientn("Spearman Rho", colors = my_palette, limits = c(-1, 1)) +
   scale_size_continuous("-log10(p)", range = c(1, 10)) +
-  theme_bw() +
+  theme_bw(base_size = 14) +
   theme(
     panel.grid.minor = element_blank(),
     panel.grid.major = element_blank(),
     axis.text = element_text(size = 12, colour = "black"),
-    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 12),
     axis.title = element_blank(),
-    panel.border = element_rect(linewidth = 0.7, linetype = "solid", colour = "black")
+    panel.border = element_rect(linewidth = 0.7, linetype = "solid", colour = "black"),
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.background = element_rect(fill = "white")
   ) +
   coord_flip() +
   ggtitle("Gene-Pathway Correlations (Original, no FDR)")
@@ -103,14 +105,16 @@ p_fdr <- ggplot(plot_data, aes(x = GeneSymb, y = PathwayName_short)) +
   geom_point(aes(size = -log10(FDR_qval), color = Spearman_Rho)) +
   scale_color_gradientn("Spearman Rho", colors = my_palette, limits = c(-1, 1)) +
   scale_size_continuous("-log10(FDR)", range = c(1, 10)) +
-  theme_bw() +
+  theme_bw(base_size = 14) +
   theme(
     panel.grid.minor = element_blank(),
     panel.grid.major = element_blank(),
     axis.text = element_text(size = 12, colour = "black"),
-    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 12),
     axis.title = element_blank(),
-    panel.border = element_rect(linewidth = 0.7, linetype = "solid", colour = "black")
+    panel.border = element_rect(linewidth = 0.7, linetype = "solid", colour = "black"),
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.background = element_rect(fill = "white")
   ) +
   coord_flip() +
   ggtitle("Gene-Pathway Correlations (FDR-Corrected)")
