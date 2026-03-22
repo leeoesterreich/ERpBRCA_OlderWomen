@@ -116,7 +116,7 @@ Defines exactly which scripts are included in the capsule vs excluded.
 **Included:**
 - `01_generate_comparison_report.R`
 
-**Note:** This script compares `results/original/` vs `results/corrected/` directories (pre- vs post-biostatistical corrections). It does NOT depend on sections 01/02 outputs. Both `original/` and `corrected/` result sets must be included in the data asset.
+**Note:** This script compares `results/original/` vs `results/corrected/` directories (pre- vs post-biostatistical corrections). It does NOT depend on sections 01/02 outputs. Both `original/` and `corrected/` result sets must be included in the data asset under `data/03_comparison/original/` and `data/03_comparison/corrected/`. The `paths.R` config maps these explicitly rather than using the generic `resolve_input()` pattern.
 
 ### Section 03_rat_wes: Rat WES (Python)
 **Included:**
@@ -124,16 +124,18 @@ Defines exactly which scripts are included in the capsule vs excluded.
 
 **Excluded:**
 - `00_run_vep.sbatch` (requires Ensembl VEP cache)
+- `run_analysis.sbatch` (SLURM wrapper)
 
 ### Section 04: Human scRNA-seq (R + Python)
 **Included (pipeline scripts):**
 - `00b_preprocess_seurat.R`, `01_load_subset_data.R`, `03_cell_type_annotation.R`, `04_cell_fractions.R`, `05_gene_expression_violin.R`, `06_run_gsva.R`, `07_run_progeny.R`, `08_run_wcsea.R`, `09_cellphonedb_prep.R`, `10_load_macrophage_seurat.R`, `11_macrophage_deg_analysis.R`, `12_macrophage_pathway_enrichment.R`, `12_enrichr_pathway_analysis.py`, `13_macrophage_cellphonedb.R`, `14_multicelltype_deg.R`, `15_multicelltype_pathway.R`, `16_cellchat_analysis.R`, `16_run_cellphonedb.py`, `17_cellphonedb_dotplot.R`
 
 **Excluded:**
-- `00a_download_geo.sh` (replaced with capsule-specific download script for Xu et al.)
+- `00a_download_geo.sh` (replaced with capsule-specific `00a_download_xu_geo.sh` for Xu et al. 2024 data)
 - `15b_pathway_polarity_diagnostic.R` (diagnostic, not pipeline)
 - `16b_run_cellphonedb_v4.py` (legacy v4 variant)
 - `regenerate_fig7bc_fonts.R` (one-off font fix)
+- All `sbatch_*.sh` and `run_analysis.sbatch` SLURM wrappers
 
 **CellPhoneDB note:** Scripts 09, 13, 16, 17 depend on CellPhoneDB. Decision point: install v5 in Docker, or provide precomputed results + run visualization (script 17) only.
 
@@ -144,6 +146,7 @@ Defines exactly which scripts are included in the capsule vs excluded.
 **Excluded:**
 - `00_fastp_trim.sh`, `01_alignment.sh`, `02_htseq_count.sh` (alignment pipeline)
 - `install_r_packages.sh` (HPC setup)
+- `run_analysis.sh` (SLURM orchestrator)
 
 ### Section 06: Spatial Biopsies (Python)
 **Included:**
@@ -158,6 +161,7 @@ Defines exactly which scripts are included in the capsule vs excluded.
 **Excluded:**
 - `build_reference.sh` (Cell Ranger reference build)
 - `01_cellranger_multi_pool1.sh`, `01_cellranger_multi_pool2.sh` (Cell Ranger)
+- `run_analysis.sh` and all `submit_*.sh` SLURM wrappers
 
 ## Section Dependency Graph
 
@@ -194,7 +198,7 @@ Runs all sections sequentially from count matrices. Each section writes intermed
 | 07 | ~30 min | PyDESeq2, GSEA |
 | **Total** | **~4-6 hours** | |
 
-**Error handling:** Each section's `run.sh` uses `set -e` — fails fast on error. `run_all.sh` logs per-section status and continues to independent sections if one fails (since all are independent).
+**Error handling:** Each section's `run.sh` uses `set -e` (fails fast on individual script error within a section). `run_all.sh` does NOT use `set -e` — instead it wraps each section call in a trap, logs success/failure, and continues to the next section since all are independent. Final exit code reflects whether any section failed.
 
 ### Mode 2: `run_codeocean.sh` — Figure Regeneration (~15-30 min)
 
@@ -309,6 +313,7 @@ Single Docker container with both R and Python.
 
 **Python packages (postInstall):**
 - scanpy, anndata, squidpy, gseapy, pydeseq2, decoupler, scrublet, statsmodels, adjustText, psutil, scikit-misc
+- commot is NOT installed by default (torch dependency chain). Sec 06 scripts that require commot will use precomputed results. Check during implementation which Sec 06 scripts actually import commot vs just read its outputs.
 
 **Potentially problematic packages (decision points during implementation):**
 
@@ -354,7 +359,7 @@ One-directional sync from main repo to capsule. Main repo is source of truth.
 **Behavior:**
 
 1. **Copies analysis scripts** from `analysis/XX_*/` to `ERpBRCA_CodeOcean/code/XX_*/`, using the per-section inclusion lists defined above
-2. **Excludes alignment/preprocessing scripts** per the exclusion lists above
+2. **Excludes** per the exclusion lists above: alignment scripts, SLURM wrappers (`sbatch_*.sh`, `submit_*.sh`, `run_analysis.sbatch`, `run_analysis.sh`), `.pipeline_markers/`, `__pycache__/`
 3. **Replaces config files only** — swaps HPC-specific `_config.py`/paths with capsule-aware versions. Analysis scripts stay identical to main repo.
 4. **Generates `code/MANIFEST.md`** — lists every script with source commit hash and modification date
 5. **Validates completeness** — checks every script referenced in `run.sh` exists in capsule
