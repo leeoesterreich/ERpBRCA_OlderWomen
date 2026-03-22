@@ -103,7 +103,7 @@ A systematic comparison of annotation methods (`method_comparison.R`, `spot_chec
 
 Differential expression and differential abundance analyses used the marker-scoring annotation from the primary pipeline (Louvain resolution 0.4), not scType annotations.
 
-Differential expression testing between Aged and Young groups was performed per cell type using a pseudobulk DESeq2 approach. Low-count genes were filtered, requiring >= 10 counts in >= 2 samples before DESeq2. Raw counts were aggregated per sample using `AggregateExpression()`, with DESeq2 `~ group` design and Aged vs Young contrast. This properly treats biological replicates (n=3 per group) as the unit of analysis. Cell types with fewer than 10 cells per sample were excluded, and groups required at least 2 samples (`MIN_CELLS_PER_SAMPLE = 10`, `MIN_SAMPLES_PER_GROUP = 2`). P-values were corrected for multiple testing using the Benjamini-Hochberg method (`p.adjust(method = "BH")`) applied within each cell type. Genes were classified as significant at FDR < 0.05 and further annotated by direction (upregulated or downregulated in Aged).
+Differential expression testing between Aged and Young groups was performed per cell type using a pseudobulk DESeq2 approach. Prior to DESeq2 modeling, genes with fewer than 10 counts in at least 2 samples were excluded to remove unreliably measured features and improve power estimation. Raw counts were aggregated per sample using `AggregateExpression()`, with DESeq2 `~ group` design and Aged vs Young contrast. This properly treats biological replicates (n=3 per group) as the unit of analysis. Cell types with fewer than 10 cells per sample were excluded, and groups required at least 2 samples (`MIN_CELLS_PER_SAMPLE = 10`, `MIN_SAMPLES_PER_GROUP = 2`). P-values were corrected for multiple testing using the Benjamini-Hochberg method (`p.adjust(method = "BH")`) applied within each cell type. Genes were classified as significant at FDR < 0.05 and further annotated by direction (upregulated or downregulated in Aged).
 
 ## 7. Differential Abundance
 
@@ -111,7 +111,7 @@ Differential abundance of cell types between Young and Aged groups was tested us
 
 Cell type labels from the marker-scoring annotation (`CellTypeByMarker_RatsnRNAseq`) were used (e.g., CancerEpithelial, Myeloid, NKTcell, Fibroblast, Endothelial). A second metadata column (`CellTypeMacroTcell_RatsnRNAseq`) is present in the object but is an identical copy of `CellTypeByMarker_RatsnRNAseq`, retained for downstream compatibility rather than representing a separate annotation level.
 
-Propeller's internally adjusted p-values were overridden with an independent Benjamini-Hochberg correction applied to the raw P.Value column.
+Propeller's internally adjusted p-values were overridden with an independent Benjamini-Hochberg correction applied to the raw P.Value column to ensure consistent FDR methodology across all analyses in the study.
 
 ## 8. Visualization
 
