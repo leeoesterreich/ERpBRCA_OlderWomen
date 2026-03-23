@@ -295,3 +295,11 @@ else
     fi
 fi
 echo "================================================================"
+
+# ── Auto-run path adaptation (unless dry-run or diff mode) ─────────
+ADAPT_SCRIPT="$(dirname "${BASH_SOURCE[0]}")/adapt_capsule_paths.sh"
+if [[ "${DRY_RUN}" -eq 0 && "${DIFF_MODE}" -eq 0 && -x "$ADAPT_SCRIPT" ]]; then
+    echo ""
+    echo "Running path adaptation..."
+    bash "$ADAPT_SCRIPT" --target "$(dirname "$TARGET_DIR")"
+fi
