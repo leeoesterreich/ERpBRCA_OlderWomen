@@ -36,6 +36,17 @@ def run_sigprofiler():
     """Run SigProfiler COSMIC signature assignment."""
     from SigProfilerAssignment import Analyzer as Analyze
 
+    # Check if rn6 genome is installed before attempting SigProfiler
+    try:
+        from SigProfilerMatrixGenerator.install import check_reference_genome
+        if not check_reference_genome("rn6"):
+            raise Exception("rn6 not installed")
+    except Exception:
+        print("WARNING: rn6 genome not installed for SigProfiler.")
+        print("  Install with: python -c 'from SigProfilerMatrixGenerator import install; install.install(\"rn6\")'")
+        print("  Skipping COSMIC signature analysis.")
+        return
+
     print("=== Running SigProfiler Assignment ===")
 
     # NOTE on exome normalization:
