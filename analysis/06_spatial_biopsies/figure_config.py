@@ -7,6 +7,7 @@ This module standardizes figure generation across the project with:
 - Dual-format (SVG + PNG) save helper
 """
 
+import os
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
 import scanpy as sc
@@ -14,8 +15,13 @@ from pathlib import Path
 from typing import Optional, Union
 import logging
 
-# Font configuration
+# Font configuration — with fallback chain
 ARIAL_FONT_PATH = '/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf'
+if not os.path.exists(ARIAL_FONT_PATH):
+    # Fallback to system Liberation Sans (metrically equivalent to Arial)
+    ARIAL_FONT_PATH = '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf'
+if not os.path.exists(ARIAL_FONT_PATH):
+    ARIAL_FONT_PATH = None  # matplotlib will use default
 MIN_FONT_SIZE = 14
 
 # Standard rcParams for all figures
