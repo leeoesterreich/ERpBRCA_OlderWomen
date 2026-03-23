@@ -1,4 +1,4 @@
-Gene	E1 log2 Fold Change	p value	q value	E2 log2 Fold Change	p value	q value
+Gene	E1_log2FC	E1_pvalue	E1_qvalue	E2_log2FC	E2_pvalue	E2_qvalue
 RP11-629N8.5	6.773	0.000	0.000	5.112	0.175	0.236
 CTD-3222D19.11	6.730	0.000	0.000	5.102	0.047	0.073
 RP11-244F12.2	5.291	0.003	0.006	nd	nd	nd
