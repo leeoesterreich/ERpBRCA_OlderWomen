@@ -21,3 +21,27 @@ logs/
 # Python
 __pycache__/
 *.pyc
+
+# AI agent / internal workflow files
+CLAUDE.md
+AGENTS.md
+.claude/
+docs/plans/
+docs/superpowers/
+docs/code_review/
+scripts/validation/
+
+# Internal presentations and review bundles
+powerpoints/
+neil_revision_figure_check/
+neil_revision_figure_check.zip
+figures/bundle.zip
+docs/biostatistical_corrections_*
+docs/create_summary_documents.py
+
+# Data and caches
+*.pkl
+*.h5ad
+.pybiomart.sqlite
+.babysit/
+.pipeline_markers/
