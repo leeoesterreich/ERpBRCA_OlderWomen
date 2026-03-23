@@ -1,6 +1,6 @@
 # Manuscript Validation Report
 
-**Generated:** 2026-02-26 08:37
+**Generated:** 2026-02-26 10:25
 **Manuscript:** Revised Manuscript_2-1-26.docx
 **Codebase:** ERpBRCA_OlderWomen (refactored)
 
@@ -9,7 +9,7 @@
 | Tier | Total | PASS/EXACT | REVIEW/CLOSE | FAIL/DIFFERS | PENDING |
 |------|-------|------------|--------------|--------------|---------|
 | Numerical | 65 | 14 | 8 | 1 | 4 |
-| Visual | 4 | 4 | 0 | 0 | 0 |
+| Visual | 4 | 3 | 1 | 0 | 0 |
 | Claims | 65 | 0 | 13 | 0 | 13 |
 
 **Overall Status:** REVIEW - Manual Verification Needed
@@ -50,21 +50,18 @@ Programmatic comparison of quantitative claims to code outputs.
 Azure OpenAI GPT-5 vision comparison of figure pairs.
 
 - ✓ **Fig. 2_A_oncoplot**: PASS
-  - Sample order differs slightly between figures (e.g., 157_O, 158_O, 167_O, 102_Y, 107_Y, 116_Y)
-  - Color palette and legend formatting differ slightly between versions
-  - Font size and axis label orientation differ
+  - Minor variation in color intensity for mutation consequence categories
+  - Sample order slightly differs between figures (e.g., 167_Y and 102_O positions)
+  - Font size and spacing differ between regenerated and original plots
 - ✓ **Fig. 2_B_cosmic**: PASS
-  - Sample order is reversed between figures (original: 167_Y→102_O; regenerated: 102_O→167_Y)
-  - Title present only in regenerated figure ('SBS Signature Counts per Sample')
-  - Slight differences in bar spacing and axis scaling due to layout
-- ✓ **Fig. 7_B_celltypes**: PASS
-  - Minor variation in UMAP cluster density between regenerated and original plots
-  - Slight positional shifts in some clusters (e.g., T cells CD8 and NK cells)
-  - Color palette tones differ slightly but maintain categorical consistency
+  - Title added in regenerated figure ('SBS Signature Counts per Sample') not present in original
+  - Font size and spacing slightly different
+  - Legend box position and style differ slightly
+- ~ **Fig. 4_E_estrogen_pathways**: REVIEW
+  - Original figure shows only two conditions (HSD17B7- and HSD17B7+), regenerated figure includes multiple samples or replicates per condition.
+  - Color scale in regenerated figure is continuous from blue to red with white midpoint, while original uses a discrete block scale with labeled range (-4 to 4).
+  - Original includes a labeled colorbar with numeric range and 'Pathway activity' label; regenerated figure lacks numeric labels on the colorbar.
 - ✓ **EDF 2_A_oncoplot**: PASS
-  - Minor variation in color saturation between variant types
-  - Sample order may differ slightly between figures
-  - Legend placement and font size slightly adjusted
 
 ---
 
@@ -99,7 +96,10 @@ Text-to-data verification of manuscript claims.
 
 ## Figures Requiring Review
 
-*No figures flagged for review.*
+
+### Needs Manual Review
+
+- **Fig. 4_E_estrogen_pathways**: Both figures show similar estrogen pathway activation patterns (upregulation in HSD17B7+), but visual formatting and numeric labeling differ. The scientific conclusion about pathway activation directionality would remain the same, though figure reproducibility is partial due to layout and labeling differences.
 
 ---
 

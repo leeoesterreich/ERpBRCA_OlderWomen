@@ -55,7 +55,7 @@ percentage,95%,95.0,,,OUT_OF_SCOPE,,Fig. 3: Systemic analysis of estrogen dispos
 percentage,95%,95.0,,,OUT_OF_SCOPE,,Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant,['Fig. 3']
 percentage,95%,95.0,,,OUT_OF_SCOPE,,Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant,['Fig. 3']
 percentage,95%,95.0,,,OUT_OF_SCOPE,,Fig. 3: Systemic analysis of estrogen disposition and inflammatory phenotype shows an E1-predominant,['Fig. 3']
-p_value,p = 0.03,0.03,0.0255749488295555,p_value_5,EXACT,0.06930648127247019,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
+p_value,p = 0.03,0.03,0.0255749488295555,p_value_5,EXACT,0.06930648127246997,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
 p_value,p < 0.0001,0.0001,9.30395414455235e-05,p_value_3,EXACT,0.03133243873714875,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
 p_value,p = 0.009,0.009,0.0092282017973772,fdr_102,EXACT,0.010874573432829049,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']
 correlation,Spearman r = 0.24,0.24,0.216376306620209,correlation_57,CLOSE,0.023623693379790978,"Fig. 4: While E1 predominates in the circulating environment, age-related increases to HSD17B7 expre",['Fig. 4']

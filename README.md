@@ -13,10 +13,11 @@ This repository contains all analysis code for the study examining how the aged 
 
 ### Key Findings
 
-- Aged F344 rats develop tumors faster than younger counterparts
-- Tumors upregulate HSD17B7 to convert E1 to E2 locally
-- Tumor-associated macrophages integrate E2 and chemokine signaling
-- Age-related immune dysfunction associated with chronic inflammation
+- Despite estrone (E1)-predominant systemic circulation post-menopause, tumors in older patients **upregulate HSD17B7** to convert E1→E2 locally, achieving E2 levels similar to pre-menopausal patients
+- **HSD17B7 inhibition** in patient-derived organoids from older ER+/HER2- patients decreased estrogen conversion and had anti-proliferative effects
+- **CCL2-driven chemokine signaling** promotes a chronically inflamed but immune dysfunctional TME characterized by immunosuppressive macrophages
+- **Dual targeting** of estrogen signaling (HSD17B7 inhibition or fulvestrant) and chemokine inflammation decreases local E2 and prevents macrophage polarization
+- Validated across aged F344 rat model and broad human ER+/HER2- patient cohort with age-matched normal breast tissue
 
 ## Repository Structure
 
