@@ -25,13 +25,9 @@ When raw feature counts were available, the pipeline performed:
 
 2. **Sample name harmonization:** Sample identifiers were stripped of the `_LEE*` suffix using `gsub("_LEE(.*)", "", colnames(count_data))` to match annotation file naming.
 
-3. **DESeq2 normalization:** A `DESeqDataSet` object was constructed using `DESeqDataSetFromMatrix()` with design formula `~ AgeRange + Group`, accounting for age range and tissue type effects during size factor estimation.
+3. **Expression normalization:** Pre-computed log2(TPM) values (`HumanERpAge_39404g168s_TPMlog2.txt`) were used as the expression matrix. The matrix was deduplicated by gene symbol (the row with the highest mean expression across samples was retained).
 
-4. **Variance stabilizing transformation:** The `varianceStabilizingTransformation()` function from DESeq2 was applied with `blind = FALSE`, using the design formula to inform the dispersion estimation. The resulting VST-transformed matrix was deduplicated by gene symbol (the row with the highest mean expression across samples was retained).
-
-### TPM-Only Mode (Fallback)
-
-When count data were unavailable, log2(TPM) values were used directly without DESeq2 normalization. The same protein-coding gene filter and sample matching steps were applied. The log2(TPM) matrix was saved as the "normalized" matrix for downstream analyses.
+Note: The pipeline supports DESeq2 VST normalization from raw counts as an alternative path, but the current analysis uses the log2(TPM) matrix as the primary input.
 
 ### Quality Control
 
@@ -60,7 +56,7 @@ GSVA was performed in `02_run_gsva.R` to quantify per-sample estrogen pathway ac
 |---|---|---|
 | HALLMARK_ESTROGEN_RESPONSE_EARLY | MSigDB Hallmark (H) | `msigdbr(species = "Homo sapiens", category = "H")` |
 | HALLMARK_ESTROGEN_RESPONSE_LATE | MSigDB Hallmark (H) | `msigdbr(species = "Homo sapiens", category = "H")` |
-| E1UpRegGene | Custom (407 genes) | `SuppleTable1_UpregulatedByE1_NotE2_407g.txt` |
+| E1UpRegGene | Custom (407 genes; Liguori et al., Cell Metabolism 2020, Table S1: genes uniquely upregulated by E1 not E2, FC>2, q<0.05) | `SuppleTable1_UpregulatedByE1_NotE2_407g.txt` |
 | REACTOME_ESTROGEN_DEPENDENT_GENE_EXPRESSION | MSigDB C2:REACTOME | `msigdbr(species = "Homo sapiens", category = "C2", subcategory = "REACTOME")` |
 | WP_ESTROGEN_SIGNALING_PATHWAY | MSigDB C2:WIKIPATHWAYS | `msigdbr(species = "Homo sapiens", category = "C2", subcategory = "WIKIPATHWAYS")` |
 | GOBP_INTRACELLULAR_ESTROGEN_RECEPTOR_SIGNALING_PATHWAY | MSigDB C5:BP | `msigdbr(species = "Homo sapiens", category = "C5", subcategory = "BP")` |
@@ -72,7 +68,7 @@ For the E1-upregulated gene set, gene symbols containing hyphens were truncated 
 - Function: `gsva(gsvaParam(...))` (GSVA 2.x API)
 - `kcdf = "Gaussian"` (appropriate for continuous normalized data)
 - `maxDiff = TRUE` (Gaussian-like enrichment statistic)
-- Input: VST-normalized or log2(TPM) expression matrix
+- Input: log2(TPM) expression matrix
 
 **Visualization:** Row-scaled heatmap of GSVA enrichment scores across all samples, annotated by age range (Young = green `#4DAF4A`, Middle = blue `#377EB8`, Elderly = red `#E41A1C`) and tissue type (Tumor = purple `#984EA3`, TumorAdj = orange `#FF7F00`). Generated with `pheatmap()` with `scale = "row"` and `show_colnames = FALSE`.
 
@@ -80,7 +76,7 @@ For the E1-upregulated gene set, gene symbols containing hyphens were truncated 
 
 PROGENy pathway activity inference was performed in `03_run_progeny.R`.
 
-**Input data:** VST-normalized expression matrix (`vst_normalized_matrix.rds`) produced by `01_preprocess.R`, consistent with the GSVA input. The matrix was filtered to protein-coding genes (same filter as preprocessing), with sample names matched to annotation via inner join.
+**Input data:** log2(TPM) expression matrix (`vst_normalized_matrix.rds`, named for historical compatibility) produced by `01_preprocess.R`, consistent with the GSVA input. The matrix was filtered to protein-coding genes (same filter as preprocessing), with sample names matched to annotation via inner join.
 
 **PROGENy parameters:**
 - Function: `progeny::progeny()`
