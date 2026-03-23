@@ -33,10 +33,20 @@ sys.stdout.reconfigure(line_buffering=True)
 logging.info("Starting immune secretion analysis script")
 log_memory_usage()
 
-# Load biopsy data
+# Load biopsy data (support both plain and gzipped pkl)
+import gzip
+
 logging.info("Loading biopsy data...")
-with open('data/biopsy_adatas.pkl', 'rb') as f:
-    biopsy_adatas = pickle.load(f)
+pkl_path = os.path.join('data', 'biopsy_adatas.pkl')
+pkl_gz_path = pkl_path + '.gz'
+if os.path.exists(pkl_gz_path):
+    with gzip.open(pkl_gz_path, 'rb') as f:
+        biopsy_adatas = pickle.load(f)
+elif os.path.exists(pkl_path):
+    with open(pkl_path, 'rb') as f:
+        biopsy_adatas = pickle.load(f)
+else:
+    raise FileNotFoundError(f"biopsy_adatas.pkl not found in data/")
 
 logging.info(f"Loaded {len(biopsy_adatas)} biopsy samples")
 
