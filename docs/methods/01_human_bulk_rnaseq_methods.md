@@ -153,7 +153,7 @@ From `environment.yml` (conda environment `erp_brca_aging`):
 | Package | Version | Purpose |
 |---|---|---|
 | R | 4.4.1 | Base language |
-| DESeq2 | (Bioconductor, version not pinned) | Count normalization and VST |
+| DESeq2 | (Bioconductor, version not pinned) | Count normalization (available but not used; log2 TPM used instead) |
 | GSVA | (Bioconductor, version not pinned) | Gene set variation analysis |
 | PROGENy | (Bioconductor, version not pinned) | Pathway activity inference |
 | msigdbr | (Bioconductor, version not pinned) | MSigDB gene set retrieval |
@@ -182,11 +182,11 @@ From `environment.yml` (conda environment `erp_brca_aging`):
 - **Random seeds:** `set.seed(12345)` was set at the start of every R script in the pipeline.
 - **Execution order:** Scripts were executed sequentially (`01` through `05`) via shell scripts, with each script depending on outputs from prior steps. The sbatch script enforced sequential execution with `set -eo pipefail`.
 - **Completion markers:** Upon successful completion, the sbatch script wrote a marker file to `.pipeline_markers/01_human_bulk_rnaseq.complete`.
-- **Intermediate checkpoints:** All intermediate results (DESeq2 object, VST matrix, GSVA scores, PROGENy activity, correlation results) were saved as RDS files. Key results were additionally exported as CSV for cross-platform accessibility.
+- **Intermediate checkpoints:** All intermediate results (expression matrix, GSVA scores, PROGENy activity, correlation results) were saved as RDS files. Key results were additionally exported as CSV for cross-platform accessibility.
 - **Hardcoded paths:** The sbatch script contains an absolute path to `SCRIPT_DIR`. All R scripts derive paths relative to the script location using `commandArgs()`.
 
 ---
 
 ## Main Text Summary
 
-Human ER+ breast cancer bulk RNA-seq data (39,404 genes, 168 samples) were preprocessed by filtering to protein-coding genes using NCBI gene annotations and normalizing with DESeq2 variance stabilizing transformation (design: ~ AgeRange + Group, `blind = FALSE`). Estrogen pathway activity was quantified using GSVA (v2.x, `kcdf = "Gaussian"`, `maxDiff = TRUE`) across seven curated gene sets from MSigDB Hallmark, Reactome, WikiPathways, GO Biological Process, and a custom E1-responsive gene set (407 genes). PROGENy pathway activity was inferred using the top 100 footprint genes per pathway with 1,000 permutations. Spearman rank correlations between nine estrogen-related genes (PAK4, HSD17B7, GREB1, PGR, ESR1, TFF1, CYP19A1, HSD17B2, SAA1) plus chronological age and all pathway activity scores were computed for Young and Elderly tumor samples, with Benjamini-Hochberg false discovery rate correction applied across all tests. MICA concordance analysis was performed across TCGA, METABRIC, and SCAN-B cohorts using GSVA with two age stratification schemes and 500 permutations. All analyses used R 4.4.1 with seed 12345 for reproducibility.
+Human ER+ breast cancer bulk RNA-seq data (39,404 genes, 168 samples) were preprocessed by filtering to protein-coding genes using NCBI gene annotations. Pre-computed log2(TPM) values were used as the expression matrix. Estrogen pathway activity was quantified using GSVA (v2.x, `kcdf = "Gaussian"`, `maxDiff = TRUE`) across five curated estrogen-related gene sets: two MSigDB Hallmark (Estrogen Response Early/Late), one Reactome (Estrogen Dependent Gene Expression), one GO Biological Process (Cellular Response to Estrogen Stimulus), and a custom E1-responsive gene set (407 genes uniquely upregulated by estrone but not estradiol, FC>2, q<0.05; Table S1 from Liguori et al., Cell Metabolism, 2020). PROGENy pathway activity was inferred using the top 100 footprint genes per pathway with 1,000 permutations. Spearman rank correlations between nine estrogen-related genes (PAK4, HSD17B7, GREB1, PGR, ESR1, TFF1, CYP19A1, HSD17B2, SAA1) plus chronological age and all pathway activity scores were computed for Young and Elderly tumor samples, with Benjamini-Hochberg false discovery rate correction applied across all tests. MICA concordance analysis was performed across TCGA, METABRIC, and SCAN-B cohorts using GSVA with two age stratification schemes and 500 permutations. All analyses used R 4.3.3 with seed 12345 for reproducibility.
