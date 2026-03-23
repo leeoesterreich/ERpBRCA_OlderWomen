@@ -73,13 +73,20 @@ def load_sample(sample_id):
         AnnData object with sample_id added to obs
     """
     pool_out = SAMPLE_POOL_MAP[sample_id]
-    matrix_path = f"{pool_out}/{sample_id}/count/sample_filtered_feature_bc_matrix.h5"
+    h5_path = f"{pool_out}/{sample_id}/count/sample_filtered_feature_bc_matrix.h5"
+    mtx_dir = f"{pool_out}/{sample_id}/count/sample_filtered_feature_bc_matrix"
 
-    if not os.path.exists(matrix_path):
-        raise FileNotFoundError(f"Matrix file not found: {matrix_path}")
-
-    log_message(f"Loading {sample_id} from {matrix_path}")
-    adata = sc.read_10x_h5(matrix_path)
+    # Try .h5 first, fall back to directory format (mtx)
+    if os.path.exists(h5_path):
+        log_message(f"Loading {sample_id} from {h5_path}")
+        adata = sc.read_10x_h5(h5_path)
+    elif os.path.isdir(mtx_dir):
+        log_message(f"Loading {sample_id} from {mtx_dir} (mtx fallback)")
+        adata = sc.read_10x_mtx(mtx_dir)
+    else:
+        raise FileNotFoundError(
+            f"No data found for {sample_id}: neither {h5_path} nor {mtx_dir} exist"
+        )
 
     # Make var_names unique (in case of duplicates)
     adata.var_names_make_unique()
