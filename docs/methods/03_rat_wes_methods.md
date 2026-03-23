@@ -45,7 +45,7 @@ The function performed signature decomposition by fitting observed trinucleotide
 
 After fitting, the script parsed the SigProfiler output file (`Assignment_Solution/Activities/Assignment_Solution_Activities.txt`), removed signatures with zero activity across all samples, and annotated each sample with its age group (Old or Young) based on a hardcoded ID-to-group mapping. Results were saved to `cosmic_signatures.csv`.
 
-A stacked bar chart was generated showing signature activities per sample. Samples were ordered with Young first (descending numeric ID: 167, 158, 157) then Old (descending: 116, 107, 102). Display labels appended an age suffix (e.g., `"157_Y"`, `"102_O"`). The figure used the `tab20` colormap, `figsize=(14, 8)`, axis label font size 18, tick font size 14/12, and was saved as both SVG and PNG (300 DPI).
+A stacked bar chart was generated showing signature activities per sample. Samples were ordered with Young first (descending numeric ID: 167, 158, 157) then Old (descending: 116, 107, 102). Display labels appended an age suffix (e.g., `"157_Y"`, `"102_O"`). The figure used the `tab10` colormap, `figsize=(14, 8)`, axis label font size 18, tick font size 14/12, and was saved as both SVG and PNG (300 DPI).
 
 ## 5. Oncoplot Generation
 
@@ -62,7 +62,7 @@ Results were cached to `homolog_cache.csv` to avoid redundant API calls on re-ru
 
 ### 5.2 Cancer Gene Filtering
 
-Mapped variants were filtered against a curated breast cancer gene list (`data/brca_genelist.csv`, 229 genes plus header). The gene list contained two columns: `Gene` (human gene symbol) and `Cancer` (cancer type annotation, e.g., `"PANCAN"`). Only variants whose human gene symbol appeared in this list were retained for the oncoplot.
+Mapped variants were filtered against a curated breast cancer gene list (`data/brca_genelist.csv`, 229 entries plus header, containing 201 unique genes after deduplication). The gene list contained two columns: `Gene` (human gene symbol) and `Cancer` (cancer type annotation, e.g., `"PANCAN"`). The 28 duplicated gene symbols (e.g., AKT1) arise from genes annotated under multiple cancer types. The script converts the gene column to a `set`, so duplicates do not affect filtering. Only variants whose human gene symbol appeared in this set were retained for the oncoplot.
 
 ### 5.3 Oncoplot Construction
 
@@ -72,7 +72,7 @@ The oncoplot was constructed as follows:
 2. **Matrix pivoting**: Data were pivoted to a gene-by-sample matrix with VEP consequence types as cell values (`pivot_table()` with `aggfunc='first'`).
 3. **Gene ordering**: Genes were sorted by mutation frequency (number of samples with a non-null entry) in descending order.
 4. **Sample ordering**: Samples were ordered with Young first (descending numeric ID), then Old (descending numeric ID).
-5. **Visualization**: The consequence matrix was encoded numerically (unique consequence types mapped to integers 1..N, 0 for wild-type), rendered as a heatmap via `seaborn.heatmap()` with `tab20`-derived colormap (white for wild-type), 0.5-width gray gridlines, and a categorical legend. Figure height scaled dynamically as `max(num_genes * 0.4, 6)` with fixed width of 10. Output was saved as SVG and PNG (300 DPI).
+5. **Visualization**: The consequence matrix was encoded numerically (unique consequence types mapped to integers 1..N, 0 for wild-type), rendered as a heatmap via `seaborn.heatmap()` with a custom Wong colorblind-safe palette (white for wild-type, followed by blue, vermillion, green, pink, sky blue, yellow, amber, black, and gray), 0.5-width gray gridlines, and a categorical legend. Figure height scaled dynamically as `max(num_genes * 0.4, 6)` with fixed width of 10. Output was saved as SVG and PNG (300 DPI).
 
 X-axis labels displayed sample IDs with age suffixes (e.g., `"167_Y"`, `"102_O"`).
 
@@ -82,13 +82,13 @@ The analysis pipeline was orchestrated via `run_analysis.sbatch`, which executed
 
 ## 7. Software Versions
 
-From `environment.yml` (environment name: `aging_wes`):
+From the `aging_wes` conda environment (activated by path in `run_analysis.sbatch`), with runtime versions recorded by SigProfiler metadata (`outputs/sigprofiler/JOB_METADATA_SPA.txt`):
 
 | Software | Version | Source |
 |----------|---------|--------|
-| Python | 3.10 | conda-forge |
-| pandas | (not pinned) | conda-forge |
-| numpy | (not pinned) | conda-forge |
+| Python | 3.9.19 | conda-forge |
+| pandas | 1.3.5 | conda-forge |
+| numpy | 1.26.4 | conda-forge |
 | matplotlib | (not pinned) | conda-forge |
 | seaborn | (not pinned) | conda-forge |
 
@@ -103,7 +103,7 @@ Additional dependencies not in `environment.yml` but required by the scripts:
 
 ## 8. Reproducibility Notes
 
-- **Random seeds**: No random seeds were set in any Python script, contrary to the project requirement of `np.random.seed(12345)`.
+- **Random seeds**: `np.random.seed(12345)` is set at the top of `01_parse_vep.py` and `02_cosmic_signatures.py`, consistent with the project requirement.
 - **Caching**: BioMart homolog queries were cached to `outputs/homolog_cache.csv`, making subsequent runs independent of external API state. SigProfiler was skipped on re-runs if its output file already existed.
 - **VEP version history**: Results were regenerated with VEP v114.2 using the Ensembl release 104 cache (latest available for Rnor_6.0 assembly). The original analysis used VEP v95 with cache v95.
 - **Determinism**: VEP annotation and VEP parsing are deterministic. SigProfilerAssignment's internal optimization may not be deterministic without explicit seed control. BioMart query results may vary across Ensembl releases.
@@ -114,4 +114,4 @@ Additional dependencies not in `environment.yml` but required by the scripts:
 
 ## Main Text Summary
 
-Somatic variants from whole exome sequencing of six rat mammary tumors (three young, three old; matched spleen germline controls) were annotated using Ensembl VEP v114.2 (Rnor_6.0 assembly, cache v104) and filtered for HIGH or MODERATE impact consequences on Ensembl-annotated genes. Mutational signatures were decomposed against COSMIC v3.4 SBS references using SigProfilerAssignment with 96-trinucleotide context on the rn6 genome. For oncoplot visualization, rat genes were mapped to human orthologs via BioMart and filtered against a curated panel of 229 cancer-associated genes. When multiple variants affected the same gene in a sample, the highest-impact consequence was retained. Samples were grouped by age and ordered by descending numeric ID within each group.
+Somatic variants from whole exome sequencing of six rat mammary tumors (three young, three old; matched spleen germline controls) were annotated using Ensembl VEP v114.2 (Rnor_6.0 assembly, cache v104) and filtered for HIGH or MODERATE impact consequences on Ensembl-annotated genes. Mutational signatures were decomposed against COSMIC v3.4 SBS references using SigProfilerAssignment with 96-trinucleotide context on the rn6 genome. For oncoplot visualization, rat genes were mapped to human orthologs via BioMart and filtered against a curated panel of 201 unique cancer-associated genes. When multiple variants affected the same gene in a sample, the highest-impact consequence was retained. Samples were grouped by age and ordered by descending numeric ID within each group.

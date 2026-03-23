@@ -26,7 +26,7 @@ Gene symbols were annotated by querying the Ensembl BioMart database (`rnorvegic
 
 Significantly differentially expressed genes were defined as those with Benjamini-Hochberg adjusted p-value (FDR) < 0.05. Results were saved as both the full result table (`deseq2_results.csv`) and the FDR-filtered subset sorted by ascending adjusted p-value (`deseq2_results_significant.csv`).
 
-DESeq2 size-factor-normalized counts were also exported. These normalized counts were rescaled to a per-million basis via `sweep(norm_counts, 2, colSums(norm_counts), "/") * 1e6` and saved as `normalized_cpm.csv` for use in PAM50 subtyping. Note: these are DESeq2 size-factor-normalized counts rescaled to counts-per-million (CPM), not true TPM (which requires gene-length normalization). The PAM50 script (`genefu::molecular.subtyping()`) internally median-centers the input, which partially compensates for the lack of gene-length normalization.
+DESeq2 size-factor-normalized counts were also exported. These normalized counts were rescaled to a per-million basis via `sweep(norm_counts, 2, colSums(norm_counts), "/") * 1e6` and saved as `normalized_cpm.csv` for use in PAM50 subtyping. Note: these are DESeq2 size-factor-normalized counts rescaled to counts-per-million (CPM), not true TPM (which requires gene-length normalization). The PAM50 script explicitly transforms these values to log2(CPM + 1) and median-centers each gene across samples before passing the matrix to `genefu::molecular.subtyping()` (see Section 6.2), which partially compensates for the lack of gene-length normalization.
 
 ## 6. PAM50 Molecular Subtyping
 
@@ -38,7 +38,7 @@ A hardcoded human-to-rat gene symbol mapping was defined for all 50 PAM50 genes 
 
 ### 6.2 Expression Data Preparation
 
-The CPM-normalized expression matrix (`normalized_cpm.csv`) was loaded. Ensembl gene IDs (detected by the `ENSRNOG` prefix) were converted to gene symbols via BioMart query (`rnorvegicus_gene_ensembl` dataset). For duplicated gene symbols, the row with the highest mean expression across samples was retained. The expression matrix was then subset to available PAM50 ortholog genes and transposed to samples-by-genes orientation. Column names were remapped to human gene symbols for compatibility with genefu centroids.
+The CPM-normalized expression matrix (`normalized_cpm.csv`) was loaded. Ensembl gene IDs (detected by the `ENSRNOG` prefix) were converted to gene symbols via BioMart query (`rnorvegicus_gene_ensembl` dataset). For duplicated gene symbols, the row with the highest mean expression across samples was retained. The expression matrix was then subset to available PAM50 ortholog genes, transformed to log2(CPM + 1), and median-centered per gene across samples (i.e., each gene's median expression was subtracted). The centered matrix was transposed to samples-by-genes orientation. Column names were remapped to human gene symbols for compatibility with genefu centroids.
 
 ### 6.3 Classification
 
@@ -62,7 +62,7 @@ Per-sample HTSeq count vectors were compared between the current pipeline and Ra
 
 ### 7.2 DESeq2 Significant Gene Overlap
 
-Significant gene sets (FDR < 0.05) from both analyses were compared. Rahul's results were loaded from `6_DEseq2/DESeq2_results_with_symbols.csv` and filtered to `padj < 0.05`. Overlap was quantified as the intersection size divided by the smaller set size, with a pass threshold of >= 90%. The Jaccard index (intersection/union) was also reported.
+Significant gene sets (FDR < 0.05) from both analyses were compared. Rahul's results were loaded from `6_DEseq2/DESeq2_results_with_symbols.csv` and filtered to `padj < 0.05`. Overlap was quantified as the intersection size divided by the smaller set size (overlap coefficient), with a pass threshold of >= 90%. The Jaccard index (intersection/union) was also computed and reported for reference but was not used for the pass/fail criterion.
 
 ### 7.3 PAM50 Subtype Concordance
 
@@ -90,10 +90,10 @@ From `environment.yml` and module loads:
 | fastp | 0.23.4 | HPC module |
 | STAR | 2.7.11b | HPC module |
 | htseq-count | 0.13.5 | HPC module |
-| R | 4.4.1 | conda (r-base) |
+| R | 4.3.3 | conda (r-base) |
 | DESeq2 | (conda bioconductor-deseq2) | Bioconductor via conda |
 | genefu | (conda r-genefu) | conda-forge |
-| biomaRt | (conda bioconductor-biomart) | Bioconductor via conda |
+| biomaRt | (bioconductor-biomart) | Bioconductor via `install_r_packages.sh` |
 | pheatmap | (conda r-pheatmap) | conda |
 | data.table | (r-essentials bundle) | conda |
 | dplyr | (r-tidyverse bundle) | conda |
@@ -109,8 +109,8 @@ From `environment.yml` and module loads:
 - The pipeline uses `set -euo pipefail` (shell scripts) and `set -eo pipefail` (sbatch wrapper) for strict error handling.
 - STAR alignment and HTSeq counting include skip-if-exists logic to support idempotent re-runs.
 - BioMart queries (for gene symbol annotation) depend on external Ensembl server availability and may return different results if the database version changes. No specific Ensembl archive release was pinned.
-- The `environment.yml` does not pin exact versions for DESeq2, genefu, or biomaRt; only R base (4.4.1) and Seurat (>=5.0) are version-constrained. Exact installed versions should be recorded at runtime.
+- The `environment.yml` does not pin exact versions for DESeq2, genefu, or biomaRt; only R base (4.3.3) and Seurat (>=5.0) are version-constrained. Exact installed versions should be recorded at runtime.
 
 ## Main Text Summary
 
-Bulk RNA-seq from six rat mammary tumors (GEO: GSE276757) was processed through a four-stage pipeline: adapter trimming (fastp v0.23.4, Q>=20, length>=36 bp), alignment to the mRatBN7.2 rat genome (STAR v2.7.11b), and gene-level quantification (htseq-count v0.13.5, reverse-stranded). Differential expression analysis was performed with DESeq2 using a ~TYPE design formula (TEST vs CONTROL, FDR < 0.05). PAM50 molecular subtyping was performed using the genefu package with a manually curated human-to-rat ortholog mapping of all 50 classifier genes. Pipeline outputs were validated against an independent analysis, confirming high concordance in read counts (Pearson r >= 0.99), significant gene sets (Jaccard overlap), and subtype assignments.
+Bulk RNA-seq from six rat mammary tumors (GEO: GSE276757) was processed through a four-stage pipeline: adapter trimming (fastp v0.23.4, Q>=20, length>=36 bp), alignment to the mRatBN7.2 rat genome (STAR v2.7.11b), and gene-level quantification (htseq-count v0.13.5, reverse-stranded). Differential expression analysis was performed with DESeq2 using a ~TYPE design formula (TEST vs CONTROL, FDR < 0.05). PAM50 molecular subtyping was performed using the genefu package with a manually curated human-to-rat ortholog mapping of all 50 classifier genes. Pipeline outputs were validated against an independent analysis, confirming high concordance in read counts (Pearson r >= 0.99), significant gene sets (overlap coefficient >= 90%), and subtype assignments.

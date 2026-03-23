@@ -26,7 +26,7 @@ Batch correction across the 9 contributing studies was performed using Harmony (
 
 For downstream analyses requiring log-normalized data (e.g., violin plots, FindMarkers), `NormalizeData()` and `ScaleData()` were run on the RNA assay. `ScaleData()` was applied to variable features plus a curated set of key markers (CCL2, TGFB1, CD163, MRC1, EPCAM, KRT19, CD68, CD3D, MS4A1, PECAM1, CTLA4, PDCD1) rather than all genes, to avoid the ~50 GB memory requirement of a full 59K x 115K scale.data matrix (line 219-230).
 
-Random seed was set to 12345 in all R scripts via `set.seed(12345)`.
+Random seed was set to 12345 in all primary analysis R scripts via `set.seed(12345)`.
 
 ## 4. Cell Type Annotation
 
@@ -81,7 +81,7 @@ A `safe_vlnplot()` wrapper function was used to handle plot combination using `w
 
 ## 8. GSVA Pathway Analysis
 
-Gene Set Variation Analysis (GSVA) was performed in two modes (`06_run_gsva.R`):
+Gene Set Variation Analysis (GSVA) was performed using pseudo-bulk aggregation (`06_run_gsva.R`):
 
 **Gene sets:** Estrogen-related pathways were assembled from MSigDB via the `msigdbr` package (species = "Homo sapiens"), spanning four collections:
 - Hallmark: ESTROGEN_RESPONSE_EARLY, ESTROGEN_RESPONSE_LATE
@@ -90,11 +90,9 @@ Gene Set Variation Analysis (GSVA) was performed in two modes (`06_run_gsva.R`):
 - GO Biological Process: RESPONSE_TO_ESTROGEN, ESTROGEN_RECEPTOR_SIGNALING_PATHWAY, POSITIVE_REGULATION_OF_INTRACELLULAR_ESTROGEN, CELLULAR_RESPONSE_TO_ESTROGEN_STIMULUS
 - LI EstroGene early/late E2 response up (loaded from local GMT files)
 
-**Pseudo-bulk mode:** Raw counts were aggregated per patient via `rowSums()`, converted to CPM, and log2-transformed (`log2(CPM + 1)`). GSVA was run with `gsvaParam()` using `kcdf = "Gaussian"` and `maxDiff = TRUE`.
+**Pseudo-bulk mode (executed):** Raw counts were aggregated per patient via `rowSums()`, converted to CPM, and log2-transformed (`log2(CPM + 1)`). GSVA was run with `gsvaParam()` using `kcdf = "Gaussian"` and `maxDiff = TRUE`. Only pseudobulk mode was executed in the production pipeline; a single-cell mode was implemented in the script but not run because memory requirements exceeded 256 GB (`run_analysis.sbatch` passes `--mode=pseudobulk`).
 
-**Single-cell mode (original approach):** Raw counts were filtered: genes with `rowSums > 10`, removal of genes containing "." in name (proxy for non-protein-coding), and cells with `colSums > 1000` (targeting ~18,063 genes x ~28,732 cells per original code). GSVA was run with `kcdf = "Poisson"` and `maxDiff = TRUE`. Per-cell GSVA scores were aggregated to per-patient means.
-
-Pathway activity was stratified by HSD17B7 expression status (median split into HSD17B7+ and HSD17B7- groups). Heatmaps were generated using ComplexHeatmap with a diverging blue-white-red color scale, clamped to [-4, 4].
+Pathway activity was stratified by HSD17B7 expression status (median split into HSD17B7+ and HSD17B7- groups). Heatmaps were generated using ComplexHeatmap with a diverging blue-white-red color scale, clipped to [-4, 4] then dynamically rescaled to the resulting data range.
 
 ## 9. PROGENy Pathway Activity
 
@@ -162,11 +160,11 @@ Per-patient pseudo-bulk GSVA was performed within each cell type, followed by st
 
 **Input data:** Full annotated Seurat object (`seurat_annotated.rds`) containing all cell types, enabling proper cross-cell-type pathway analysis.
 
-**Pseudo-bulk construction:** For each cell type present in the object, per-patient expression profiles were created by averaging SCTransform-normalized data (`GetAssayData()`, layer = "data") across cells, requiring >= 10 cells per patient per cell type (`min_patients_per_group = 2` in script 15, compared to `MIN_PATIENTS_PER_GROUP = 3` in the DESeq2-based script 14). If the SCT assay was unavailable, RNA counts were normalized to CPM + log2.
+**Pseudo-bulk construction:** For each cell type present in the object, per-patient expression profiles were created by summing SCTransform corrected counts (`GetAssayData()`, layer = "counts"), then normalizing to CPM and log2-transforming (`log2(CPM + 1)`), requiring >= 10 cells per patient per cell type (`min_patients_per_group = 3`). If the SCT assay was unavailable, RNA counts were normalized to CPM + log2.
 
 **GSVA parameters:** `gsvaParam()` with `kcdf = "Gaussian"` and `maxDiff = TRUE`. Gene sets included all MSigDB Hallmark pathways, BioCarta (subcategory "CP:BIOCARTA"), and LI_ESTROGENE early/late E2 response gene sets from local GMT files.
 
-**Statistical testing:** For each pathway within each cell type, Elderly vs Young patient GSVA scores were compared using a Welch t-test (`t.test(..., var.equal = FALSE)`). FDR correction was applied using two strategies: (1) across all pathway-cell type combinations (`padj_all`), and (2) restricted to 25 curated pathways only (`padj`, reducing multiple testing burden from ~4000+ to ~312 tests). Significance was determined at FDR < 0.05.
+**Statistical testing:** For each pathway within each cell type, Elderly vs Young patient GSVA scores were compared using a Welch t-test (`t.test(..., var.equal = FALSE)`). MidAge patients were included in the GSVA computation (all age groups present in the pseudobulk profiles) but only the Young vs Elderly contrast was tested. FDR correction was applied using two strategies: (1) across all pathway-cell type combinations (`padj_all`), and (2) per cell type restricted to curated pathways only (`padj`, reducing multiple testing burden). Significance was determined at FDR < 0.05.
 
 **Curated pathway set (Hallmark):** ESTROGEN_RESPONSE_EARLY, ESTROGEN_RESPONSE_LATE, INFLAMMATORY_RESPONSE, TNFA_SIGNALING_VIA_NFKB, TGF_BETA_SIGNALING, IL6_JAK_STAT3_SIGNALING, IL2_STAT5_SIGNALING, INTERFERON_GAMMA_RESPONSE, INTERFERON_ALPHA_RESPONSE, EPITHELIAL_MESENCHYMAL_TRANSITION, ANGIOGENESIS, HYPOXIA, APOPTOSIS, plus LI_ESTROGENE_EARLY_E2_RESPONSE_UP and LI_ESTROGENE_LATE_E2_RESPONSE_UP. The unified set includes IL2_STAT5, IFN_ALPHA, and EMT; COMPLEMENT is excluded.
 
@@ -186,9 +184,10 @@ CellChat preprocessing steps included:
 1. `subsetData()` - subset to signaling genes
 2. `identifyOverExpressedGenes()` - identify overexpressed ligands/receptors
 3. `identifyOverExpressedInteractions()` - identify overexpressed L-R pairs
-4. `computeCommunProb()` with `type = "triMean"` (truncated mean) and `min.cells = 10`
-5. `computeCommunProbPathway()` - aggregate to pathway level
-6. `aggregateNet()` - aggregate communication network
+4. `computeCommunProb()` with `type = "triMean"` (truncated mean)
+5. `filterCommunication()` with `min.cells = 10`
+6. `computeCommunProbPathway()` - aggregate to pathway level
+7. `aggregateNet()` - aggregate communication network
 
 Young and Elderly CellChat objects were merged using `mergeCellChat()` for comparative visualization. Bubble plots were generated using `netVisual_bubble()` with `color.heatmap = "Spectral"`.
 
@@ -196,15 +195,11 @@ Young and Elderly CellChat objects were merged using `mergeCellChat()` for compa
 
 CellPhoneDB was run via the Python API in two versions:
 
-**CellPhoneDB v5** (`16_run_cellphonedb.py`): Used `cpdb_statistical_analysis_method.call()` with parameters: `counts_data = "gene_name"`, `threshold = 0.1` (minimum fraction of cells expressing a gene), `iterations = 1000` (permutations), `threads = 4`. No random seed was set.
+**CellPhoneDB v5** (`16_run_cellphonedb.py`): Used `cpdb_statistical_analysis_method.call()` with parameters: `counts_data = "gene_name"`, `threshold = 0.1` (minimum fraction of cells expressing a gene), `iterations = 1000` (permutations), `threads = 4`, `debug_seed = 42`.
 
-**CellPhoneDB v4** (`16b_run_cellphonedb_v4.py`): Used the same API with `counts_data = "hgnc_symbol"`, `threshold = 0.1`, `threads = 4`, `debug_seed = 42`, `result_precision = 3`.
+**CellPhoneDB v4** (`16b_run_cellphonedb_v4.py`): Used the same API with `counts_data = "hgnc_symbol"`, `threshold = 0.1`, `threads = 4`, `debug_seed = 42`, `result_precision = 3`. No `iterations` argument was passed; the CellPhoneDB default of 1,000 permutations was used.
 
 Both versions were run separately for Elderly and Young age groups using pre-prepared count matrices and metadata files from script 09.
-
-### 21.1 Independent GSEA (Script 09)
-
-Script 09 (`09_pathway_enrichment_analysis.py`) performed an independent GSEA using cell-level Wilcoxon rank-sum z-scores for gene ranking (distinct from the pseudobulk-based log2FC x -log10(p) ranking in script 05), querying three libraries: MSigDB_Hallmark_2020, KEGG_2021_Human, and Reactome_2022.
 
 ## 22. CellPhoneDB Dot Plot Visualization
 
@@ -212,7 +207,7 @@ A comparative dot plot of CellPhoneDB results was generated in R (`17_cellphoned
 - **top50** (default): Despite the mode name, selects the top 40 ligand-receptor pairs (via `head(40)`) by minimum p-value across all macrophage-immune cell interactions
 - **curated**: A predefined list of L-R pairs with normalized name matching to handle ordering differences between CellPhoneDB versions
 
-The plot focused on Macrophage-as-sender interactions with six target cell types: B cells, Cycling T cells, NK cells, NKT cells, CD4+ T cells, and CD8+ T cells. Dot size encoded `-log10(p-value)` (capped at 3), and dot color encoded `log2(mean expression + 1)` using an RdBu diverging palette (range: -10 to +5). Only interactions with BH-FDR corrected p < 0.05 were displayed. X-axis labels were placed on top (manuscript convention). Age groups were labeled "Younger" and "Older".
+The plot focused on Macrophage-as-sender interactions with six target cell types: B cells, Cycling T cells, NK cells, NKT cells, CD4+ T cells, and CD8+ T cells. Dot size encoded `-log10(p-value)` (capped at 3), and dot color encoded `log2(mean expression + 1)` using a custom five-color gradient (blue `#0072B2` → light blue `#56B4E9` → yellow `#F0E442` → orange `#E69F00` → red-orange `#D55E00`, range: -10 to +5). In `top50` mode, only interactions with BH-FDR corrected p < 0.05 were displayed; in `curated` mode, all predefined pairs were plotted regardless of FDR significance. X-axis labels were placed on top (manuscript convention). Age groups were labeled "Younger" and "Older".
 
 ## 23. Software Versions
 
@@ -228,33 +223,33 @@ From `environment.yml` (conda environment `erp_brca_aging`):
 | GSVA | (Bioconductor) |
 | PROGENy | (Bioconductor) |
 | msigdbr | (Bioconductor) |
-| ComplexHeatmap | (via R) |
+| ComplexHeatmap | (Bioconductor, not pinned in environment.yml) |
 | pheatmap | (via R) |
 | CellChat | (pre-installed, version not pinned in environment.yml) |
 | indepthPathway | (optional, may not be installed) |
 | Python | 3.10 |
 | GSEApy | (via pip, version not pinned) |
 | CellPhoneDB | v4/v5 (version not pinned in environment.yml) |
-| SingleR | (Bioconductor, loaded but not used in current scripts) |
-| speckle | (for compositional analysis, loaded but not used in current scripts) |
+| SingleR | (Bioconductor, available in environment.yml but not loaded or used in current scripts) |
+| speckle | (for compositional analysis, available in environment.yml but not loaded or used in current scripts) |
 | pandas | (via conda) |
 | numpy | (via conda) |
 | matplotlib | (via conda) |
 | seaborn | (via conda) |
-| scipy | (via conda, used for hierarchical clustering in ENRICHR heatmaps) |
+| scipy | (used for hierarchical clustering in ENRICHR heatmaps, not pinned in environment.yml) |
 
 ## 24. Reproducibility Notes
 
-- All R scripts set `set.seed(12345)` for reproducibility of stochastic operations (PCA, UMAP, permutation tests).
+- All primary analysis R scripts set `set.seed(12345)` for reproducibility of stochastic operations (PCA, UMAP, permutation tests). Auxiliary scripts (e.g., `regenerate_fig7bc_fonts.R`) may omit the seed when no stochastic operations are performed.
 - `12_enrichr_pathway_analysis.py` sets `np.random.seed(12345)`, though ENRICHR API calls are inherently server-side and non-deterministic.
-- `16_run_cellphonedb.py` does not set a random seed; `16b_run_cellphonedb_v4.py` uses `debug_seed=42`.
+- Both `16_run_cellphonedb.py` and `16b_run_cellphonedb_v4.py` set `debug_seed=42`.
 - Seurat 5.x column name mangling (prepending "g" to numeric IDs, replacing "_" with "-") was explicitly handled in pseudobulk aggregation scripts (11, 14) via a reverse-mapping function.
 - Intermediate Seurat objects were saved as RDS checkpoints at each major processing step (preprocessing, annotation, macrophage subset) to enable re-entry without recomputation.
-- All figures were saved in dual format (PDF vector + PNG raster at 300 DPI).
+- Figures were saved as PNG (300 DPI) across all scripts. Most scripts also saved PDF and/or SVG vector formats; some scripts (e.g., `15_multicelltype_pathway.R`, `regenerate_fig7bc_fonts.R`) saved PNG + SVG without PDF.
 - The pipeline was executed on an HPC cluster via SLURM batch scripts with varying resource allocations (8 GB for downloads up to 64+ GB for GSVA on full matrices).
 
 ---
 
 ## Main Text Summary
 
-Single-cell RNA-seq data from the Xu et al. (2024) Primary Breast Tumor Atlas were analyzed to characterize age-dependent transcriptional changes in hormone receptor-positive breast cancer. Treatment-naive HR+ patients (n ~ 36) were stratified into Young (age <= 50), MidAge (51-80), and Elderly (> 80) groups. Following quality control (200-6,000 genes, >= 400 UMIs, < 15% mitochondrial), SCTransform normalization, Harmony batch correction across 9 source studies, and atlas-derived cell type annotation (18 cell types), the dataset comprised approximately 115,000 cells. Cell type proportions were compared across age groups using Wilcoxon rank-sum tests with BH-FDR correction. GSVA pathway activity analysis was performed on estrogen-related gene sets from Hallmark, Reactome, WikiPathways, and GO collections, using both pseudo-bulk (CPM + log2, Gaussian kernel) and single-cell (Poisson kernel) approaches. PROGENy footprint-based pathway activity and WCSEA enrichment supplemented GSVA findings. Macrophage-focused pseudobulk differential expression (DESeq2) identified age-associated genes, with downstream pathway enrichment (hypergeometric test, Hallmark/BioCarta) and ENRICHR analysis (6 databases, per-library FDR correction). Cell-cell communication was assessed using both CellPhoneDB (v4/v5, 1,000-iteration permutation test) and CellChat (Secreted Signaling database, truncated mean method), comparing macrophage-immune cell interactions between age groups. Multi-cell-type GSVA with Welch t-tests on per-patient pseudo-bulk scores (curated-pathway FDR correction) identified age-differential pathway activity patterns across immune, epithelial, and stromal compartments.
+Single-cell RNA-seq data from the Xu et al. (2024) Primary Breast Tumor Atlas were analyzed to characterize age-dependent transcriptional changes in hormone receptor-positive breast cancer. Treatment-naive HR+ patients (n ~ 36) were stratified into Young (age <= 50), MidAge (51-80), and Elderly (> 80) groups. Following quality control (200-6,000 genes, >= 400 UMIs, < 15% mitochondrial), SCTransform normalization, Harmony batch correction across 9 source studies, and atlas-derived cell type annotation (18 cell types), the dataset comprised approximately 115,000 cells. Cell type proportions were compared across age groups using Wilcoxon rank-sum tests with BH-FDR correction. GSVA pathway activity analysis was performed on estrogen-related gene sets from Hallmark, Reactome, WikiPathways, and GO collections, using pseudo-bulk aggregation (CPM + log2, Gaussian kernel). PROGENy footprint-based pathway activity and WCSEA enrichment supplemented GSVA findings. Macrophage-focused pseudobulk differential expression (DESeq2) identified age-associated genes, with downstream pathway enrichment (hypergeometric test, Hallmark/BioCarta) and ENRICHR analysis (6 databases, per-library FDR correction). Cell-cell communication was assessed using both CellPhoneDB (v4/v5, 1,000-iteration permutation test) and CellChat (Secreted Signaling database, truncated mean method), comparing macrophage-immune cell interactions between age groups. Multi-cell-type GSVA with Welch t-tests on per-patient pseudo-bulk scores (curated-pathway FDR correction) identified age-differential pathway activity patterns across immune, epithelial, and stromal compartments.

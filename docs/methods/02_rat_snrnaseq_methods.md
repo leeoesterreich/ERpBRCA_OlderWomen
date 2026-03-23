@@ -93,7 +93,7 @@ Scaled expression data from the SCT assay (`scale.data` layer) were used as inpu
 
 ### 5.3 scType Cluster-Level Annotation (03c_sctype_cluster.R)
 
-Cell-level scType scores (computed as in Section 5.2) were aggregated by cluster: for each cluster, the mean score per cell type was calculated by summing cell-level scores and dividing by the number of cells in the cluster. Each cluster was assigned to the cell type with the highest mean score. Results were compared against the original manual annotations from the source analysis, which assigned 40 clusters at resolution 1.5 based on visual inspection of dot plots.
+Cell-level scType scores were computed using the same algorithm as in Section 5.2 but with modified marker sets: endothelial positive markers replaced Flt1 (also expressed in epithelial cells) with Vwf and Tie1, and endothelial negative markers were expanded to include Krt8, Krt5, and Cd3d to more strongly penalize epithelial and T cell marker co-expression. Scores were aggregated by cluster: for each cluster, the mean score per cell type was calculated by summing cell-level scores and dividing by the number of cells in the cluster. Each cluster was assigned to the cell type with the highest mean score. Results were compared against the original manual annotations from the source analysis, which assigned 40 clusters at resolution 1.5 based on visual inspection of dot plots.
 
 ### 5.4 Method Comparison
 
@@ -101,15 +101,13 @@ A systematic comparison of annotation methods (`method_comparison.R`, `spot_chec
 
 ## 6. Differential Expression
 
-Differential expression and differential abundance analyses used the marker-scoring annotation from the primary pipeline (Louvain resolution 0.4), not scType annotations.
-
-Differential expression testing between Aged and Young groups was performed per cell type using a pseudobulk DESeq2 approach. Prior to DESeq2 modeling, genes with fewer than 10 counts in at least 2 samples were excluded to remove unreliably measured features and improve power estimation. Raw counts were aggregated per sample using `AggregateExpression()`, with DESeq2 `~ group` design and Aged vs Young contrast. This properly treats biological replicates (n=3 per group) as the unit of analysis. Cell types with fewer than 10 cells per sample were excluded, and groups required at least 2 samples (`MIN_CELLS_PER_SAMPLE = 10`, `MIN_SAMPLES_PER_GROUP = 2`). P-values were corrected for multiple testing using the Benjamini-Hochberg method (`p.adjust(method = "BH")`) applied within each cell type. Genes were classified as significant at FDR < 0.05 and further annotated by direction (upregulated or downregulated in Aged).
+Differential expression testing between Aged and Young groups was performed per cell type using a pseudobulk DESeq2 approach on the marker-scoring annotation from the primary pipeline (`CellTypeByMarker_RatsnRNAseq`, Louvain resolution 0.4). Raw RNA counts were aggregated per sample using `AggregateExpression()` to create pseudobulk profiles, properly treating biological replicates (n=3 per group) as the unit of analysis. Prior to DESeq2 modeling, genes with fewer than 10 counts in at least 2 samples were excluded to remove unreliably measured features and improve power estimation. DESeq2 was run with a `~ group` design and an Aged vs Young contrast. Cell types with fewer than 10 cells per sample were excluded, and groups required at least 2 samples (`MIN_CELLS_PER_SAMPLE = 10`, `MIN_SAMPLES_PER_GROUP = 2`). P-values were corrected for multiple testing using the Benjamini-Hochberg method (`p.adjust(method = "BH")`) applied within each cell type. Genes were classified as significant at FDR < 0.05 and further annotated by direction (upregulated or downregulated in Aged).
 
 ## 7. Differential Abundance
 
 Differential abundance of cell types between Young and Aged groups was tested using the propeller method from the speckle package (`speckle::propeller()`). Propeller performs an empirical Bayes moderated test on arcsin-square-root-transformed cell type proportions, properly accounting for the compositional nature of single-cell data and using biological replicates (samples) as the unit of analysis.
 
-Cell type labels from the marker-scoring annotation (`CellTypeByMarker_RatsnRNAseq`) were used (e.g., CancerEpithelial, Myeloid, NKTcell, Fibroblast, Endothelial). A second metadata column (`CellTypeMacroTcell_RatsnRNAseq`) is present in the object but is an identical copy of `CellTypeByMarker_RatsnRNAseq`, retained for downstream compatibility rather than representing a separate annotation level.
+Cell type labels from the scType annotation (`sctype_celltype` from `seurat_annotated_sctype.rds`) were used, as this annotation includes immune cell subtypes (Myeloid, NKTcell, DendriticCell) that are absent from the resolution 0.4 marker-scoring annotation.
 
 Propeller's internally adjusted p-values were overridden with an independent Benjamini-Hochberg correction applied to the raw P.Value column to ensure consistent FDR methodology across all analyses in the study.
 
@@ -128,12 +126,12 @@ The following visualizations were generated:
 | Marker heatmap | Scaled average expression per cluster (pheatmap) | `outputs/marker_heatmap.pdf` |
 | scType UMAP | Detailed and main cell type annotations | `figures/by_analysis/rat_snrnaseq/sctype_annotation_umap.pdf` |
 | scType cluster UMAP | Cluster-level scType annotations | `figures/by_analysis/rat_snrnaseq/sctype_cluster_annotation.pdf` |
-| Volcano plots | Per-cell-type DE results, top 10 FDR genes labeled (ggrepel) | `figures/by_analysis/rat_snrnaseq/DE_volcano_plots.pdf` |
+| Volcano plots | Per-cell-type DE results, top 5 FDR genes with |log2FC| > 0.5 labeled (ggrepel) | `figures/by_analysis/rat_snrnaseq/DE_volcano_plots.pdf` |
 | DA stacked bar | Cell type proportions per sample, faceted by age group | `figures/by_analysis/rat_snrnaseq/DA_proportion_plots.pdf` |
 | DA boxplot | Cell type proportions (%) by age group with jittered points | `figures/by_analysis/rat_snrnaseq/DA_proportion_plots.pdf` |
 | DA log2FC bar | Propeller log2 fold change by cell type, FDR-colored | `figures/by_analysis/rat_snrnaseq/DA_proportion_plots.pdf` |
 
-All figure panels were saved in both PDF (vector) and PNG (300 DPI) formats, with SVG versions for selected panels.
+All figure panels were saved in PDF (vector) format.
 
 ## 9. Software Versions
 
@@ -158,7 +156,7 @@ The analysis was performed using the `erp_snrnaseq` conda environment with the f
 
 ## 10. Reproducibility Notes
 
-- **Random seed:** All scripts set `set.seed(12345)` at the top. Seed was explicitly passed to `SCTransform()` (`seed.use = 12345`), `RunPCA()` (`seed.use = 12345`), `RunUMAP()` (`seed.use = 12345`), and `FindClusters()` (`random.seed = 12345`).
+- **Random seed:** All primary pipeline scripts set `set.seed(12345)` at the top. Seed was explicitly passed to `SCTransform()` (`seed.use = 12345`), `RunPCA()` (`seed.use = 12345`), `RunUMAP()` (`seed.use = 12345`), and `FindClusters()` (`random.seed = 12345`).
 - **Parallelization:** `future.globals.maxSize` was set to 4 GB (`4 * 1024^3`). No explicit `plan()` call was made, so processing ran sequentially by default.
 - **Checkpoints:** Intermediate Seurat objects were saved as RDS files at each major step: `seurat_qc_filtered.rds` (post-QC), `seurat_integrated.rds` (post-integration), `seurat_annotated.rds` (post-clustering/annotation), with additional checkpoints for scType variants.
 - **SLURM parameters:** The pipeline was executed via SLURM (`run_analysis.sbatch`) with 64 GB memory, 8 CPUs, 12-hour wall time, on the `htc` partition.
@@ -167,4 +165,4 @@ The analysis was performed using the `erp_snrnaseq` conda environment with the f
 
 ## Main Text Summary
 
-Single-nucleus RNA sequencing data from six NMU-induced rat mammary tumors (three Aged, three Young; GEO: GSE276758) were processed using Seurat v5. Nuclei were filtered by gene count (200--6,000), UMI count (>400), and mitochondrial content (<15%), and doublets were removed using DoubletFinder (5% expected rate, per-sample pK optimization via dimensions 1:30). Data were normalized with SCTransform (glmGamPoi, regressing mitochondrial percentage) and integrated across samples using Harmony. UMAP embedding and shared nearest neighbor clustering (Louvain algorithm, resolution 0.4) were computed on the first 30 Harmony-corrected components. Cell types were annotated by scoring clusters against canonical mammary tissue marker gene sets; a parallel scType-based annotation confirmed immune cell identification. Differential expression and differential abundance analyses used the marker-scoring annotation (resolution 0.4). Pseudobulk DESeq2 DE testing required >= 10 cells per sample per cell type and >= 2 samples per group, with low-count gene filtering (>= 10 counts in >= 2 samples) and BH-corrected FDR < 0.05. Differential abundance was assessed using propeller (speckle package) with an independent Benjamini-Hochberg correction applied to raw p-values. All analyses used random seed 12345.
+Single-nucleus RNA sequencing data from six NMU-induced rat mammary tumors (three Aged, three Young; GEO: GSE276758) were processed using Seurat v5. Nuclei were filtered by gene count (200--6,000), UMI count (>400), and mitochondrial content (<15%), and doublets were removed using DoubletFinder (5% expected rate, per-sample pK optimization via dimensions 1:30). Data were normalized with SCTransform (glmGamPoi, regressing mitochondrial percentage) and integrated across samples using Harmony. UMAP embedding and shared nearest neighbor clustering (Louvain algorithm, resolution 0.4) were computed on the first 30 Harmony-corrected components. Cell types were annotated by scoring clusters against canonical mammary tissue marker gene sets; a parallel scType-based annotation confirmed immune cell identification. Differential expression used the marker-scoring annotation (resolution 0.4) with pseudobulk DESeq2 testing, requiring >= 10 cells per sample per cell type and >= 2 samples per group, with low-count gene filtering (>= 10 counts in >= 2 samples) and BH-corrected FDR < 0.05. Differential abundance used the scType annotation (which includes immune subtypes absent from the marker-scoring annotation) and was assessed using propeller (speckle package) with an independent Benjamini-Hochberg correction applied to raw p-values. All analyses used random seed 12345.
