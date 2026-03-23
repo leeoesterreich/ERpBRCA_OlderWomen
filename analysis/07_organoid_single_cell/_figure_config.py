@@ -10,12 +10,16 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
-# Register Arial font
+# Register Arial font (with fallback chain)
 ARIAL_PATH = '/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf'
+if not os.path.exists(ARIAL_PATH):
+    # Fallback to system Liberation Sans (metrically equivalent to Arial)
+    ARIAL_PATH = '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf'
 if os.path.exists(ARIAL_PATH):
     fm.fontManager.addfont(ARIAL_PATH)
-    matplotlib.rcParams['font.family'] = 'Arial'
+    matplotlib.rcParams['font.family'] = fm.FontProperties(fname=ARIAL_PATH).get_name()
 else:
+    ARIAL_PATH = None  # matplotlib will use default
     matplotlib.rcParams['font.family'] = 'sans-serif'
 
 # Global rcParams: Arial font, larger sizes
