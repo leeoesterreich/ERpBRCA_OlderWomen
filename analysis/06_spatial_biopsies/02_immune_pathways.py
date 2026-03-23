@@ -217,11 +217,17 @@ def create_pathway_dotplot(all_results, output_path):
         logging.warning("No results to plot in dotplot")
         return
 
-    # Set Arial font from local file
+    # Set Arial font from local file (with fallback)
     import matplotlib.font_manager as fm
     arial_path = '/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/Arial.ttf'
-    fm.fontManager.addfont(arial_path)
-    plt.rcParams['font.family'] = 'Arial'
+    if not os.path.exists(arial_path):
+        arial_path = '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf'
+    if os.path.exists(arial_path):
+        fm.fontManager.addfont(arial_path)
+        font_name = fm.FontProperties(fname=arial_path).get_name()
+        plt.rcParams['font.family'] = font_name
+    else:
+        plt.rcParams['font.family'] = 'sans-serif'
 
     # Sample name mapping
     sample_map = {
@@ -391,10 +397,20 @@ if args.figures_only:
 # FULL ANALYSIS MODE: Run complete pathway analysis
 # ============================================================================
 
-# Load biopsy data
+# Load biopsy data (support both plain and gzipped pkl)
+import gzip
+
 logging.info("Loading biopsy data...")
-with open('data/biopsy_adatas.pkl', 'rb') as f:
-    biopsy_adatas = pickle.load(f)
+pkl_path = os.path.join('data', 'biopsy_adatas.pkl')
+pkl_gz_path = pkl_path + '.gz'
+if os.path.exists(pkl_gz_path):
+    with gzip.open(pkl_gz_path, 'rb') as f:
+        biopsy_adatas = pickle.load(f)
+elif os.path.exists(pkl_path):
+    with open(pkl_path, 'rb') as f:
+        biopsy_adatas = pickle.load(f)
+else:
+    raise FileNotFoundError(f"biopsy_adatas.pkl not found in data/")
 
 logging.info(f"Loaded {len(biopsy_adatas)} biopsy samples")
 
