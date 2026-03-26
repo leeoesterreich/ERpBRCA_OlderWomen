@@ -1,0 +1,27 @@
+Case ID	Gender	Age	Grade	Cancer Type	Subtype by IHC	Treatment status
+CID4290A	Female	88	2	IDC	ER+	Naive
+CID4067	Female	85	2	IDC	ER+	Naive
+CID3948	Female	82	3	IDC	ER+	Naive
+CID4513	Female	73	3	MBC	TNBC	Treated
+CID4515	Female	67	3	IDC	TNBC	Naive
+CID4495	Female	63	3	IDC	TNBC	Naive
+CID3963	Female	61	3	IDC	ER+	Treated
+CID3921	Female	60	3	IDC	HER2+	Naive
+CID4463	Female	58	2	IDC	ER+	Naive
+CID4517-1	Female	58	3	IDC	HER2+	Naive
+CID4040	Female	57	3	IDC	ER+	Naive
+CID4471	Female	55	2	ILC	ER+	Naive
+CID4461	Female	54	2	IDC	ER+	Naive
+CID4465	Female	54	3	IDC	TNBC	Naive
+CID3946	Female	52	3	IDC	TNBC	Naive
+CID4398	Female	52	3	IDC	ER+	Treated
+CID4523	Female	52	3	MBC	TNBC	Treated
+CID3941	Female	50	2	IDC	ER+	Naive
+CID3838	Female	49	3	IDC	HER2+	Naive
+CID4497-1	Female	49	3	IDC	TNBC	Naive
+CID4499-1	Female	47	3	IDC	TNBC	Naive
+CID4535	Female	47	2	ILC	ER+	Naive
+CID3586	Female	43	3	IDC	HER2+/ER+	Naive
+CID4530N	Female	42	2	IDC	ER+	Naive
+CID4066	Female	41	2	IDC	HER2+/ER+	Treated
+CID4404-1	Female	35	3	IDC	TNBC	Naive

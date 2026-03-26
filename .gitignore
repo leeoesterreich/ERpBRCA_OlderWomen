@@ -1,0 +1,88 @@
+# This .gitignore is appropriate for repositories deployed to GitHub Pages and using
+# a Gemfile as specified at https://github.com/github/pages-gem#conventional
+
+# Basic Jekyll gitignores (synchronize to Jekyll.gitignore)
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# Additional Ruby/bundler ignore for when you run: bundle install
+/vendor
+
+# Specific ignore for GitHub Pages
+# GitHub Pages will always use its own deployed version of pages-gem 
+# This means GitHub Pages will NOT use your Gemfile.lock and therefore it is
+# counterproductive to check this file into the repository.
+# Details at https://github.com/github/pages-gem/issues/768
+Gemfile.lock
+logs/
+
+# Python
+__pycache__/
+*.pyc
+
+# AI agent / internal workflow files
+CLAUDE.md
+AGENTS.md
+.claude/
+docs/plans/
+docs/superpowers/
+docs/code_review/
+scripts/validation/
+
+# Internal presentations and review bundles
+powerpoints/
+neil_revision_figure_check/
+neil_revision_figure_check.zip
+figures/
+docs/biostatistical_corrections_*
+docs/create_summary_documents.py
+
+# Generated outputs (run scripts to reproduce)
+*.rds
+*.h5
+*.h5seurat
+*.png
+*.pdf
+*.svg
+*.jpg
+*.csv
+!analysis/07_organoid_single_cell/configs/*.csv
+data/human_scrnaseq/
+data/rat_snrnaseq/
+analysis/04_human_scrnaseq/outputs/cellphonedb/counts_*.txt
+analysis/03_rat_wes/outputs_v95_backup/
+
+# Data and caches
+*.pkl
+*.h5ad
+.pybiomart.sqlite
+.babysit/
+.pipeline_markers/
+
+# Internal workflow scripts
+scripts/bundle_figures.py
+
+# Validation/QC scripts (kept in dev repo only)
+analysis/poll_and_validate.sbatch
+analysis/regenerate_figures.sbatch
+analysis/*/spot_check_markers.R
+analysis/*/method_comparison.R
+analysis/04_human_scrnaseq/regenerate_fig7bc_fonts.R
+scripts/compare_results.R
+scripts/rebundle_after_jobs.sbatch
+
+# Partial-run/debug sbatch files
+analysis/02_rat_snrnaseq/run_step*.sbatch
+analysis/02_rat_snrnaseq/sbatch_03*.sh
+analysis/04_human_scrnaseq/sbatch_*.sh
+analysis/07_organoid_single_cell/submit_*.sh
+analysis/07_organoid_single_cell/run_*_only*.sbatch
+analysis/07_organoid_single_cell/run_figures_only*.sbatch
+
+# Setup/infra scripts
+setup_envs.sbatch
+analysis/05_rat_bulk_rnaseq/install_r_packages.sh
+analysis/05_rat_bulk_rnaseq/05_validate_vs_published.R
+analysis/05_rat_bulk_rnaseq/outputs/validation_results.rds

@@ -1,0 +1,22 @@
+name: erp_bulk_rnaseq
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base=4.3
+  - r-tidyverse
+  - r-data.table
+  - r-ggplot2
+  - r-patchwork
+  - r-rmarkdown
+  - r-ggrepel
+  - r-pheatmap
+  - r-rcolorbrewer
+  - r-tibble
+  - bioconductor-deseq2
+  - bioconductor-gsva
+  # Install via R after env creation:
+  # install.packages("msigdbr")
+  # BiocManager::install("progeny")
+  # BiocManager::install("qusage")

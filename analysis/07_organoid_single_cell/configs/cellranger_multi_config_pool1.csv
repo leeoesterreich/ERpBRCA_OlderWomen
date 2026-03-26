@@ -1,0 +1,16 @@
+[gene-expression]
+reference,/path/to/refdata-gex-GRCh38-2024-A-custom
+probe-set,/path/to/Chromium_Human_Transcriptome_Probe_Set_v1.1.0_GRCh38-2024-A.csv
+filter-probes,false
+create-bam,false
+
+[libraries]
+fastq_id,fastqs,lanes,feature_types
+Lee_020326_AL1_FlexPool_1-4_OES9112A1,/path/to/fastqs/Lee_020326_AL1_FlexPool_1-4_OES9112A1,any,Gene Expression
+
+[samples]
+sample_id,probe_barcode_ids,description
+OS01,BC001,Vehicle
+OS02,BC002,E1
+OS03,BC003,E1+ICI
+OS04,BC004,E1+HSD17B7i

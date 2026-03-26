@@ -1,0 +1,49 @@
+name: erp_wes
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  # Python
+  - python=3.10
+
+  # Core bioinformatics tools
+  - cnvkit
+  - vcftools
+  - bcftools
+  - samtools
+  - bedtools
+  - pysam
+  - pybedtools
+  - pyvcf3
+  - pyfaidx
+  - biopython
+
+  # R for CNVkit segmentation
+  - r-base=4.4.1
+  - bioconductor-dnacopy
+
+  # Data analysis
+  - pandas
+  - numpy
+  - scipy
+  - scikit-learn
+  - h5py
+  - anndata
+  - pydeseq2
+  - statsmodels
+
+  # Visualization
+  - matplotlib
+  - seaborn
+
+  # Jupyter environment
+  - jupyter
+  - jupyterlab
+
+  # SigProfiler suite (pip packages)
+  - pip
+  - pip:
+      - sigprofilerassignment
+      - sigprofilermatrixgenerator
+      - sigprofilerplotting

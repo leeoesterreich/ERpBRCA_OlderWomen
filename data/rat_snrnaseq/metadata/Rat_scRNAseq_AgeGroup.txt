@@ -1,0 +1,7 @@
+CaseID	AgeGroup
+Lee_021924_Nuclei1	Aged
+Lee_021924_Nuclei2	Aged
+Lee_021924_Nuclei3	Aged
+Lee_021924_Nuclei4	Young
+Lee_021924_Nuclei5	Young
+Lee_021924_Nuclei6	Young

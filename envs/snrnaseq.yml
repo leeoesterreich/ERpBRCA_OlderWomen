@@ -1,0 +1,24 @@
+name: erp_snrnaseq
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-base=4.3
+  - r-tidyverse
+  - r-data.table
+  - r-ggplot2
+  - r-patchwork
+  - r-ggrepel
+  - r-gridextra
+  - r-matrix
+  - r-tibble
+  - r-seurat>=5.0
+  - r-seuratobject
+  - r-harmony
+  - bioconductor-glmgampoi
+  # Install via R after env creation:
+  # BiocManager::install("SingleR")
+  # install.packages("dittoSeq")
+  # install.packages("speckle")
+  # remotes::install_github("chris-mcginnis-ucsf/DoubletFinder")
