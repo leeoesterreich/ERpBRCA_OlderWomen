@@ -1,63 +1,63 @@
 #!/usr/bin/env python3
-"""Generate oncoplot data and figure from filtered VEP output."""
+"""
+03_generate_oncoplot.py
 
-import os
-import pandas as pd
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-import seaborn as sns
-from matplotlib.colors import ListedColormap
-from matplotlib.collections import LineCollection
+Generate oncoplot visualization from filtered variant data.
+
+This script:
+1. Loads filtered variant data from 01_parse_vep.py output
+2. Maps rat gene IDs to human gene symbols via pybiomart
+3. Filters for cancer-related genes using brca_genelist.csv
+4. Generates a publication-quality oncoplot figure
+
+Author: Alexander Chang
+Date: 2024-07
+"""
+
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib.collections import LineCollection
+from matplotlib.colors import ListedColormap
 from pybiomart import Dataset
 
-# Register Arial font (with fallback)
-SCRIPT_DIR_STR = os.path.dirname(os.path.abspath(__file__))
-ARIAL_PATH = os.path.join(SCRIPT_DIR_STR, '..', '..', 'fonts', 'Arial.ttf')
-if not os.path.exists(ARIAL_PATH):
-    ARIAL_PATH = '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf'
-if os.path.exists(ARIAL_PATH):
-    fm.fontManager.addfont(ARIAL_PATH)
-    matplotlib.rcParams['font.family'] = fm.FontProperties(fname=ARIAL_PATH).get_name()
-else:
-    matplotlib.rcParams['font.family'] = 'sans-serif'
+# ============================================================================
+# Configuration
+# ============================================================================
 
-OUTPUT_DIR = Path(__file__).parent / "outputs"
-FIGURES_DIR = Path(__file__).parent / "figures"
-DATA_DIR = Path(__file__).parent / "data"
+SCRIPT_DIR = Path(__file__).parent
+DATA_DIR = SCRIPT_DIR / "data"
+OUTPUT_DIR = SCRIPT_DIR / "output"
+FIGURES_DIR = SCRIPT_DIR / "figures"
 
-# Sample age groups (confirmed: lower IDs are older rats)
-YOUNG_SAMPLES = ['157', '158', '167']
-OLD_SAMPLES = ['102', '107', '116']
+# Sample age groups
+YOUNG_SAMPLES = {"157", "158", "167"}
+OLD_SAMPLES = {"102", "107", "116"}
 
 
-def extract_sample_id(sample_name: str) -> str:
-    """Extract numeric sample ID from various naming formats.
-
-    Handles: '157_tumor_vs_157_spleen', '102', 'Rat_O_102', etc.
-    """
-    import re
-    match = re.search(r'(102|107|116|157|158|167)', sample_name)
-    if match:
-        return match.group(1)
-    return sample_name[:3]  # Fallback to first 3 chars
+# ============================================================================
+# Helper Functions
+# ============================================================================
 
 
-def chunk_list(lst, chunk_size=200):
-    """Yield successive chunks from list."""
+def chunk_list(lst, chunk_size):
+    """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), chunk_size):
-        yield lst[i:i + chunk_size]
+        yield lst[i : i + chunk_size]
 
 
 def find_homologs(gene_ids):
-    """Map rat Ensembl gene IDs to human homologs."""
+    """Query rat-to-human homologs from Ensembl via pybiomart."""
     try:
-        rat_dataset = Dataset(name='rnorvegicus_gene_ensembl', host='http://www.ensembl.org')
+        rat_dataset = Dataset(
+            name="rnorvegicus_gene_ensembl", host="http://www.ensembl.org"
+        )
         result = rat_dataset.query(
-            attributes=['ensembl_gene_id', 'hsapiens_homolog_ensembl_gene'],
-            filters={'link_ensembl_gene_id': gene_ids}
+            attributes=["ensembl_gene_id", "hsapiens_homolog_ensembl_gene"],
+            filters={"link_ensembl_gene_id": gene_ids},
         )
         if not result.empty:
             return result
@@ -67,12 +67,12 @@ def find_homologs(gene_ids):
 
 
 def find_symbols(ensembl_ids):
-    """Map human Ensembl IDs to gene symbols."""
+    """Query human gene symbols from Ensembl IDs via pybiomart."""
     try:
-        dataset = Dataset(name='hsapiens_gene_ensembl', host='http://www.ensembl.org')
+        dataset = Dataset(name="hsapiens_gene_ensembl", host="http://www.ensembl.org")
         result = dataset.query(
-            attributes=['ensembl_gene_id', 'external_gene_name'],
-            filters={'link_ensembl_gene_id': ensembl_ids}
+            attributes=["ensembl_gene_id", "external_gene_name"],
+            filters={"link_ensembl_gene_id": ensembl_ids},
         )
         if not result.empty:
             return result
@@ -82,76 +82,58 @@ def find_symbols(ensembl_ids):
 
 
 def map_to_human_symbols(df):
-    """Map rat genes to human gene symbols via homologs."""
-    gene_ids = df['Gene'].unique().tolist()
+    """Map rat gene IDs to human gene symbols.
 
-    # Check for cached results
-    cache_file = OUTPUT_DIR / "homolog_cache.csv"
-    if cache_file.exists():
-        print("Loading cached homolog mapping...")
-        cache = pd.read_csv(cache_file)
-        cached_genes = set(cache['rat_gene_id'].tolist())
-        uncached = [g for g in gene_ids if g not in cached_genes]
-        if not uncached:
-            return cache
-        gene_ids = uncached
-        print(f"Querying {len(gene_ids)} uncached genes...")
-    else:
-        cache = pd.DataFrame()
+    Returns DataFrame with columns: rat_gene_id, human_gene_id, gene_symbol
+    """
+    gene_ids = df["Gene"].unique().tolist()
+    print(f"Mapping {len(gene_ids)} unique rat gene IDs...")
 
-    # Query homologs in chunks
+    # Step 1: Get human homologs
     all_homologs = pd.DataFrame()
     for chunk in chunk_list(gene_ids, 200):
         result = find_homologs(chunk)
-        if not result.empty:
-            all_homologs = pd.concat([all_homologs, result], ignore_index=True)
+        all_homologs = pd.concat([all_homologs, result], ignore_index=True)
 
     if all_homologs.empty:
-        print("Warning: No homologs found for uncached genes")
-        # Return cached data if available
-        if not cache.empty:
-            return cache
         return pd.DataFrame()
 
-    # Rename columns
-    all_homologs.columns = ['rat_gene_id', 'human_ensembl_id']
-    all_homologs = all_homologs.dropna()
+    all_homologs = all_homologs.rename(
+        columns={
+            "Gene stable ID": "rat_gene_id",
+            "Human gene stable ID": "human_gene_id",
+        }
+    )
+    all_homologs = all_homologs.dropna(subset=["human_gene_id"])
+    print(f"Found {len(all_homologs)} rat-to-human homolog mappings")
 
-    # Query gene symbols in chunks
-    human_ids = all_homologs['human_ensembl_id'].unique().tolist()
+    # Step 2: Get human gene symbols
+    human_ids = all_homologs["human_gene_id"].unique().tolist()
     all_symbols = pd.DataFrame()
     for chunk in chunk_list(human_ids, 200):
         result = find_symbols(chunk)
-        if not result.empty:
-            all_symbols = pd.concat([all_symbols, result], ignore_index=True)
+        all_symbols = pd.concat([all_symbols, result], ignore_index=True)
 
     if all_symbols.empty:
-        print("Warning: No gene symbols found for uncached genes")
-        # Return cached data if available
-        if not cache.empty:
-            return cache
         return all_homologs
 
-    all_symbols.columns = ['human_ensembl_id', 'gene_symbol']
+    all_symbols = all_symbols.rename(
+        columns={"Gene stable ID": "human_gene_id", "Gene name": "gene_symbol"}
+    )
+    all_symbols = all_symbols.dropna(subset=["gene_symbol"])
 
     # Merge to get final mapping
-    mapping = all_homologs.merge(all_symbols, on='human_ensembl_id', how='left')
-    mapping = mapping.dropna(subset=['gene_symbol'])
-
-    # Update cache
-    if not cache.empty:
-        mapping = pd.concat([cache, mapping], ignore_index=True).drop_duplicates()
-    mapping.to_csv(cache_file, index=False)
-    print(f"Cached {len(mapping)} gene mappings")
+    mapping = all_homologs.merge(all_symbols, on="human_gene_id", how="inner")
+    print(f"Final mapping: {len(mapping)} gene symbol mappings")
 
     return mapping
 
 
 def filter_cancer_genes(df, gene_list_file):
     """Filter for genes in cancer gene list."""
-    cancer_genes = pd.read_csv(gene_list_file, encoding='utf-8-sig')
-    cancer_gene_set = set(cancer_genes['Gene'].tolist())
-    return df[df['gene_symbol'].isin(cancer_gene_set)]
+    cancer_genes = pd.read_csv(gene_list_file)
+    cancer_gene_set = set(cancer_genes["Gene"].tolist())
+    return df[df["gene_symbol"].isin(cancer_gene_set)]
 
 
 def generate_oncoplot_figure(df):
@@ -160,72 +142,44 @@ def generate_oncoplot_figure(df):
 
     # Extract consequence and impact
     df = df.copy()
-    # IMPACT is now a separate column (not in Extra)
-    if 'IMPACT' not in df.columns:
-        df['IMPACT'] = df['Extra'].str.extract(r'IMPACT=([^;]+)')
+    df["IMPACT"] = df["Extra"].str.extract(r"IMPACT=([^;]+)")
 
     # Priority: HIGH > MODERATE
-    impact_priority = {'HIGH': 1, 'MODERATE': 2}
-    df['IMPACT_PRIORITY'] = df['IMPACT'].map(impact_priority).fillna(3)
-    df = df.sort_values(['Sample', 'gene_symbol', 'IMPACT_PRIORITY'])
+    impact_priority = {"HIGH": 1, "MODERATE": 2}
+    df["IMPACT_PRIORITY"] = df["IMPACT"].map(impact_priority).fillna(3)
+    df = df.sort_values(["Sample", "gene_symbol", "IMPACT_PRIORITY"])
 
     # Aggregate to one consequence per gene per sample
-    agg_df = df.groupby(['Sample', 'gene_symbol']).first().reset_index()
+    agg_df = df.groupby(["Sample", "gene_symbol"]).first().reset_index()
 
     # Pivot to matrix format
     plot_data = agg_df.pivot_table(
-        values='Consequence',
-        index='gene_symbol',
-        columns='Sample',
-        aggfunc='first'
+        values="Consequence", index="gene_symbol", columns="Sample", aggfunc="first"
     )
 
     # Sort genes by mutation frequency
     gene_freq = plot_data.notna().sum(axis=1).sort_values(ascending=False)
     plot_data = plot_data.reindex(gene_freq.index)
 
-    # Sort samples: Young first (167, 158, 157), then Old (116, 107, 102)
-    # Within each group, use DESCENDING numeric order to match manuscript
-    sample_order = sorted(plot_data.columns, key=lambda x: (
-        extract_sample_id(x) not in YOUNG_SAMPLES,  # True (Old) sorts after False (Young)
-        -int(extract_sample_id(x))  # DESCENDING numeric ID within group
-    ))
+    # Sort samples: Old first, then Young
+    sample_order = sorted(
+        plot_data.columns, key=lambda x: (x[:3] in YOUNG_SAMPLES, x)
+    )
     plot_data = plot_data[sample_order]
 
     # Create consequence-to-number mapping
-    # Fixed consequence priority order (HIGH→MODERATE) for reproducible coloring
-    CONSEQUENCE_PRIORITY = [
-        'Frameshift Variant', 'Stop Gained', 'Splice Donor Variant',
-        'Splice Acceptor Variant', 'Stop Lost', 'Start Lost',
-        'Missense Variant', 'Inframe Insertion', 'Inframe Deletion',
-        'Protein Altering Variant',
-    ]
-    # Include any consequences in the data, in priority order
-    observed = df['Consequence'].dropna().unique()
-    ordered_consequences = [c for c in CONSEQUENCE_PRIORITY if c in observed]
-    # Append any unexpected consequences alphabetically
-    ordered_consequences += sorted(c for c in observed if c not in CONSEQUENCE_PRIORITY)
-    consequence_map = {cons: i+1 for i, cons in enumerate(ordered_consequences)}
+    unique_consequences = df["Consequence"].dropna().unique()
+    consequence_map = {cons: i + 1 for i, cons in enumerate(unique_consequences)}
 
     # Convert to numeric matrix (0 for missing)
-    # applymap for pandas <2.1 (aging_wes env has pandas 1.3.5)
-    plot_numeric = plot_data.applymap(lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0)
+    plot_numeric = plot_data.map(
+        lambda x: consequence_map.get(x, 0) if pd.notna(x) else 0
+    )
 
-    # Create colormap with white for missing (Wong colorblind-safe palette)
-    n_colors = len(ordered_consequences) + 1
-    wong_colors = np.array([
-        [1,    1,    1,    1],   # white (missing)
-        [0.00, 0.45, 0.70, 1],   # #0072B2 blue
-        [0.84, 0.37, 0.00, 1],   # #D55E00 vermillion
-        [0.00, 0.62, 0.45, 1],   # #009E73 green
-        [0.80, 0.47, 0.74, 1],   # #CC79A7 pink
-        [0.35, 0.70, 0.90, 1],   # #56B4E9 sky blue
-        [0.94, 0.89, 0.26, 1],   # #F0E442 yellow
-        [0.90, 0.60, 0.00, 1],   # #E69F00 amber
-        [0.00, 0.00, 0.00, 1],   # #000000 black
-        [0.60, 0.60, 0.60, 1],   # #999999 gray
-    ])
-    colors = wong_colors[:n_colors]
+    # Create colormap with white for missing
+    n_colors = len(unique_consequences) + 1
+    colors = plt.cm.tab20(np.linspace(0, 1, n_colors))
+    colors[0] = [1, 1, 1, 1]  # White for missing
     custom_cmap = ListedColormap(colors)
 
     # Plot
@@ -233,8 +187,6 @@ def generate_oncoplot_figure(df):
     fig_height = max(num_genes * 0.4, 6)
 
     fig, ax = plt.subplots(figsize=(10, fig_height))
-    fig.patch.set_facecolor("white")
-    ax.set_facecolor("white")
     sns.heatmap(plot_numeric, cmap=custom_cmap, cbar=False, linewidths=0.5, ax=ax)
 
     # Add gridlines
@@ -243,41 +195,56 @@ def generate_oncoplot_figure(df):
         lines.append(((0, i), (plot_numeric.shape[1], i)))
     for j in range(plot_numeric.shape[1] + 1):
         lines.append(((j, 0), (j, plot_numeric.shape[0])))
-    line_segments = LineCollection(lines, color='gray', linewidths=0.5, alpha=0.5)
+    line_segments = LineCollection(lines, color="gray", linewidths=0.5, alpha=0.5)
     ax.add_collection(line_segments)
 
-    ax.set_title('Oncoplot', fontsize=16)
-    ax.set_xlabel('Samples', fontsize=14)
-    ax.set_ylabel('Genes', fontsize=14)
+    ax.set_title("Oncoplot", fontsize=16)
+    ax.set_xlabel("Samples", fontsize=14)
+    ax.set_ylabel("Genes", fontsize=14)
 
-    # Relabel x-axis with age suffix using ID-based lookup (not positional)
-    # Per legend: Young (157, 158, 167) = '_Y', Old (102, 107, 116) = '_O'
+    # Relabel x-axis with age suffix
     new_labels = []
     for label in ax.get_xticklabels():
-        sample_id = extract_sample_id(label.get_text())
-        suffix = '_Y' if sample_id in YOUNG_SAMPLES else '_O'
-        new_labels.append(f"{sample_id}{suffix}")
-    ax.set_xticklabels(new_labels, fontsize=12, rotation=45, ha='right')
-    ax.tick_params(axis='y', labelsize=10)
+        sample_id = label.get_text()[:3]
+        suffix = "_Y" if sample_id in YOUNG_SAMPLES else "_O"
+        new_labels.append(sample_id + suffix)
+    ax.set_xticklabels(new_labels, fontsize=12, rotation=45, ha="right")
+    ax.tick_params(axis="y", labelsize=10)
 
     # Legend
     legend_elements = [
-        plt.Rectangle((0,0), 1, 1, facecolor=colors[consequence_map[cons]],
-                      edgecolor='none', label=cons.replace('_', ' ').title())
-        for cons in ordered_consequences
+        plt.Rectangle(
+            (0, 0),
+            1,
+            1,
+            facecolor=colors[consequence_map[cons]],
+            edgecolor="none",
+            label=cons.replace("_", " ").title(),
+        )
+        for cons in unique_consequences
     ]
-    ax.legend(handles=legend_elements, title='Consequence',
-             bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=10)
+    ax.legend(
+        handles=legend_elements,
+        title="Consequence",
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left",
+        fontsize=9,
+    )
 
     plt.tight_layout()
 
-    fig.savefig(FIGURES_DIR / "oncoplot.svg", format='svg', bbox_inches='tight', facecolor="white")
-    fig.savefig(FIGURES_DIR / "oncoplot.png", format='png', dpi=300, bbox_inches='tight', facecolor="white")
+    fig.savefig(FIGURES_DIR / "oncoplot.svg", format="svg", bbox_inches="tight")
+    fig.savefig(FIGURES_DIR / "oncoplot.png", format="png", dpi=300, bbox_inches="tight")
     plt.close(fig)
 
     print(f"Saved oncoplot figure: {num_genes} genes x {plot_data.shape[1]} samples")
 
     return plot_data
+
+
+# ============================================================================
+# Main
+# ============================================================================
 
 
 def main():
@@ -302,7 +269,7 @@ def main():
         raise ValueError("No gene mappings found - check pybiomart connection")
 
     # Merge mapping with variant data
-    df = df.merge(mapping, left_on='Gene', right_on='rat_gene_id', how='inner')
+    df = df.merge(mapping, left_on="Gene", right_on="rat_gene_id", how="inner")
     print(f"Mapped {len(df)} variants to human symbols")
 
     # Filter for cancer genes
@@ -311,7 +278,9 @@ def main():
         raise FileNotFoundError(f"Gene list not found: {gene_list_file}")
 
     df_cancer = filter_cancer_genes(df, gene_list_file)
-    print(f"Filtered to {len(df_cancer)} variants in {df_cancer['gene_symbol'].nunique()} cancer genes")
+    print(
+        f"Filtered to {len(df_cancer)} variants in {df_cancer['gene_symbol'].nunique()} cancer genes"
+    )
 
     if df_cancer.empty:
         print("Warning: No cancer genes found in data")
@@ -323,11 +292,13 @@ def main():
     # Save data outputs
     plot_data.to_csv(OUTPUT_DIR / "oncoplot_data.csv")
 
-    summary = pd.DataFrame({
-        'gene': plot_data.index,
-        'n_samples_mutated': plot_data.notna().sum(axis=1),
-        'mutation_frequency': plot_data.notna().sum(axis=1) / plot_data.shape[1]
-    })
+    summary = pd.DataFrame(
+        {
+            "gene": plot_data.index,
+            "n_samples_mutated": plot_data.notna().sum(axis=1),
+            "mutation_frequency": plot_data.notna().sum(axis=1) / plot_data.shape[1],
+        }
+    )
     summary.to_csv(OUTPUT_DIR / "oncoplot_summary.csv", index=False)
 
     print(f"Saved oncoplot data to {OUTPUT_DIR}")

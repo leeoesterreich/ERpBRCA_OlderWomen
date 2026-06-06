@@ -86,3 +86,8 @@ setup_envs.sbatch
 analysis/05_rat_bulk_rnaseq/install_r_packages.sh
 analysis/05_rat_bulk_rnaseq/05_validate_vs_published.R
 analysis/05_rat_bulk_rnaseq/outputs/validation_results.rds
+docs/handoffs/
+
+# EPS bundle artifacts (regenerable via scripts/build_eps_bundle.sh)
+bundle/eps_for_neil/
+bundle/*.zip
