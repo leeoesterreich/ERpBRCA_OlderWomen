@@ -1,5 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=human_scrnaseq
+#SBATCH --cluster=htc
+#SBATCH --partition=htc
+# gres is intentionally omitted (NOT a GPU job)
 #SBATCH -N 1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=256G

@@ -172,20 +172,30 @@ make_hsd17b7_heatmap <- function(gsva_mat, expr_mat, suffix, seurat_obj) {
     c("#313695", "#74add1", "white", "#fdae61", "#d73027")
   )
 
+  # --- Rotated heatmap: HSD17B7+/- as row labels (left), pathways as x-axis columns ---
+  gsva_agg_t <- t(gsva_agg)  # pathways as columns, groups as rows
+
+  row_anno <- HeatmapAnnotation(
+    HSD17B7_Status = c("HSD17B7-", "HSD17B7+"),
+    col = list(HSD17B7_Status = c("HSD17B7-" = "#74add1", "HSD17B7+" = "#d73027")),
+    show_annotation_name = FALSE
+  )
+
   ht <- Heatmap(
-    gsva_agg,
+    gsva_agg_t,
     name = "Pathway\nactivity",
     col = col_fun,
     cluster_rows = FALSE,
     cluster_columns = FALSE,
+    left_annotation = row_anno,
     row_names_side = "left",
-    row_names_gp = gpar(fontsize = 10, fontfamily = "Arial"),
+    row_names_gp = gpar(fontsize = 12, fontfamily = "Arial"),
     column_names_rot = 45,
-    column_names_gp = gpar(fontsize = 12, fontfamily = "Arial"),
+    column_names_gp = gpar(fontsize = 10, fontfamily = "Arial"),
     column_names_side = "bottom",
     rect_gp = gpar(col = NA),
-    width = unit(2, "cm"),
-    height = unit(nrow(gsva_agg) * 0.5, "cm"),
+    width = unit(ncol(gsva_agg_t) * 0.55, "cm"),
+    height = unit(2, "cm"),
     heatmap_legend_param = list(
       title = "Pathway\nactivity",
       at = c(-round(data_range, 1), 0, round(data_range, 1)),
@@ -194,15 +204,15 @@ make_hsd17b7_heatmap <- function(gsva_mat, expr_mat, suffix, seurat_obj) {
     )
   )
 
-  # Save heatmap
-  pdf(file.path(output_dir, paste0("gsva_heatmap_", suffix, ".pdf")), width = 10, height = 6)
+  # Save rotated heatmap
+  pdf(file.path(output_dir, paste0("gsva_heatmap_rotated_", suffix, ".pdf")), width = 12, height = 4)
   draw(ht, padding = unit(c(10, 10, 10, 10), "mm"))
   dev.off()
 
-  png(file.path(figures_dir, paste0("gsva_heatmap_", suffix, ".png")), width = 10*300, height = 6*300, res = 300)
+  png(file.path(figures_dir, paste0("gsva_heatmap_rotated_", suffix, ".png")), width = 12*300, height = 4*300, res = 300)
   draw(ht, padding = unit(c(10, 10, 10, 10), "mm"))
   dev.off()
-  svg(file.path(figures_dir, paste0("gsva_heatmap_", suffix, ".svg")), width = 10, height = 6)
+  svg(file.path(figures_dir, paste0("gsva_heatmap_rotated_", suffix, ".svg")), width = 12, height = 4)
   draw(ht, padding = unit(c(10, 10, 10, 10), "mm"))
   dev.off()  # SVG for vector assembly
 
@@ -256,6 +266,103 @@ make_hsd17b7_heatmap <- function(gsva_mat, expr_mat, suffix, seurat_obj) {
 }
 
 # =============================================================================
+# Helper: per-patient comparison — faceted dot plot with + vs - directional arrows
+# =============================================================================
+make_hsd17b7_per_patient_comparison <- function(gsva_mat, hsd17b7_group, seurat_obj, suffix) {
+  valid_rows <- intersect(names(estrogen_pathways), rownames(gsva_mat))
+  sample_cols <- names(hsd17b7_group)
+
+  # Build long-format data frame
+  long_df <- data.frame(
+    pathway = rep(valid_rows, each = length(sample_cols)),
+    patient = rep(sample_cols, length(valid_rows)),
+    HSD17B7_group = rep(hsd17b7_group[sample_cols], length(valid_rows)),
+    GSVA_score = as.numeric(t(gsva_mat[valid_rows, sample_cols, drop = FALSE])),
+    stringsAsFactors = FALSE
+  )
+
+  # Order factor so + appears first in legend
+  long_df$HSD17B7_group <- factor(long_df$HSD17B7_group,
+                                   levels = c("HSD17B7+", "HSD17B7-"))
+  long_df$pathway <- factor(long_df$pathway, levels = rev(valid_rows))
+
+  # Per-pathway robust statistics (median + IQR) and difference
+  stats_df <- do.call(rbind, lapply(valid_rows, function(pw) {
+    pw_data <- long_df[long_df$pathway == pw, ]
+    med_plus <- median(pw_data$GSVA_score[pw_data$HSD17B7_group == "HSD17B7+"], na.rm = TRUE)
+    med_minus <- median(pw_data$GSVA_score[pw_data$HSD17B7_group == "HSD17B7-"], na.rm = TRUE)
+    diff_val <- med_plus - med_minus
+    n_plus <- sum(pw_data$HSD17B7_group == "HSD17B7+", na.rm = TRUE)
+    n_minus <- sum(pw_data$HSD17B7_group == "HSD17B7-", na.rm = TRUE)
+    # Paired-ish t-test (wilcox.test since not truly paired samples)
+    p_val <- tryCatch({
+      test_res <- wilcox.test(GSVA_score ~ HSD17B7_group, data = pw_data)
+      test_res$p.value
+    }, error = function(e) NA)
+    data.frame(pathway = pw, diff = diff_val, med_plus, med_minus,
+               n_plus, n_minus, p_val, stringsAsFactors = FALSE)
+  }))
+  stats_df$arrow <- ifelse(stats_df$diff > 0, "^", "v")
+
+  # Merge stats back for annotation
+  long_df <- merge(long_df, stats_df[, c("pathway", "diff", "arrow", "p_val")], by = "pathway")
+
+  # Faceted dot plot
+  p <- ggplot(long_df, aes(x = HSD17B7_group, y = GSVA_score, color = HSD17B7_group)) +
+    geom_point(size = 3, alpha = 0.8, position = position_jitterdodge(
+      jitter.width = 0.15, jitter.height = 0, dodge.width = 0.6), seed = 12345) +
+    # Robust center: boldhovon diamonds (median)
+    stat_summary(
+      geom = "crossbar", fun = median, width = 0.4,
+      fun.min = function(x) quantile(x, 0.25, na.rm = TRUE),
+      fun.max = function(x) quantile(x, 0.75, na.rm = TRUE),
+      color = "grey40", alpha = 0.6, linewidth = 0.5
+    ) +
+    # Directional arrows between + and - medians
+    geom_segment(
+      data = stats_df,
+      aes(x = "HSD17B7+", xend = "HSD17B7-", y = med_minus, yend = med_plus,
+          color = NULL),
+      arrow = arrow(length = unit(0.02, "npc"), type = "closed"),
+      inherit.aes = FALSE
+    ) +
+    facet_wrap(~ pathway, scales = "free", ncol = 3) +
+    scale_color_manual(values = c("HSD17B7+" = "#d73027", "HSD17B7-" = "#74add1"),
+                       guides = FALSE) +
+    scale_x_discrete(limits = c("HSD17B7+", "HSD17B7-")) +
+    theme_bw(base_family = "Arial") +
+    theme(
+      panel.grid = element_blank(),
+      panel.border = element_blank(),
+      axis.title.x = element_text(size = 11),
+      axis.title.y = element_text(size = 11),
+      axis.text.x = element_text(size = 10),
+      axis.text.y = element_text(size = 8),
+      strip.text = element_text(size = 9, face = "bold"),
+      strip.background = element_rect(fill = grey(0.93), color = NA)
+    ) +
+    labs(x = "HSD17B7 Status", y = "GSVA Score (Pseudobulk)")
+
+  png(file.path(figures_dir, paste0("gsva_per_patient_comparison_", suffix, ".png")),
+      width = 14*300, height = 16*300, res = 300)
+  print(p)
+  dev.off()
+  svg(file.path(figures_dir, paste0("gsva_per_patient_comparison_", suffix, ".svg")),
+      width = 14, height = 16)
+  print(p)
+  dev.off()
+  pdf(file.path(output_dir, paste0("gsva_per_patient_comparison_", suffix, ".pdf")),
+      width = 14, height = 16)
+  print(p)
+  dev.off()
+
+  # Save per-patient CSV
+  write.csv(long_df, file.path(output_dir, paste0("gsva_per_patient_", suffix, ".csv")), row.names = FALSE)
+  write.csv(stats_df, file.path(output_dir, paste0("gsva_comparison_stats_", suffix, ".csv")), row.names = FALSE)
+  cat("  Per-patient comparison saved (statistically robust)\n")
+}
+
+# =============================================================================
 # MODE 1: Pseudo-bulk GSVA (refactored approach)
 # =============================================================================
 pseudobulk_result <- NULL
@@ -303,6 +410,10 @@ if (run_mode %in% c("both", "pseudobulk")) {
   cat("  Result:", nrow(gsva_pb), "pathways x", ncol(gsva_pb), "samples\n")
 
   pseudobulk_result <- make_hsd17b7_heatmap(gsva_pb, pseudobulk_log, "pseudobulk", seurat_obj)
+
+  # Per-patient comparison: HSD17B7+ vs HSD17B7- with robust statistics
+  make_hsd17b7_per_patient_comparison(gsva_pb, pseudobulk_result$hsd17b7_group,
+                                       seurat_obj, "pseudobulk")
 
   saveRDS(gsva_pb, file.path(output_dir, "gsva_pseudobulk.rds"))
   saveRDS(pseudobulk_log, file.path(output_dir, "pseudobulk_log2cpm.rds"))
