@@ -2,7 +2,6 @@
 #SBATCH --job-name=human_scrnaseq
 #SBATCH --cluster=htc
 #SBATCH --partition=htc
-# gres is intentionally omitted (NOT a GPU job)
 #SBATCH -N 1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=256G
@@ -12,130 +11,42 @@
 #SBATCH --output=logs/analysis_%j.out
 #SBATCH --error=logs/analysis_%j.err
 
-# Human scRNA-seq analysis pipeline
-# Requires: Raw data downloaded via 00a_download_geo.sh
-
-# Load conda environment on HTC cluster
-export PATH="/ix1/alee/LO_LAB/Personal/Alexander_Chang/miniconda3/bin:$PATH"
-source /ix1/alee/LO_LAB/Personal/Alexander_Chang/miniconda3/etc/profile.d/conda.sh 2>/dev/null || true
-conda activate /ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/erp_brca_aging
-
-# Now enable strict mode
-set -eo pipefail
+# Human scRNA-seq analysis pipeline orchestrator
+# Dispatches Stage 1 (preprocessing) and Stage 2 (downstream)
+# with SLURM dependency-based checkpointing.
+# For independent execution, use run_preprocessing.sbatch or
+# run_downstream.sbatch directly.
 
 SCRIPT_DIR="/ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/SanghoonCodeReview/ERpBRCA_OlderWomen/analysis/04_human_scrnaseq"
 cd "$SCRIPT_DIR"
 echo "Working directory: $SCRIPT_DIR"
 
-mkdir -p logs outputs outputs/preprocessing figures
+MARKER_DIR="$(dirname "$SCRIPT_DIR")/.pipeline_markers"
 
-# Check if preprocessed data already exists
-PREPROCESS_FILE="../../data/human_scrnaseq/SeuratObj_Xu2024_HRpos_AfterQCSCT.rds"
-if [ -f "$PREPROCESS_FILE" ]; then
-    echo "=== Step 0b: Preprocessed data exists, skipping ==="
+# --- Stage 1: Preprocessing ---
+PREPROC_MARKER="$MARKER_DIR/04_human_scrnaseq_preprocessing.complete"
+if [ -f "$PREPROC_MARKER" ]; then
+    echo "=== Stage 1 already completed ($(cat "$PREPROC_MARKER")), skipping ==="
+    PREPROC_JOB_ID=""
 else
-    echo "=== Step 0b: Preprocess raw data ==="
-    Rscript 00b_preprocess_seurat.R
+    echo "=== Submitting Stage 1: Preprocessing ==="
+    PREPROC_JOB_ID=$(sbatch "$SCRIPT_DIR/run_preprocessing.sbatch" | awk '{print $4}')
+    echo "Stage 1 submitted as job $PREPROC_JOB_ID"
 fi
 
-echo "=== Step 1: Load and subset data ==="
-Rscript 01_load_subset_data.R
-
-# Note: Harmony integration removed (not used per methods)
-
-echo "=== Step 3: Cell type annotation ==="
-Rscript 03_cell_type_annotation.R
-
-echo "=== Step 4: Cell fractions ==="
-Rscript 04_cell_fractions.R
-
-echo "=== Step 5: Gene expression ==="
-Rscript 05_gene_expression_violin.R
-
-echo "=== Step 6: GSVA (pseudobulk only — single-cell mode exceeds 256GB) ==="
-Rscript 06_run_gsva.R --mode=pseudobulk
-
-echo "=== Step 7: PROGENy ==="
-Rscript 07_run_progeny.R
-
-echo "=== Step 8: WCSEA ==="
-Rscript 08_run_wcsea.R
-
-echo "=== Step 9: CellPhoneDB prep ==="
-Rscript 09_cellphonedb_prep.R
-
-echo "=== Step 10: Export TAM analysis CSV ==="
-Rscript -e '
-tryCatch({
-  suppressPackageStartupMessages(library(Seurat))
-  suppressPackageStartupMessages(library(dplyr))
-
-  # Check input file exists
-  if (!file.exists("outputs/seurat_annotated.rds")) {
-    stop("seurat_annotated.rds not found")
-  }
-
-  # Load annotated object
-  seurat <- readRDS("outputs/seurat_annotated.rds")
-
-  # Validate required column
-  if (!"CellTypeAnnot" %in% colnames(seurat@meta.data)) {
-    stop("Column CellTypeAnnot not found in Seurat metadata")
-  }
-
-  # Get macrophage cells
-  mac_cells <- WhichCells(seurat, expression = CellTypeAnnot == "Macrophage")
-
-  if (length(mac_cells) == 0) {
-    warning("No macrophage cells found, creating empty TAM analysis")
-    tam_metrics <- data.frame(sample = character(), age_group = character(), n_cells = integer())
-  } else {
-    mac_subset <- subset(seurat, cells = mac_cells)
-
-    # Calculate TAM metrics per sample
-    tam_metrics <- mac_subset@meta.data %>%
-      group_by(orig.ident) %>%
-      summarise(
-        n_cells = n(),
-        .groups = "drop"
-      )
-
-    # Add AgeGroup if available
-    if ("AgeGroup" %in% colnames(mac_subset@meta.data)) {
-      age_mapping <- mac_subset@meta.data %>%
-        select(orig.ident, AgeGroup) %>%
-        distinct()
-      tam_metrics <- left_join(tam_metrics, age_mapping, by = "orig.ident")
-    }
-  }
-
-  write.csv(tam_metrics, "outputs/tam_analysis.csv", row.names = FALSE)
-  cat("TAM analysis exported:", nrow(tam_metrics), "samples\n")
-}, error = function(e) {
-  message(paste("ERROR in TAM export:", e$message))
-  quit(status = 1)
-})
-' || { echo "ERROR: TAM export failed"; exit 1; }
-
-echo "=== Step 11: Ensure PNG figures exist ==="
-# Convert any PDFs that don't have PNG counterparts (fallback)
-for pdf in outputs/*.pdf; do
-    [ -f "$pdf" ] || continue
-    base=$(basename "$pdf" .pdf)
-    png="figures/${base}.png"
-    if [ ! -f "$png" ]; then
-        echo "Converting $pdf -> $png"
-        env -i PATH=/usr/bin:/bin pdftoppm -png -r 300 -singlefile "$pdf" "figures/${base}" 2>/dev/null \
-            || env -i PATH=/usr/bin:/bin convert -density 300 "$pdf" "$png" 2>/dev/null \
-            || echo "WARNING: Could not convert $pdf"
+# --- Stage 2: Downstream ---
+DOWNSTREAM_MARKER="$MARKER_DIR/04_human_scrnaseq.complete"
+if [ -f "$DOWNSTREAM_MARKER" ]; then
+    echo "=== Stage 2 already completed ($(cat "$DOWNSTREAM_MARKER")), skipping ==="
+else
+    SBATCH_ARGS=""
+    if [ -n "$PREPROC_JOB_ID" ]; then
+        SBATCH_ARGS="--dependency=afterok:$PREPROC_JOB_ID"
+        echo "Stage 2 will wait for Stage 1 (job $PREPROC_JOB_ID) to complete"
     fi
-done
+    echo "=== Submitting Stage 2: Downstream ==="
+    DOWNSTREAM_JOB_ID=$(sbatch $SBATCH_ARGS "$SCRIPT_DIR/run_downstream.sbatch" | awk '{print $4}')
+    echo "Stage 2 submitted as job $DOWNSTREAM_JOB_ID"
+fi
 
-# Write completion marker (only if we get here = success)
-# Note: Single dirname to go from 04_human_scrnaseq/ up to analysis/
-MARKER_DIR="$(dirname "$SCRIPT_DIR")/.pipeline_markers"
-mkdir -p "$MARKER_DIR"
-echo "Job ${SLURM_JOB_ID:-local} completed at $(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$MARKER_DIR/04_human_scrnaseq.complete"
-echo "Marker written: $MARKER_DIR/04_human_scrnaseq.complete"
-
-echo "=== Analysis complete ==="
+echo "=== Pipeline dispatch complete ==="
