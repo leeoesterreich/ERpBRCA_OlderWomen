@@ -15,8 +15,9 @@
 # Human scRNA-seq analysis pipeline
 # Requires: Raw data downloaded via 00a_download_geo.sh
 
-# Load conda environment (before strict mode to avoid bashrc variable issues)
-source /ihome/alee/alc376/.bashrc
+# Load conda environment on HTC cluster
+export PATH="/ix1/alee/LO_LAB/Personal/Alexander_Chang/miniconda3/bin:$PATH"
+source /ix1/alee/LO_LAB/Personal/Alexander_Chang/miniconda3/etc/profile.d/conda.sh 2>/dev/null || true
 conda activate /ix1/alee/LO_LAB/Personal/Alexander_Chang/alc376/envs/erp_brca_aging
 
 # Now enable strict mode
